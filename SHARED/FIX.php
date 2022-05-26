@@ -1,5 +1,5 @@
 <?php // Fix up a few things for closure compiler files with various bodges.
-// (c)2021 David C. Walley
+// (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
 // Do some preprocessing on js_php money code files
 // 1) %PHP% %FIX% "TIMESTAMP" > .\ZZZ_TIMESTAMP.txt                                                     & rem Create a unique ID based on current date/time (save in a file for to make use of it).
@@ -88,7 +88,7 @@ function                                Go(/////////////////////////////////////
  if( "TIMESTAMP" === $sArg1 ){   echo ( time() - 1636000000 );                                  return;}//> If a request for a time, report it.
                                                                                                         //>
                                         $sArg2                  = $_SERVER['argv'][2];                  //> 2nd argument given on command line.
- if( "NOTES"     === $sArg1 ){   Go_Notes( $sArg2 );                                            return;}//>
+ if( "NOTES"     === $sArg1 ){   Go_Notes( $sArg2 );                                            return;}//> Make changes so prettier can handle blank lines and comments correctly.
                                                                                                         //>
                                         $sFileIn                = $_SERVER['argv'][3];                  //> 3rd is the haystack.
  Go_Replace( $sArg1 ,$sArg2 ,$sFileIn );                                                                //>

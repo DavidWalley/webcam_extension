@@ -1,5 +1,5 @@
-//$_DAVES.js_php JavaScript with PHP macros. DAVE'S GLOBALS: Language fixes and code conveniences - returning DOM ids and such.
-// (c)2022 David C. Walley
+//$_DAVES.js_php JavaScript with PHP macros. DAVE'S GLOBALS: Language fixes and code conveniences - returning DOM ids and such. Set syntax highlighter to JavaScript.
+// (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
 
 /*DEV*/ function                        G_ASSERT(/////////////////////////////////////////////////////////# Power comments during development.

@@ -1,7 +1,7 @@
 # webcam_extension
 Code for a virtual webcam Chrome extension example, using GPU to add semi-transparent flag animation, suitable for use in a browser-based online meeting.
 
-I stopped hand-crafting "source code" some years back when I wrote programs in a work-flow tool-chain to do it for me instead. The following is my work-flow for this project:
+An introductory note is in order: I stopped hand-crafting "source code" some years back when I wrote a program to do it for me. The following is my work-flow for this project:
 
 "Money code", files prefixed with '$_', are working development files, but also suitable as input for creating standards-compliant prettified clean "source code". Refer to the money code if you would like to see all notes, including visual-cortex-optimized layout of co-located code / abstract notional mappings (i.e., tables).
 

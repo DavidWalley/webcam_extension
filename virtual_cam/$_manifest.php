@@ -1,5 +1,5 @@
 <?php // Chrome extension manifest. https:/ /developer.chrome.com/docs/extensions/mv3/manifest/
-//(c)2022 David C. Walley
+// (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
 echo '{"manifest_version"'              .':3'                                                   ."\n";  //> Required.
 /*DEV*/ echo ',"name"'                  .':"DEV Virtual Webcam"'                                ."\n";  //> Required. DEV version.

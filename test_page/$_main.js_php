@@ -1,5 +1,5 @@
 //test_page/$_main.js_php - Javascript code with PHP macros, for testing Virtual Camera injection into list of available cameras.
-//(c)2022 David C. Walley
+// (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
 
 const                                   g_eleVideo           = document.getElementById('video0'      ); //>
@@ -20,7 +20,7 @@ function                                UpdateVideoSourceOptions(///////////////
    const                                eleOption               = document.createElement('option');     //>
    eleOption.value = a_mediaDevice.deviceId;                                                            //>
    count++                                                                                              //>
-   const                                label            = a_mediaDevice.label   ||   'Camera '+ count; //>
+   const                                label            = a_mediaDevice.label   ||   "Camera "+ count; //>
    const                                textNode         = document.createTextNode( label );            //>
    eleOption.appendChild(textNode);                                                                     //>
    g_eleSelect.appendChild(eleOption);                                                                  //>

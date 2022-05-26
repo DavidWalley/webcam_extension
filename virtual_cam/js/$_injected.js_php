@@ -1,9 +1,10 @@
 // $_injected.js_php - Daves Virtual Webcam
-// (c)2022 David C. Walley. Release under  Based on https://github.com/spite/virtual-webcam
+// (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
+// Refactoring of https://github.com/spite/virtual-webcam
 
 // Shader          = a program running on a GPU.
-// Vertex Shader   = 1st part of GPU program - In 3-D rendering program, this code is run in parallel on a per-polygon basis.
-// Fragment Shader = 2nd part of GPU program - In 3-D rendering program, this code is run more-or-less on a per-output pixel basis. Do as much work as you can in the vertex shader, rather than in the fragment shader. 
+// Vertex Shader   = 1st part of GPU program - In 3-D rendering program, this code is run in parallel on a per-triangle-vertex order.
+// Fragment Shader = 2nd part of GPU program - In 3-D rendering program, this code is run more-or-less on a per-output pixel order. Do as much work as you can in the vertex shader, rather than in the fragment shader. 
 
 
 /*DEV*/ function                        G_ASSERT(/////////////////////////////////////////////////////////# Power comments during development.
@@ -19,17 +20,20 @@
 
 const                                   N                       = "\n";                                 //> Newline. Used in GPU code to make error messages easier to understand.
 
-const                                   sCodeVertexShader       =                                       //> GLSL code for execution on the GPU...
- 'attribute vec4 '                      +'attributePosition;'                                        +N //> Vertex shader. DEPRECATED 'attribute' qualifier is effectively equivalent to an input qualifier in vertex shaders. It cannot be used in any other shader stage. It cannot be used in interface blocks.
+const                                   sCodeVertexShader       =                                       //> Vertex shader GLSL code, for execution on the GPU...
+ 'attribute vec4 '                      +'attributePosition;'                                        +N //> DEPRECATED 'attribute' qualifier is effectively equivalent to an input qualifier in vertex shaders. It cannot be used in any other shader stage. It cannot be used in interface blocks.
                                                                                                         //>
 +'void '                                +'main('// /// // // // // // // // // // // // // // // // // ///>
 +'){'+N                                 // // // // // // // // // // // // // // // // // // // // // ///>
 + 'gl_Position = attributePosition;'                                                                 +N //> gl_Position is intended for writing the homogeneous vertex position at any time during vertexshader execution. Will be used by primitive assembly, clipping, culling, and other fixed functionality operations, if present, that operate on primitives after vertex processing has occurred.
 +'}'+N// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
-;
+;                                                                                                       /*DEV*/console.log( sCodeVertexShader );
 
 
-const                                   sCodeFragmentShader     =                                       //> GLSL code for execution on the GPU...
+const                                   dFLAGSIZEX              = 0.6 ;                                 //>
+const                                   dFLAGSIZEY              = 0.35;                                 //>
+const                                   dOPACITY                = 0.6 ;                                 //>
+const                                   sCodeFragmentShader     =                                       //> Fragment shader GLSL code for execution on the GPU...
  'precision lowp float;'                                                                             +N //> Don't seem to need highest available precision. ???Doesn't fix problem with passing in the current time?
 +'uniform vec2 '                        +'uniformvec2CanvasSize;'                                    +N //> Size of the output canvas passed in.
 +'uniform float '                       +'uniformfNow_ms;'                                           +N //>
@@ -38,37 +42,40 @@ const                                   sCodeFragmentShader     =               
                                                                                                         //>
 +'void '                                +'main('// /// // // // // // // // // // // // // // // // // ///> Takes gl_FragCoord,
 +'){'+N                                 // // // // // // // // // // // // // // // // // // // // // ///> Changes gl_FragColor.
-+ 'float '                              +'u0 = gl_FragCoord.x/uniformvec2CanvasSize.x;'              +N //>
-+ 'float '                              +'v0 = gl_FragCoord.y/uniformvec2CanvasSize.y;'              +N //>
-+ 'float '                              +'u1 = 0.0;'                                                 +N //>
-+ 'float '                              +'v1 = 0.0;'                                                 +N //>
++ 'float '                              +'u0 = gl_FragCoord.x/uniformvec2CanvasSize.x;'              +N //> Convert pixel co-
++ 'float '                              +'v0 = gl_FragCoord.y/uniformvec2CanvasSize.y;'              +N //> ordinates to a range of 0 to 1.
++ 'float '                              +'u1 = 0.0;'                                                 +N //> Co-
++ 'float '                              +'v1 = 0.0;'                                                 +N //> ordinates within texture (image).
                                                                                                         //>
-+ 'float '                              +'r0 = texture2D( uniformsampler2d0 ,vec2(u0 ,v0) ).r;'      +N //> deprecated. Retrieves texels from texture uniformsampler2d0
-+ 'float '                              +'g0 = texture2D( uniformsampler2d0 ,vec2(u0 ,v0) ).g;'      +N //>
-+ 'float '                              +'b0 = texture2D( uniformsampler2d0 ,vec2(u0 ,v0) ).b;'      +N //>
++ 'float '                              +'r0 = texture2D( uniformsampler2d0 ,vec2(u0 ,v0) ).r;'      +N //> deprecated. Retrieves texels from texture uniformsampler2d0 (video feed), including the Red
++ 'float '                              +'g0 = texture2D( uniformsampler2d0 ,vec2(u0 ,v0) ).g;'      +N //> Green and
++ 'float '                              +'b0 = texture2D( uniformsampler2d0 ,vec2(u0 ,v0) ).b;'      +N //> Blue values of the pixel.
                                                                                                         //>
 + 'float '                              +'r1 = 0.0;'                                                 +N //> deprecated. Retrieves texels from texture uniformsampler2d1
 + 'float '                              +'g1 = 0.0;'                                                 +N //>
 + 'float '                              +'b1 = 0.0;'                                                 +N //>
-+ 'float '                              +'y = (1.0-u0)*(0.06 *sin( 11.0*(u0 + 0.4*uniformfNow_ms) )'    //> Fluttering of flag, parameters set by trial and error to get a nice effect
-+                                                     '+0.037*sin( 15.3*(u0 + 0.9*uniformfNow_ms) )'    //> "
-+                                                     '+0.029*sin( 22.3*(u0 + 1.3*uniformfNow_ms) )'    //> ".
-+                                                     ');'                                           +N //> ".
-+ 'if(  0.6 < u0       ){'                                                                           +N //> If in right corner (0.6 of full display width),
-+  'if( v0  < 0.35 + y ){'                                                                           +N //> and if at bottom (bottom 35% plus flutter)
-+   'u1 = ( u0 - 0.6 )*'+   ( 1/(1.0 - 0.6) ).toFixed(5)   +';'                                      +N //>  + ?
-+   'v1 = ( v0 - y   )*'+   ( 1/ 0.35       ).toFixed(5)   +';'                                      +N //> 1/0.3
++ 'float '                              +'dFlutter  = (1.0-u0)*(0.06 *sin( 11.0*(u0 + 0.4*uniformfNow_ms) )'   //> Calculate time-based fluttering of flag, parameters set by trial and error to get a nice effect
++                                                      '+0.037*sin( 15.3*(u0 + 0.9*uniformfNow_ms) )'   //> "
++                                                      '+0.029*sin( 22.3*(u0 + 1.3*uniformfNow_ms) )'   //> ".
++                                                      ');'                                          +N //> ".
++ 'float '                              +'dSun = 3.0*dFlutter;'                                         //> Lightness to add to create a 3-D highlight effect on the flag.
++ 'if(  '+          dFLAGSIZEX +' < u0 ){'                                                           +N //> If in right corner (0.6 of full display width),
++  'if( v0  < '+    dFLAGSIZEY +' + dFlutter ){'                                                     +N //> and if at bottom (bottom 35% plus flutter)
+
++   'u1 = ( u0 - '+ dFLAGSIZEX +' )*'+   ( 1/(1 - dFLAGSIZEX) ).toFixed(5)   +';'                    +N //>  + ?
++   'v1 = ( v0 - dFlutter         )*'+   ( 1/     dFLAGSIZEY  ).toFixed(5)   +';'                    +N //> 1/0.3
 +   'r1 = texture2D( uniformsampler2d1 ,vec2(u1 ,v1) ).r;'                                           +N //> deprecated. Retrieves texels from texture uniformsampler2d1
 +   'g1 = texture2D( uniformsampler2d1 ,vec2(u1 ,v1) ).g;'                                           +N //>
 +   'b1 = texture2D( uniformsampler2d1 ,vec2(u1 ,v1) ).b;'                                           +N //>
-+   'gl_FragColor = vec4(r1*0.6 + r0*0.4 + y*3.0'                                                       //> Calculate mixture of flag and video,
-+                      ',g1*0.6 + g0*0.4 + y*3.0'                                                       //> plus adjust brightness to give flag a 3-D effect
-+                      ',b1*0.6 + b0*0.4 + y*3.0'                                                       //> "
-+                      ',1.0'                                                                           //>
++   'gl_FragColor = vec4(r1*'+ dOPACITY.toFixed(5) +' + r0*'+ (1 - dOPACITY).toFixed(5) +' + dSun'      //> Calculate mixture of flag and video,
++                      ',g1*'+ dOPACITY.toFixed(5) +' + g0*'+ (1 - dOPACITY).toFixed(5) +' + dSun'      //> plus adjust brightness to give flag a 3-D effect
++                      ',b1*'+ dOPACITY.toFixed(5) +' + b0*'+ (1 - dOPACITY).toFixed(5) +' + dSun'      //> "
++                      ',1.0'                                                                           //> Completely opaque result
 +                      ');'                                                                          +N //> .
-+'return;'                                                                                           +N //>
-+ '}}'                                                                                               +N //>
-+ 'gl_FragColor = vec4( r0 ,g0 ,b0 ,1.0);'                                                           +N //> Copy color as is.
++'return;'                                                                                           +N //> We are done in this case.
++ '}}'                                                                                               +N //> .
+                                                                                                        //> Otherwise
++ 'gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                                                            +N //> copy color as is.
 +'}'+N//main// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
 ;                                                                                                       /*DEV*/console.log( sCodeFragmentShader );
 
