@@ -3,7 +3,8 @@
 
 
 const                                   g_eleVideo              = document.getElementById('video0' );   //>
-const                                   g_eleButton             = document.getElementById('button0');   //>
+const                                   g_eleButton0            = document.getElementById('button0');   //>
+const                                   g_eleButton1            = document.getElementById('button1');   //>
 const                                   g_eleSelect             = document.getElementById('select0');   //>
 let                                     g_currentStream         ;                                       //>
 
@@ -28,11 +29,16 @@ function                                EnumerateDevicesDone(///////////////////
 }//EnumerateDevicesDone///////////////////////////////////////////////////////////////////////////////////>
 
 
-function                                OnClickButton(////////////////////////////////////////////////////>
+function                                UpdateVideoSourcesList0(///////////////////////////////////////////>
                                         event                                                           //>
 ){                                      //////////////////////////////////////////////////////////////////>
  navigator.mediaDevices.enumerateDevices().then( EnumerateDevicesDone );                                //> List devices currently available in 
-                                                                                                        //>
+}//UpdateVideoSourcesList/////////////////////////////////////////////////////////////////////////////////>
+
+
+function                                UpdateVideoSourcesList1(///////////////////////////////////////////>
+                                        event                                                           //>
+){                                      //////////////////////////////////////////////////////////////////>
  if( typeof g_currentStream !== 'undefined' ){                                                          //> If there are any current streams, then
   g_currentStream.getTracks().forEach(   function(track){ track.stop(); }   );                          //> stop them
  }//if                                                                                                  //> .
@@ -49,11 +55,12 @@ function                                OnClickButton(//////////////////////////
             g_eleVideo.srcObject = stream;                                                              //>
            //return navigator.mediaDevices.enumerateDevices();                                          //>
   }        )                                                                                            //>
- .catch(   function(error){ console.log(error); }   );                                                //>
-}/////////////////////////////////////////////////////////////////////////////////////////////////////////>
+ .catch(   function(error){ console.log(error); }   );                                                  //>
+}//UpdateVideoSourcesList/////////////////////////////////////////////////////////////////////////////////>
 
 
-g_eleButton.addEventListener( 'click' ,OnClickButton );
+g_eleButton0.addEventListener( 'click' ,UpdateVideoSourcesList0 );
+g_eleButton1.addEventListener( 'click' ,UpdateVideoSourcesList1 );
 
 navigator.mediaDevices.enumerateDevices().then( EnumerateDevicesDone );
 

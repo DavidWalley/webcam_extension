@@ -1,0 +1,9 @@
+# .gitignore - List of files and directories NOT to track in GIT version control system
+# (c)2022 David C. Walley, Calgary, AB, Canada
+# Author(s): David C. Walley
+
+# Temporary files:
+##################
+TEMP_*
+/PRO/*
+*/manifest.json
