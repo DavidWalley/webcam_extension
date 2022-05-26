@@ -2,14 +2,14 @@
 //(c)2022 David C. Walley
 
 
-const                                   g_eleVideo              = document.getElementById('video0' );   //>
-const                                   g_eleButton0            = document.getElementById('button0');   //>
-const                                   g_eleButton1            = document.getElementById('button1');   //>
-const                                   g_eleSelect             = document.getElementById('select0');   //>
-let                                     g_currentStream         ;                                       //>
+const                                   g_eleVideo           = document.getElementById('video0'      ); //>
+const                                   g_eleButtonGoList    = document.getElementById('buttonGoList'); //>
+const                                   g_eleButtonCamera    = document.getElementById('buttonCamera'); //>
+const                                   g_eleSelect          = document.getElementById('selectSource'); //>
+let                                     g_currentStream      ;                                          //>
 
 
-function                                EnumerateDevicesDone(/////////////////////////////////////////////>
+function                                UpdateVideoSourceOptions(/////////////////////////////////////////>
                                         a_mediaDevices                                                  //>
 ){                                      //////////////////////////////////////////////////////////////////>
  g_eleSelect.innerHTML = '';                                                                            //>
@@ -17,27 +17,27 @@ function                                EnumerateDevicesDone(///////////////////
  a_mediaDevices.forEach(                                                                                //>
   function( a_mediaDevice ){                                                                            //>
    if( a_mediaDevice.kind !== 'videoinput' ){                                                   return;}//>
-   const                               option                = document.createElement('option');        //>
-   option.value = a_mediaDevice.deviceId;                                                               //>
+   const                                eleOption               = document.createElement('option');     //>
+   eleOption.value = a_mediaDevice.deviceId;                                                            //>
    count++                                                                                              //>
-   const                               label                 = a_mediaDevice.label || 'Camera '+ count; //>
-   const                               textNode              = document.createTextNode( label );        //>
-   option.appendChild(textNode);                                                                        //>
-   g_eleSelect.appendChild(option);                                                                     //>
+   const                                label            = a_mediaDevice.label   ||   'Camera '+ count; //>
+   const                                textNode         = document.createTextNode( label );            //>
+   eleOption.appendChild(textNode);                                                                     //>
+   g_eleSelect.appendChild(eleOption);                                                                  //>
   }//function                                                                                           //>
  );//forEach                                                                                            //>
-}//EnumerateDevicesDone///////////////////////////////////////////////////////////////////////////////////>
+}//UpdateVideoSourceOptions///////////////////////////////////////////////////////////////////////////////>
 
 
-function                                UpdateVideoSourcesList0(///////////////////////////////////////////>
-                                        event                                                           //>
+function                                OnClick_GoList(///////////////////////////////////////////////////>
+                                        a_eventDummy                                                    //>
 ){                                      //////////////////////////////////////////////////////////////////>
- navigator.mediaDevices.enumerateDevices().then( EnumerateDevicesDone );                                //> List devices currently available in 
+ navigator.mediaDevices.enumerateDevices().then( UpdateVideoSourceOptions );                            //> List devices currently available in 
 }//UpdateVideoSourcesList/////////////////////////////////////////////////////////////////////////////////>
 
 
-function                                UpdateVideoSourcesList1(///////////////////////////////////////////>
-                                        event                                                           //>
+function                                OnClick_GoCamera(/////////////////////////////////////////////////>
+                                        a_eventDummy                                                    //>
 ){                                      //////////////////////////////////////////////////////////////////>
  if( typeof g_currentStream !== 'undefined' ){                                                          //> If there are any current streams, then
   g_currentStream.getTracks().forEach(   function(track){ track.stop(); }   );                          //> stop them
@@ -50,19 +50,18 @@ function                                UpdateVideoSourcesList1(////////////////
   {video : videoConstraints                                                                             //>
   ,audio : false                                                                                        //>
   }                                                                                                     //>
- ).then(   function(stream){                                                                            //>
-            g_currentStream      = stream;                                                              //>
-            g_eleVideo.srcObject = stream;                                                              //>
-           //return navigator.mediaDevices.enumerateDevices();                                          //>
+ ).then(   function(a_stream){                                                                          //>
+            g_currentStream      = a_stream;                                                            //>
+            g_eleVideo.srcObject = a_stream;                                                            //>
   }        )                                                                                            //>
- .catch(   function(error){ console.log(error); }   );                                                  //>
+ .catch(   function(a_error){ console.log(a_error); }   );                                              //>
 }//UpdateVideoSourcesList/////////////////////////////////////////////////////////////////////////////////>
 
 
-g_eleButton0.addEventListener( 'click' ,UpdateVideoSourcesList0 );
-g_eleButton1.addEventListener( 'click' ,UpdateVideoSourcesList1 );
+g_eleButtonGoList.addEventListener( 'click' ,OnClick_GoList   );
+g_eleButtonCamera.addEventListener( 'click' ,OnClick_GoCamera );
 
-navigator.mediaDevices.enumerateDevices().then( EnumerateDevicesDone );
+navigator.mediaDevices.enumerateDevices().then( UpdateVideoSourceOptions );
 
 
 //End of file.
