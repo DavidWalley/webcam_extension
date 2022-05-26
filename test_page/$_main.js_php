@@ -1,0 +1,61 @@
+//test_page/$_main.js_php - Javascript code with PHP macros, for testing Virtual Camera injection into list of available cameras.
+//(c)2022 David C. Walley
+
+
+const                                   g_eleVideo              = document.getElementById('video0' );   //>
+const                                   g_eleButton             = document.getElementById('button0');   //>
+const                                   g_eleSelect             = document.getElementById('select0');   //>
+let                                     g_currentStream         ;                                       //>
+
+
+function                                EnumerateDevicesDone(/////////////////////////////////////////////>
+                                        a_mediaDevices                                                  //>
+){                                      //////////////////////////////////////////////////////////////////>
+ g_eleSelect.innerHTML = '';                                                                            //>
+ let                                    count                   = 1;                                    //>
+ a_mediaDevices.forEach(                                                                                //>
+  function( a_mediaDevice ){                                                                            //>
+   if( a_mediaDevice.kind !== 'videoinput' ){                                                   return;}//>
+   const                               option                = document.createElement('option');        //>
+   option.value = a_mediaDevice.deviceId;                                                               //>
+   count++                                                                                              //>
+   const                               label                 = a_mediaDevice.label || 'Camera '+ count; //>
+   const                               textNode              = document.createTextNode( label );        //>
+   option.appendChild(textNode);                                                                        //>
+   g_eleSelect.appendChild(option);                                                                     //>
+  }//function                                                                                           //>
+ );//forEach                                                                                            //>
+}//EnumerateDevicesDone///////////////////////////////////////////////////////////////////////////////////>
+
+
+function                                OnClickButton(////////////////////////////////////////////////////>
+                                        event                                                           //>
+){                                      //////////////////////////////////////////////////////////////////>
+ navigator.mediaDevices.enumerateDevices().then( EnumerateDevicesDone );                                //> List devices currently available in 
+                                                                                                        //>
+ if( typeof g_currentStream !== 'undefined' ){                                                          //> If there are any current streams, then
+  g_currentStream.getTracks().forEach(   function(track){ track.stop(); }   );                          //> stop them
+ }//if                                                                                                  //> .
+                                                                                                        //>
+ const                                  videoConstraints            = {};                               //>
+ if( g_eleSelect.value === '' ){        videoConstraints.facingMode = 'user';                         } //>
+ else                          {        videoConstraints.deviceId   = { exact : g_eleSelect.value };  } //>
+ navigator.mediaDevices.getUserMedia(                                                                   //>
+  {video : videoConstraints                                                                             //>
+  ,audio : false                                                                                        //>
+  }                                                                                                     //>
+ ).then(   function(stream){                                                                            //>
+            g_currentStream      = stream;                                                              //>
+            g_eleVideo.srcObject = stream;                                                              //>
+           //return navigator.mediaDevices.enumerateDevices();                                          //>
+  }        )                                                                                            //>
+ .catch(   function(error){ console.log(error); }   );                                                //>
+}/////////////////////////////////////////////////////////////////////////////////////////////////////////>
+
+
+g_eleButton.addEventListener( 'click' ,OnClickButton );
+
+navigator.mediaDevices.enumerateDevices().then( EnumerateDevicesDone );
+
+
+//End of file.
