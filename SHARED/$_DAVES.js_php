@@ -1,0 +1,253 @@
+//$_DAVES.js_php JavaScript with PHP macros. DAVE'S GLOBALS: Language fixes and code conveniences - returning DOM ids and such.
+// (c)2022 David C. Walley
+
+
+/*DEV*/ function                        G_ASSERT(/////////////////////////////////////////////////////////# Power comments during development.
+/*DEV*/                                 $a_b                                                            //# Must be true,
+/*DEV*/ ,                               $a_s                                                            //# otherwise display the following message and halt.
+/*DEV*/ ){                              //////////////////////////////////////////////////////////////////# Report nothing.
+/*DEV*/  if( $a_b ){                                                                            return;}//> If true then there is no problem.
+/*DEV*/  console.log( $a_s );                                                                           //> DEBUG info on failure - user message
+/*DEV*/  console.trace();                                                                               //> DEBUG info on failure.
+/*DEV*/  debugger;                                                                                      //> Switch to browser's debug mode? https://stackoverflow.com/questions/9298839/is-it-possible-to-stop-javascript-execution#9298915
+/*DEV*/ }//G_ASSERT///////////////////////////////////////////////////////////////////////////////////////>
+
+
+function                                G_ele(a){ return document.getElementById(a); }                  //# Code convenience.
+function                                G_bIS(a){ return 'undefined' !== typeof a; }                    //# Code convenience for detecting undefined variable and avoiding potential error of typo which will compile.
+
+let                                     s_i                     = 0;                                    //# Current count for unique IDs for DOM elements.
+function                                G_i(){ s_i++; return s_i; }                                     //# Serial counter to ensure unique IDs of created DOM elements.
+
+
+function                                G_sTRIM(//////////////////////////////////////////////////////////# Full-service trim - replace strings of internal whitespace with single whitespaces.
+                                        a_s                                                             //# Input string to be trimmed.
+){   return a_s.replace( /\s+/g ,' ' ).trim();   }////////////////////////////////////////////////////////>
+
+
+function                                G_nMOD(///////////////////////////////////////////////////////////# Correction to JavaScript's so-called modulus operation (JS has negative remainders).
+                                        a_n                                                             //# Number.
+,                                       a_nModulus                                                      //# Modulus to use.
+){                                      //////////////////////////////////////////////////////////////////# Report a number.
+return ( (a_n%a_nModulus) + a_nModulus )%a_nModulus;                                                    //>
+}//G_nMOD/////////////////////////////////////////////////////////////////////////////////////////////////>
+/*DEV*/ var                                                                                             //> TESTS:
+/*DEV*/ n = G_nMOD( 13 , 8); G_ASSERT( n ===  5 ,"G_nMOD() ERR 0 >"+ n +"<" );                          //>
+/*DEV*/ n = G_nMOD( 13 ,13); G_ASSERT( n ===  0 ,"G_nMOD() ERR 1 >"+ n +"<" );                          //>
+/*DEV*/ n = G_nMOD(-13 , 8); G_ASSERT( n ===  3 ,"G_nMOD() ERR 2 >"+ n +"<" );                          //>
+/*DEV*/ n = G_nMOD( 13 ,-8); G_ASSERT( n === -3 ,"G_nMOD() ERR 3 >"+ n +"<" );                          //>
+
+
+function                                G_TELL(///////////////////////////////////////////////////////////# Global DEBUG output.
+                                        a_s                                                             //# Message to append to display, or '' to clear display.
+){                                      //////////////////////////////////////////////////////////////////# Output message to console.
+ /*DEV*/ var                            eleTell                 = G_ele( share_sDIVtELL() );            //> Debug output element.
+ /*DEV*/ if( null !== eleTell ){                                                                        //>
+ /*DEV*/  if( '' === a_s ){ eleTell.innerHTML = '';                                             return;}//>
+ /*DEV*/  var                           s                       = eleTell.innerHTML;                    //>
+ /*DEV*/  eleTell.innerHTML = a_s + s;                                                                  //>
+ /*DEV*/ }//if                                                                                          //>
+ console.log(a_s);                                                                                      //> DEBUG
+}//G_TELL/////////////////////////////////////////////////////////////////////////////////////////////////>
+
+
+function                                G_adVIEW_WH_px(///////////////////////////////////////////////////# Report display size in pixels.
+){                                      //////////////////////////////////////////////////////////////////>
+                                                                                                        //> TODO - Get zoom/rem size.
+return [    window.innerWidth                                                                           //> returns the width of the window's layout viewport.
+        ||  document.documentElement.clientWidth                                                        //>
+         ||            document.body.clientWidth                                                        //> Best width in pixels?
+       ,    window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight   //> height
+        //. window.innerWidth                                                                           //> It covers cases where the scrollbar is not taken into consideration and has mobile support.   https://stackoverflow.com/questions/6942785/window-innerwidth-vs-document-documentelement-clientwidth
+        //.  && document.documentElement.clientWidth                                                    //>
+        //.      ?    Math.min( window.innerWidth ,document.documentElement.clientWidth )               //>
+        //.      :    window.innerWidth                                                                 //>
+        //.       ||  document.documentElement.clientWidth                                              //>
+        //.        || document.getElementsByTagName('body')[0].clientWidth;                             //>
+       ];                                                                                               //> .
+}//G_adVIEW_WH_px/////////////////////////////////////////////////////////////////////////////////////////>
+
+
+function                                G_promiseNAP(/////////////////////////////////////////////////////# Wait for a while.
+                                        a_take_ms                                                       //# Length of time to wait, in millisecond.
+){                                      //////////////////////////////////////////////////////////////////# Report a promise.
+return new Promise(   function(a_resolve){ setTimeout(a_resolve ,a_take_ms); }   );                     //>
+}//G_promiseNAP///////////////////////////////////////////////////////////////////////////////////////////>
+
+
+function                                G_dateNEW(////////////////////////////////////////////////////////# Coding error reducer (search for 'new Date' to find potential mistakes with zero-index month argument).
+                                        a_nY                                                            //# Year, e.g. 2022
+,                                       a_nM                                                            //# Month, where 1 = January.
+,                                       a_nD                                                            //# Date of month.
+){ return new Date(a_nY,a_nM-1,a_nD); }///////////////////////////////////////////////////////////////////>
+
+
+function                                G_sDateSi(////////////////////////////////////////////////////////# Convert a local date to SI standard display string.
+                                        a_date                                                          //# a date object, e.g. var date = new Date( a_when_ms );
+){                                      //////////////////////////////////////////////////////////////////# Report a text string.
+ const                                  asMON                   = ["01" ,"02" ,"03"  ,"04" ,"05" ,"06"  //>
+                                                                  ,"07" ,"08" ,"09"  ,"10" ,"11" ,"12"  //>
+                                                                  ];                                    //>
+return a_date.getFullYear() + '-'+ asMON[ a_date.getMonth() ] +'-'+ a_date.getDate();                   //>
+}//G_sDateSimple//////////////////////////////////////////////////////////////////////////////////////////>
+/*DEV*/ var                                                                                             //>
+/*DEV*/ s=G_sDateSi(G_dateNEW(2022,5,15)); G_ASSERT(s==='2022-05-15',"G_sDateSi() ERR 0 >"+s+"<");      //>
+
+
+function                                G_sDateSimple(////////////////////////////////////////////////////# Convert a local date to a short display string.
+                                        a_date                                                          //# a date object, e.g. var date = new Date( a_when_ms );
+){                                      //////////////////////////////////////////////////////////////////# Report a text string.
+ const                                  asMON                   = ["Jan","Feb","Mar" ,"Apr","May","Jun" //>
+                                                                  ,"Jul","Aug","Sep" ,"Oct","Nov","Dec" //>
+                                                                  ];                                    //>
+return a_date.getFullYear() + ' '+ asMON[ a_date.getMonth() ] +' '+ a_date.getDate();                   //>
+}//G_sDateSimple//////////////////////////////////////////////////////////////////////////////////////////>
+/*DEV*/ s=G_sDateSimple(G_dateNEW(2022,5,15)); G_ASSERT(s==='2022 May 15',"G_sDateSimple() ERR 0 >"+s+"<"); //>
+
+
+function                                G_sHourSimple(////////////////////////////////////////////////////# Convert a time of day to a short display string.
+                                        a_dHour                                                         //# Given a time of day in hours (and possible fraction of an hour).
+){                                      //////////////////////////////////////////////////////////////////# Report a text string.
+ if( isNaN(a_dHour) ){                                                                return ''       ;}//>
+ if( a_dHour <= -2 ){                                                                 return 'unknown';}//>
+ if( a_dHour <= -1 ){                                                                 return 'closed' ;}//>
+ var                                    iHour                   = Math.floor(  a_dHour             );   //>
+ var                                    dMinutes                = Math.floor( (a_dHour - iHour)*60 );   //>
+ if( 0 === dMinutes ){                                                                                  //>
+  if( iHour  <  12 ){                                                          return  iHour      +'a';}//>
+  if( iHour === 12 ){                                                          return         '12noon';}//>
+  if( iHour  <  24 ){                                                          return (iHour - 12)+'p';}//>
+  if( iHour === 24 ){                                                          return         '12midn';}//>
+return                                                                                (iHour - 24)+'a'; //>
+ }//if                                                                                                  //>
+                                                                                                        //>
+ var                                    sMinutes                = ('00'+ dMinutes).slice(-2);           //>
+ if( iHour  <  12 ){                                        return (  iHour      +':'+ sMinutes +'a' );}//>
+ if( iHour === 12 ){                                        return (  '12'       +':'+ sMinutes +'p' );}//>
+ if( iHour  <  24 ){                                        return ( (iHour - 12)+':'+ sMinutes +'p' );}//>
+ if( iHour === 24 ){                                        return (  '12'       +':'+ sMinutes +'a' );}//>
+return                                                             ( (iHour - 24)+':'+ sMinutes +'a' ); //>
+}//G_sHourSimple//////////////////////////////////////////////////////////////////////////////////////////>
+
+
+//function                                G_sDateTimeSimple(////////////////////////////////////////////////>
+//                                        a_when_ms                                                       //>
+//){                                      //////////////////////////////////////////////////////////////////>
+// var                                    date                    = new Date( a_when_ms );                //>
+// var                                    r_s                     = ' '+ G_sDateSimple( date );           //> Date
+//return r_s + ' '+ date.toTimeString().slice(0,5);                                                       //> Time
+//}//G_sDateTimeSimple//////////////////////////////////////////////////////////////////////////////////////>
+
+
+//function                                G_context(////////////////////////////////////////////////////////#
+//                                        a_sSuffix                                                       //# e.g. 'circle'
+//){                                      //////////////////////////////////////////////////////////////////#
+// var                                    canvas       = document.getElementById('canvas_' + a_sSuffix ); //>  Create a canvas with which we can edit an image.
+// var                                    r_context    = canvas.getContext('2d');                         //>
+// r_context.drawImage(   document.getElementById('image_'+ a_sSuffix)   ,0,0   );                        //> Image element, default fill?
+//return r_context;                                                                                       //>
+//}//G_context//////////////////////////////////////////////////////////////////////////////////////////////>
+
+
+function                                G_dLevenshtein(///////////////////////////////////////////////////# Calculate distance between 2 text strings.   https://www.tutorialspoint.com/levenshtein-distance-in-javascript
+                                        a_s0                    = ''                                    //# Given a test string,
+,                                       a_s1                    = ''                                    //# and another.
+){                                      //////////////////////////////////////////////////////////////////# Report a number.
+ const                             track = Array(                     a_s1.length + 1 ).fill( null )    //>
+                                           .map(                                                        //>
+                                            function(){ return Array( a_s0.length + 1 ).fill( null ); } //>
+                                           );                                                           //>
+ for(  let i = 0; i <= a_s0.length; i += 1 ){   track[0][i] = i;   }                                    //>
+ for(  let j = 0; j <= a_s1.length; j += 1 ){   track[j][0] = j;   }                                    //>
+                                                                                                        //>
+ for(  let j = 1; j <= a_s1.length; j += 1 ){                                                           //>
+  for( let i = 1; i <= a_s0.length; i += 1 ){                                                           //>
+   track[j][i] = Math.min( track[j    ][i - 1] +                                    1                   //> deletion
+                 ,         track[j - 1][i    ] +                                    1                   //> insertion
+                 ,         track[j - 1][i - 1] + (   ( a_s0[i-1] === a_s1[j-1] )?0 :1   )               //> substitution
+                 );                                                                                     //>
+ }}//for i//for j                                                                                       //>
+return track[a_s1.length][a_s0.length];                                                                 //>
+};//G_dLevenshtein////////////////////////////////////////////////////////////////////////////////////////>
+
+
+//. const                                   G_dLevenshteinD =function(////////////////////////////////////////> Calculate distance between 2 text strings.   https://www.tutorialspoint.com/levenshtein-distance-in-javascript
+//.                                         a_sA                                                            //>
+//. ,                                       a_sB                                                            //>
+//. ){                                      //////////////////////////////////////////////////////////////////>
+//.  const                                  nASize                  = a_sA.length + 1;                      //>
+//.  const                                  nBSize                  = a_sB.length + 1;                      //>
+//.  const                                  r_a2                    = Array(nASize);                        //>
+//.  for(  let i = 0; i < nASize; ++i ){ r_a2[i]    = Array(nBSize); }                                      //>
+//.  for(  let i = 0; i < nASize; ++i ){ r_a2[i][0] = i            ; }                                      //>
+//.  for(  let j = 0; j < nBSize; ++j ){ r_a2[0][j] = j            ; }                                      //>
+//.                                                                                                         //>
+//.  for(  let i = 1; i < nASize; ++i ){                                                                    //>
+//.   for( let j = 1; j < nBSize; ++j ){                                                                    //>
+//.    const                                substitutionCost        = a_sA[i - 1] === a_sB[j - 1] ?0 :1;    //>
+//.    r_a2[i][j] = Math.min( r_a2[i - 1][j    ] + 1                                                        //>
+//.                 ,         r_a2[i    ][j - 1] + 1                                                        //>
+//.                 ,         r_a2[i - 1][j - 1] + substitutionCost                                         //>
+//.    );                                                                                                   //>
+//.   }                                                                                                     //>
+//.  }                                                                                                      //>
+//. return r_a2[a_sA.length][a_sB.length];                                                                  //>
+//. };//G_dLevenshteinD///////////////////////////////////////////////////////////////////////////////////////>
+//. 
+//. 
+//. /*DEV*/G_ASSERT(  G_dLevenshtein(''       ,''           ) === G_dLevenshteinD(''       ,''           ) ,"Lev 11"  ); //> DEBUG Test that the above 2 function do the same thing.
+//. /*DEV*/G_ASSERT(  G_dLevenshtein(''       ,'a'          ) === G_dLevenshteinD(''       ,'a'          ) ,"Lev 12"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('a'      ,'a'          ) === G_dLevenshteinD('a'      ,'a'          ) ,"Lev 13"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('a'      ,'b'          ) === G_dLevenshteinD('a'      ,'b'          ) ,"Lev 14"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('a'      ,'adeaa'      ) === G_dLevenshteinD('a'      ,'adeaa'      ) ,"Lev 15:"+ G_dLevenshtein('a','adeaa' )+' '+G_dLevenshteinD('a','adeaa' )  );//>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('hitting','kitten'     ) === G_dLevenshteinD('hitting','kitten'     ) ,"Lev 16"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('hits'   ,'kittens'    ) === G_dLevenshteinD('hits'   ,'kittens'    ) ,"Lev 17"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('hAsss'  ,'kittens'    ) === G_dLevenshteinD('hAsss'  ,'kittens'    ) ,"Lev 18"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('hAss'   ,'kiAsns'     ) === G_dLevenshteinD('hAss'   ,'kiAsns'     ) ,"Lev 19"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('hAs2s'  ,'kAs23ns'    ) === G_dLevenshteinD('hAs2s'  ,'kAs23ns'    ) ,"Lev 1a"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('hAs3s'  ,'kAs4ens'    ) === G_dLevenshteinD('hAs3s'  ,'kAs4ens'    ) ,"Lev 1b"  ); //>
+//. /*DEV*/G_ASSERT(  G_dLevenshtein('hAs4s'  ,'kAs4ens Rte') === G_dLevenshteinD('hAs4s'  ,'kAs4ens Rte') ,"Lev 1c"  ); //>
+//. /*DEV*/console.log('Tests done for G_dLevenshtein.');                                                   //. DEBUG
+
+
+function                                anRgbToHsl(///////////////////////////////////////////////////////> Convert color descriptions from RGB (Red, Green, Blue) to HSL (Hue, Saturation, Lightness).   https://gmigdos.wordpress.com/2011/01/13/javascript-convert-rgb-values-to-hsl/
+                                        a_nRed                                                          //> Red pixel value. 0 to 255
+,                                       a_nGrn                                                          //> Green pixel value. 0 to 255
+,                                       a_nBlu                                                          //> Blue pixel value. 0 to 255
+){                                      //////////////////////////////////////////////////////////////////> Report Hue (degrees), Saturation [0,1000], Lightness [0,1000].
+ var                                    r                       = a_nRed/255;                           //> Adjust range to 0 or 1.
+ var                                    g                       = a_nGrn/255;                           //> Adjust range to 0 or 1.
+ var                                    b                       = a_nBlu/255;                           //> Adjust range to 0 or 1.
+ var                                    max                     = Math.max(r ,g ,b);                    //>
+ var                                    min                     = Math.min(r ,g ,b);                    //>
+ var                                    h                       = 0;                                    //>
+ var                                    s                       = 0;                                    //>
+ var                                    l                       = (max + min) / 2;                      //>
+ if( max === min ){                                                 return [ 0 ,0 ,Math.floor(l*1000)];}//> gray (achromatic)
+ var                                    d                       = max - min;                            //> Largest distance.
+ s = 0.5 < l ?d/(2 - max - min)                                                                         //>
+             :d/(    max + min);                                                                        //>
+ switch( max ){                                                                                         //>
+ case       r: h = (g - b) / d + (g < b ? 6 : 0);                                                       //>
+ break;case g: h = (b - r) / d +              2 ;                                                       //>
+ break;case b: h = (r - g) / d +              4 ;                                                       //>
+ }//switch                                                                                              //>
+return [   Math.floor(h*60), Math.floor(s*1000), Math.floor(l*1000)   ];                                //>
+}/////////////////////////////////////////////////////////////////////////////////////////////////////////>
+// console.log("SHARED");                                 // degrees of H       S        L              //>
+/*DEV*/ s= JSON.stringify( anRgbToHsl(  0,  0,  0) ); G_ASSERT( s === '[0'   +',0'    +',0]'    ,"anRgbToHsl ERR 0 >"+ s +"<" ); //.
+/*DEV*/ s= JSON.stringify( anRgbToHsl(  1,  0,  0) ); G_ASSERT( s === '[0'   +',1000' +',1]'    ,"anRgbToHsl ERR 1 >"+ s +"<" ); //.
+/*DEV*/ s= JSON.stringify( anRgbToHsl(  0,  1,  0) ); G_ASSERT( s === '[120' +',1000' +',1]'    ,"anRgbToHsl ERR 2 >"+ s +"<" ); //.
+/*DEV*/ s= JSON.stringify( anRgbToHsl(  0,  0,  1) ); G_ASSERT( s === '[240' +',1000' +',1]'    ,"anRgbToHsl ERR 3 >"+ s +"<" ); //.
+/*DEV*/ s= JSON.stringify( anRgbToHsl( 10,  0,  0) ); G_ASSERT( s === '[0'   +',1000' +',19]'   ,"anRgbToHsl ERR 4 >"+ s +"<" ); //. Red
+/*DEV*/ s= JSON.stringify( anRgbToHsl( 10, 10,  0) ); G_ASSERT( s === '[60'  +',1000' +',19]'   ,"anRgbToHsl ERR 5 >"+ s +"<" ); //. Ora
+/*DEV*/ s= JSON.stringify( anRgbToHsl(  0, 10,  0) ); G_ASSERT( s === '[120' +',1000' +',19]'   ,"anRgbToHsl ERR 6 >"+ s +"<" ); //. Grn
+/*DEV*/ s= JSON.stringify( anRgbToHsl(  0, 10, 10) ); G_ASSERT( s === '[180' +',1000' +',19]'   ,"anRgbToHsl ERR 7 >"+ s +"<" ); //. Cyn
+/*DEV*/ s= JSON.stringify( anRgbToHsl(  0,  0, 10) ); G_ASSERT( s === '[240' +',1000' +',19]'   ,"anRgbToHsl ERR 8 >"+ s +"<" ); //. Blu
+/*DEV*/ s= JSON.stringify( anRgbToHsl( 10,  0, 10) ); G_ASSERT( s === '[300' +',1000' +',19]'   ,"anRgbToHsl ERR 9 >"+ s +"<" ); //. Vio
+/*DEV*/ s= JSON.stringify( anRgbToHsl( 10, 10, 10) ); G_ASSERT( s === '[0'   +',0'    +',39]'   ,"anRgbToHsl ERR 10>"+ s +"<" ); //.
+/*DEV*/ s= JSON.stringify( anRgbToHsl(255,255,255) ); G_ASSERT( s === '[0'   +',0'    +',1000]' ,"anRgbToHsl ERR 11>"+ s +"<" ); //.
+/*DEV*/ s= JSON.stringify( anRgbToHsl( 10, 68,200) ); G_ASSERT( s === '[221' +',904'  +',411]'  ,"anRgbToHsl ERR 12>"+ s +"<" ); //.
+
+
+//End of file.
