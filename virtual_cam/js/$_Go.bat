@@ -43,30 +43,19 @@ echo ----- Preprocess inject.js
 %PHP% %FIX% "//*PRO*/"    "/*PRO*/"  .\ZZZ_inject1.js                 >        .\ZZZ_inject2.js         &
 %PHP% %FIX% "/*VERSION*/" %VERSION%  .\ZZZ_inject2.js                 >        .\ZZZ_inject3.js         & rem Insert version based on date/time into the code.
 %PHP% %FIX% "NOTES"                  .\ZZZ_inject3.js                 >            .\inject.js          & rem Save a copy while making changes so prettier can handle blank lines and comments correctly.
-
 rem prettier --write .\inject.js
 rem Keep a prettier prettifed version of the code as source code.
-
-call prettier --write .\inject.js && (
- echo prettier was successful
- echo %ERRORLEVEL%
-) || (
- echo prettier failed
- echo %ERRORLEVEL%
-)
-
-echo ----- inject.js DONE.
-
+call prettier --write .\inject.js                                                                       & rem 
 %compile%                                .\inject.js   --js_output_file ..\..\PRO\js\inject.js          & rem
 echo ----- inject.js DONE.
 
-echo ----- Compile injected.js
+echo ----- Preprocess injected.js
 %PHP%                                  .\$_injected.js_php            >        .\ZZZ_injected0.js       & rem Run PHP macros in money code.
 %PHP% %FIX% "/*DEV*/"     "//*DEV*/" .\ZZZ_injected0.js               >        .\ZZZ_injected1.js       & rem Comment out DEV lines.
 %PHP% %FIX% "//*PRO*/"    "/*PRO*/"  .\ZZZ_injected1.js               >        .\ZZZ_injected2.js       & rem
 %PHP% %FIX% "/*VERSION*/" %VERSION%  .\ZZZ_injected2.js               >        .\ZZZ_injected3.js       & rem Insert version based on date/time into the code.
 %PHP% %FIX% "NOTES"                  .\ZZZ_injected3.js               >            .\injected.js        & rem Make changes so prettier can handle blank lines and comments correctly.
-prettier --write .\injected.js                                                                          & rem Overwrite file to create a prettifed version of the code as standard source code.
+call prettier --write .\injected.js                                                                          & rem Overwrite file to create a prettifed version of the code as standard source code.
 %compile%                                .\injected.js --js_output_file ..\..\PRO\js\injected.js        & rem
 echo --- injected.js DONE.
 

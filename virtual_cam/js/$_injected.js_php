@@ -18,9 +18,6 @@
 /*DEV*/ }//G_ASSERT///////////////////////////////////////////////////////////////////////////////////////>
 
 
-/*DEV*/ G_ASSERT( g_sFLAG_PIRATE ,"g_sFLAG_PIRATE should be defined." );
-
-
 const                                   N                       = "\n";                                 //> Newline. Used in GPU code to make error messages easier to understand.
 
 const                                   g_sCodeVertexShader     =                                       //> Vertex shader GLSL code, for execution on the GPU...
@@ -344,5 +341,10 @@ async function                          ModifyMediaFunctions(///////////////////
 
 
 ModifyMediaFunctions();                                                                                 //> Add virtual camera to system's list of cameras.
+
+// include data file somehow?
+// <?php echo 'console.log("hers jo");'; ?> PHP Not working live when script1.setAttribute( 'src' ,window['chrome']['runtime']['getURL']('js/$_injected.js_php') )?
+/*DEV*/ G_ASSERT( g_sFLAG_PIRATE ,"g_sFLAG_PIRATE should be defined." ); //> Defined live, need to include some other way for PRO?
+
 
 //End of file.

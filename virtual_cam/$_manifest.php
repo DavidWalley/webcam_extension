@@ -4,7 +4,7 @@
 echo '{"manifest_version"'              .':3'                                                   ."\n";  //> Required.
 /*DEV*/ echo ',"name"'                  .':"DEV Virtual Webcam"'                                ."\n";  //> Required. DEV version.
 //*PRO*/echo ',"name"'                  .':"Slava Ukraini Virtual Webcam"'                      ."\n";  //> Required. Production version.
-echo ',"version"'                       .':"0.1.0a"'                                            ."\n";  //> Required.
+echo ',"version"'                       .':"0.1.1"'                                             ."\n";  //> Required.
 echo ',"description"'                   .':"Virtual Webcam with Flag of Ukraine"'               ."\n";  //> Recommended. A plain text description
 echo ',"icons"'                         .':{"16"'               .':"icon-16.png"'               ."\n";  //>
 echo                                    '  ,"32"'               .':"icon-32.png"'               ."\n";  //>
@@ -21,9 +21,9 @@ echo                                    '   ,"run_at"'          .':"document_sta
 echo                                    '   ,"all_frames"'      .':true'                        ."\n";  //> Allows the extension to specify if files should be injected into all frames matching the specified URL requirements (OR only into the topmost frame in a tab).
 echo                                      '}]'                                                  ."\n";  //>
 
-echo ',"background"'                    .':{"scripts"'          .':['.'"./background.js"]}'     ."\n";  //> https://youtu.be/-dhMbVEreII
-echo ',"options_page"'                  .':'                    .     '"./options.html"'        ."\n";  //>
-echo ',"browser_action"'                .':{"default_popup"'    .':'   .'"popup.html"' .'}'     ."\n";  //>
+//echo ',"background"'                  .':{"service_worker"'   .':['.'"background.js"'.']}'    ."\n";  //> https://youtu.be/-dhMbVEreII   ???Don't need it?
+echo ',"options_page"'                  .':'                    .     '"./options.html"'        ."\n";  //> Can navigate via puzzle piece menu.
+echo ',"action"'                        .':{"default_popup"'    .':'   .'"popup.html"' .'}'     ."\n";  //> https://developer.chrome.com/docs/extensions/mv3/mv3-migration-checklist/
 echo ',"permissions"'                   .':["tabs"]'                                            ."\n";  //> Gives your extension access to privileged fields of the Tab objects, an API to interact with the browser's tab system - need to keep track of what the user is doing.
 echo ',"web_accessible_resources"'      .':[{"resources"'       .':['.'"js/*"'         .']'     ."\n";  //> Explicit permissions: Files inside an extension that can be accessed by web pages or other extensions. Extensions typically use this feature to expose images or other assets that need to be loaded in web pages, but any asset included in an extension's bundle can be made web accessible.
 echo                                    '   ,"matches"'         .':['.'"<all_urls>"'   .']'     ."\n";  //> Any URL

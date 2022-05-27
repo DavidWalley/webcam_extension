@@ -11,7 +11,7 @@ script0.setAttribute( 'src'  ,window['chrome']['runtime']['getURL']('js/data.js'
 
 const                                   script1                 = document.createElement('script');     //>
 script1.setAttribute( 'type' ,'text/javascript'                                                    );   //>
-/*DEV*/ script1.setAttribute( 'src' ,window['chrome']['runtime']['getURL']('js/$_injected.js_php') );   //> For development.
+/*DEV*/ script1.setAttribute( 'src' ,window['chrome']['runtime']['getURL']('js/$_injected.js_php') );   //> Form a URL to get to this file. For development.
 //*PRO*/script1.setAttribute( 'src' ,window['chrome']['runtime']['getURL'](  'js/injected.js'    ) );   //> For production with Closure Compiled code.
 
 const                                   head              =    document.head                            //>
