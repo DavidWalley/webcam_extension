@@ -7,6 +7,7 @@ echo '{"manifest_version"'              .':3'                                   
 echo ',"version"'                       .':"0.1.0a"'                                            ."\n";  //> Required.
 echo ',"description"'                   .':"Virtual Webcam with Flag of Ukraine"'               ."\n";  //> Recommended. A plain text description
 echo ',"icons"'                         .':{"16"'               .':"icon-16.png"'               ."\n";  //>
+echo                                    '  ,"32"'               .':"icon-32.png"'               ."\n";  //>
 echo                                    '  ,"48"'               .':"icon-48.png"'               ."\n";  //>
 echo                                    '  ,"128"'              .':"icon-128.png"'              ."\n";  //>
 echo                                    '  }'                                                   ."\n";  //>

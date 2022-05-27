@@ -7,4 +7,6 @@
 //.popup.html
 //.options.html
 
-console.log('from background.'))
+console.log('from background.'));
+
+//End of file.
