@@ -14,3 +14,6 @@ Tools for my work-flow are included -- converting money code to source code, and
 I use PHP, to serve up '.php' files as localhost '.html' pages, but also '.js_php' files, which may include <?php> preprocessor tags (syntax-highlight them as JavaScript files), converted to '.js' code files, on-demand.
 
 The same preprocessing chain is done via command line commands, prior to prettification into source code, and/or Google's Closure Compiler compilation into optimized and minimized production code. This code is packed as a Chrome Extension using the chrome://extensions page in Google Chrome.
+
+# To Do
+Prettify manifest.json

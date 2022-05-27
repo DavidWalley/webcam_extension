@@ -37,16 +37,25 @@ mkdir                                                                   ..\..\PR
 set /P VERSION=<ZZZ_TIMESTAMP.txt                                                                       & rem "
 echo %VERSION%                                                                                          & rem ".
 
-echo ----- Compile inject.js
+echo ----- Preprocess inject.js
 %PHP%                                  .\$_inject.js_php              >        .\ZZZ_inject0.js         & rem Run PHP macros in money code.
 %PHP% %FIX% "/*DEV*/"     "//*DEV*/" .\ZZZ_inject0.js                 >        .\ZZZ_inject1.js         & rem Comment out DEV lines.
 %PHP% %FIX% "//*PRO*/"    "/*PRO*/"  .\ZZZ_inject1.js                 >        .\ZZZ_inject2.js         &
 %PHP% %FIX% "/*VERSION*/" %VERSION%  .\ZZZ_inject2.js                 >        .\ZZZ_inject3.js         & rem Insert version based on date/time into the code.
 %PHP% %FIX% "NOTES"                  .\ZZZ_inject3.js                 >            .\inject.js          & rem Save a copy while making changes so prettier can handle blank lines and comments correctly.
 
-prettier --write .\inject.js                                                                            & rem Keep a prettier prettifed version of the code as source code.
+rem prettier --write .\inject.js
+rem Keep a prettier prettifed version of the code as source code.
 
-GOTO :End
+call prettier --write .\inject.js && (
+ echo prettier was successful
+ echo %ERRORLEVEL%
+) || (
+ echo prettier failed
+ echo %ERRORLEVEL%
+)
+
+echo ----- inject.js DONE.
 
 %compile%                                .\inject.js   --js_output_file ..\..\PRO\js\inject.js          & rem
 echo ----- inject.js DONE.
@@ -68,7 +77,8 @@ xcopy ..\icon-128.png                                                   ..\..\PR
 %PHP% %FIX% "/*DEV*/"     "//*DEV*/"   ..\$_manifest.php              >    ..\ZZZ_manifest1.php         & rem Comment out DEV lines.
 %PHP% %FIX% "//*PRO*/"    "/*PRO*/"  ..\ZZZ_manifest1.php             >    ..\ZZZ_manifest2.php         & rem Use PROduction version of code.
 %PHP%                                ..\ZZZ_manifest2.php             > ..\..\PRO\manifest.json         & rem Run PHP macros in money code.
-rem %PHP%                              ..\$_manifest.php              >        ..\manifest.json         &
+
+%PHP%                                  ..\$_manifest.php              >        ..\manifest.json         & rem Run PHP macros to rewrite DEV version for further localhost development.
 
 del                                                                         .\ZZZ_*.*                   & rem
 del                                                                        ..\ZZZ_*.*                   & rem
