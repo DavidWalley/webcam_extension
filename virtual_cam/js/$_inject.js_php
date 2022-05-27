@@ -1,6 +1,5 @@
 // $_inject.js_php - Inject a script into all pages running in Chrome after Daves Virtual Webcam extension is installed (as mentioned in manifest.json extension file).
 // (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
-// Refactoring of https://github.com/spite/virtual-webcam
 
 'use strict';                                                                                           //>
                                                                                                         //>
