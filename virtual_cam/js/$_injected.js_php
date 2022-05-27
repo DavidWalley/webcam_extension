@@ -39,6 +39,7 @@ const                                   g_sCodeFragmentShader   =               
 +'uniform float '                       +'uniformfNow_ms;'                                           +N //>
 +'uniform sampler2D '                   +'uniformsampler2dVideo;'                                    +N //> Texture unit 0 (oF at least 8) is video input (because?). sampler2D is just a way to get data from an array.   https://stackoverflow.com/questions/63322297/what-are-the-use-cases-of-sampler2d-uniforms-in-webgl-opengl
 +'uniform sampler2D '                   +'uniformsampler2dFlag;'                                     +N //> Texture unit 1
++'uniform sampler2D '                   +'uniformsampler2dDave;'                                     +N //> Texture unit 2
                                                                                                         //>
 +'void '                                +'main('// /// // // // // // // // // // // // // // // // // ///> Takes gl_FragCoord,
 +'){'+N                                 // // // // // // // // // // // // // // // // // // // // // ///> Changes gl_FragColor.
@@ -72,9 +73,9 @@ const                                   g_sCodeFragmentShader   =               
 +    'v1 = ( v0 - dFlutter )*'+ ( 1/g_dFLAGSIZEY  ).toFixed(5) +';'                                  +N //> 1/0.3
 +    'if( v1 < 0.0 ){ gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                               +'return;}'+N//>
 +    'if( bFlip ){ u1 = 1.0 - u1; }'                                                                 +N //>
-+    'r1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).r;'                                          +N //> deprecated. Retrieves texels from texture uniformsampler2dFlag
-+    'g1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).g;'                                          +N //>
-+    'b1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).b;'                                          +N //>
++    'r1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).r;'                                       +N //> deprecated. Retrieves texels from texture uniformsampler2dFlag
++    'g1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).g;'                                       +N //>
++    'b1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).b;'                                       +N //>
 +    'gl_FragColor = vec4(r1*'+ g_dOPACITY.toFixed(5) +' + r0*'+ (1 - g_dOPACITY).toFixed(5) +' + dSun' //> Calculate mixture of flag and video,
 +                       ',g1*'+ g_dOPACITY.toFixed(5) +' + g0*'+ (1 - g_dOPACITY).toFixed(5) +' + dSun' //> plus adjust brightness to give flag a 3-D effect
 +                       ',b1*'+ g_dOPACITY.toFixed(5) +' + b0*'+ (1 - g_dOPACITY).toFixed(5) +' + dSun' //> "
@@ -93,12 +94,12 @@ const                                   g_sCodeFragmentShader   =               
 +   'if( v0 < '+    g_dFLAGSIZEY  +' + dFlutter ){'                                                  +N //> and if at bottom (bottom 35% plus flutter)
                                                                                                         //>
 +    'u1 = ( u0 - '+ (1 - g_dFLAGSIZEX) +' )*'+   ( 1/g_dFLAGSIZEX  ).toFixed(5)   +';'              +N //>  + ?
-+    'v1 = ( v0 - dFlutter'+           ' )*'+   ( 1/g_dFLAGSIZEY  ).toFixed(5)   +';'                +N //> 1/0.3
++    'v1 = ( v0 - dFlutter'+             ' )*'+   ( 1/g_dFLAGSIZEY  ).toFixed(5)   +';'              +N //> 1/0.3
 +    'if( v1 < 0.0 ){ gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                               +'return;}'+N//>
 +    'if( bFlip ){ u1 = 1.0 - u1; }'                                                                 +N //>
-+    'r1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).r;'                                          +N //> deprecated. Retrieves texels from texture uniformsampler2dFlag
-+    'g1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).g;'                                          +N //>
-+    'b1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).b;'                                          +N //>
++    'r1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).r;'                                       +N //> deprecated. Retrieves texels from texture uniformsampler2dFlag
++    'g1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).g;'                                       +N //>
++    'b1 = texture2D( uniformsampler2dFlag ,vec2(u1 ,v1) ).b;'                                       +N //>
 +    'gl_FragColor = vec4(r1*'+ g_dOPACITY.toFixed(5) +' + r0*'+ (1 - g_dOPACITY).toFixed(5) +' + dSun' //> Calculate mixture of flag and video,
 +                       ',g1*'+ g_dOPACITY.toFixed(5) +' + g0*'+ (1 - g_dOPACITY).toFixed(5) +' + dSun' //> plus adjust brightness to give flag a 3-D effect
 +                       ',b1*'+ g_dOPACITY.toFixed(5) +' + b0*'+ (1 - g_dOPACITY).toFixed(5) +' + dSun' //> "
@@ -199,6 +200,7 @@ class                                   ShaderRenderer//////////////////////////
   g.useProgram(              me._program                                                             ); //> Sets the specified WebGLProgram as part of the current rendering state (must preceed the following...)
   g.uniform1i(               me._uniformsampler2dVideo ,0 );                                            //> Bind our texture to texture unit 0.
   g.uniform1i(               me._uniformsampler2dFlag  ,1 );                                            //> Bind our texture to texture unit 1.
+  g.uniform1i(               me._uniformsampler2dDave  ,2 );                                            //> Bind our texture to texture unit 1.
   g.uniform1f(               me._location_ufNow_ms                                                      //> Pass in the current time.
   ,                          ( Date.now()%100000 )*0.0001                                               //> ???Overcome  some kind of number format issue - can't seem to pass in a float as is?
   );                                                                                                    //>
