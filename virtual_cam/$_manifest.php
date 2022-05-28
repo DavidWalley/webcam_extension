@@ -14,14 +14,15 @@ echo                                    '  }'                                   
 echo ',"minimum_chrome_version"'        .':"10.0"'                                              ."\n";  //>
 echo ',"content_scripts"'               .':[{"matches"'         .':["<all_urls>"]'              ."\n";  //> All URLs loaded in Chrome should have access to the virtual camera? All auto-run content scripts must specify match patterns.
 
-/*DEV*/ echo                            '   ,"js"'              .':["js/$_inject.js_php"]'      ."\n";  //> Code to inject into pages (and run when that page is loaded?).
+/*DEV*/ echo                            '   ,"js"'              .':["js/$_inject.js_php"]'      ."\n";  //> Code to perform injection into pages (and run when that page is loaded?).
 //*PRO*/echo                            '   ,"js"'              .  ':["js/inject.js"]'          ."\n";  //>
 
 echo                                    '   ,"run_at"'          .':"document_start"'            ."\n";  //> Scripts are injected after any files from CSS, but before any other DOM is constructed or any other script is run.   https:/ /developer.chrome.com/docs/extensions/mv3/content_scripts/
 echo                                    '   ,"all_frames"'      .':true'                        ."\n";  //> Allows the extension to specify if files should be injected into all frames matching the specified URL requirements (OR only into the topmost frame in a tab).
 echo                                      '}]'                                                  ."\n";  //>
 
-//echo ',"background"'                  .':{"service_worker"'   .':['.'"background.js"'.']}'    ."\n";  //> https://youtu.be/-dhMbVEreII   ???Don't need it?
+echo ',"background"'                    .':{"service_worker"'   .':'. '"./background.js"' .'}'  ."\n";  //> https://youtu.be/-dhMbVEreII
+
 echo ',"options_page"'                  .':'                    .     '"./options.html"'        ."\n";  //> Can navigate via puzzle piece menu.
 echo ',"action"'                        .':{"default_popup"'    .':'   .'"popup.html"' .'}'     ."\n";  //> https://developer.chrome.com/docs/extensions/mv3/mv3-migration-checklist/
 echo ',"permissions"'                   .':["tabs","storage"]'                                  ."\n";  //> Gives your extension access to privileged fields of the Tab objects, an API to interact with the browser's tab system - need to keep track of what the user is doing.

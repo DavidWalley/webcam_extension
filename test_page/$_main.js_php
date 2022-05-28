@@ -2,17 +2,16 @@
 // (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
 
-const                                   g_eleVideo           = document.getElementById('video0'      ); //>
-const                                   g_eleButtonGoList    = document.getElementById('buttonGoList'); //>
-const                                   g_eleButtonCamera    = document.getElementById('buttonCamera'); //>
-const                                   g_eleSelect          = document.getElementById('selectSource'); //>
-let                                     g_currentStream      ;                                          //>
+const                                   g_eleVideoExample    = document.getElementById('videoExample'); //> Example of the video element that might be found on someone's website.
+const                                   g_eleButtonGoList    = document.getElementById('buttonGoList'); //> Step 1) Button to populate a list of available video sources.
+const                                   g_eleSelectSource    = document.getElementById('selectSource'); //> Step 2) List of available video sources (which should include the virtual camera after step 1).
+const                                   g_eleButtonCamera    = document.getElementById('buttonCamera'); //> Step 3) Button to start camera (in our case, to test the virtual camera) video feed.
 
 
 function                                UpdateVideoSourceOptions(/////////////////////////////////////////>
                                         a_mediaDevices                                                  //>
 ){                                      //////////////////////////////////////////////////////////////////>
- g_eleSelect.innerHTML = '';                                                                            //>
+ g_eleSelectSource.innerHTML = '';                                                                      //>
  let                                    count                   = 1;                                    //>
  a_mediaDevices.forEach(                                                                                //>
   function( a_mediaDevice ){                                                                            //>
@@ -23,36 +22,39 @@ function                                UpdateVideoSourceOptions(///////////////
    const                                label            = a_mediaDevice.label   ||   "Camera "+ count; //>
    const                                textNode         = document.createTextNode( label );            //>
    eleOption.appendChild(textNode);                                                                     //>
-   g_eleSelect.appendChild(eleOption);                                                                  //>
+   g_eleSelectSource.appendChild(eleOption);                                                            //>
   }//function                                                                                           //>
  );//forEach                                                                                            //>
 }//UpdateVideoSourceOptions///////////////////////////////////////////////////////////////////////////////>
 
 
-function                                OnClick_GoList(///////////////////////////////////////////////////>
+function                                OnClick_GoList(///////////////////////////////////////////////////> What a web page might do to give us a choice of cameras.
                                         a_eventDummy                                                    //>
 ){                                      //////////////////////////////////////////////////////////////////>
  navigator.mediaDevices.enumerateDevices().then( UpdateVideoSourceOptions );                            //> List devices currently available in 
 }//UpdateVideoSourcesList/////////////////////////////////////////////////////////////////////////////////>
 
 
-function                                OnClick_GoCamera(/////////////////////////////////////////////////>
+let                                     g_currentStream      ;                                          //>
+
+function                                OnClick_GoCamera(/////////////////////////////////////////////////> What a web page might do to start up our virtual camera.
                                         a_eventDummy                                                    //>
 ){                                      //////////////////////////////////////////////////////////////////>
  if( typeof g_currentStream !== 'undefined' ){                                                          //> If there are any current streams, then
   g_currentStream.getTracks().forEach(   function(track){ track.stop(); }   );                          //> stop them
  }//if                                                                                                  //> .
+ g_currentStream = null;                                                                                //> ???Is this needed? Does cleanup occur when we set it another stream? Is this clearer?
                                                                                                         //>
  const                                  videoConstraints            = {};                               //>
- if( g_eleSelect.value === '' ){        videoConstraints.facingMode = 'user';                         } //>
- else                          {        videoConstraints.deviceId   = { exact : g_eleSelect.value };  } //>
- navigator.mediaDevices.getUserMedia(                                                                   //>
+ if( g_eleSelectSource.value === '' ){        videoConstraints.facingMode = 'user';                         } //>
+ else                          {        videoConstraints.deviceId   = { exact : g_eleSelectSource.value };  } //>
+ navigator.mediaDevices.getUserMedia(                                                                   //> Ask user for permission?
   {video : videoConstraints                                                                             //>
   ,audio : false                                                                                        //>
   }                                                                                                     //>
  ).then(   function(a_stream){                                                                          //>
-            g_currentStream      = a_stream;                                                            //>
-            g_eleVideo.srcObject = a_stream;                                                            //>
+            g_currentStream      = a_stream;                                                            //> Set the stream to the given? stream.
+            g_eleVideoExample.srcObject = a_stream;                                                            //> Into some page's video element, send the stream.
   }        )                                                                                            //>
  .catch(   function(a_error){ console.log(a_error); }   );                                              //>
 }//UpdateVideoSourcesList/////////////////////////////////////////////////////////////////////////////////>

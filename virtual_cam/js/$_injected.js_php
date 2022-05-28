@@ -8,6 +8,7 @@
 // Fragment Shader = 2nd part of GPU program - In 3-D rendering program, this code is run more-or-less on a per-output pixel order. Do as much work as you can in the vertex shader, rather than in the fragment shader. 
 // u               = uniform
 
+
 const                                   N                       = "\n";                                 //> Newline. Used within GPU code text, to make reports from the GPU easier to understand, i.e, gives line with the error.
 
 /*DEV*/ function                        G_ASSERT(/////////////////////////////////////////////////////////# Power comments during development.
@@ -25,10 +26,10 @@ const                                   g_sCodeVertexShader     =               
  'attribute vec4 '                      +'attributePosition;'                                        +N //> DEPRECATED 'attribute' qualifier is effectively equivalent to an input qualifier in vertex shaders. It cannot be used in any other shader stage. It cannot be used in interface blocks.
                                                                                                         //>
 +'void '                                +'main('// /// // // // // // // // // // // // // // // // // ///>
-+'){'+N                                 // // // // // // // // // // // // // // // // // // // // // ///>
++'){'+N                                                                                                                                                                                                                                                                                            // // // // // // // // // // // // // // // // // // // // // ///>
 + 'gl_Position = attributePosition;'                                                                 +N //> ???No longer used? gl_Position is intended for writing the homogeneous vertex position at any time during vertexshader execution. Will be used by primitive assembly, clipping, culling, and other fixed functionality operations, if present, that operate on primitives after vertex processing has occurred.
 +'}'+N// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
-;                                                                                                       // /*DEV*/console.log( g_sCodeVertexShader );
+;                                                                                                                                                                                                                                                                                                                                                                  // /*DEV*/console.log( g_sCodeVertexShader );
 
 
 const                                   g_dFLAGSIZEx            = 0.4 ;                                 //>
@@ -39,12 +40,16 @@ const                                   g_sCodeFragmentShader   =               
  'precision lowp float;'                                                                             +N //> Don't seem to need highest available precision. ???Doesn't fix problem with passing in the current time?
 +'uniform vec2 '                        +'uvec2CanvasSize;'                                          +N //> Size of the output canvas passed in.
 +'uniform float '                       +'ufNow_ms;'                                                 +N //>
++'uniform float '                       +'ufSide;'                                                   +N //>
++'uniform float '                       +'ufFlip;'                                                   +N //>
+//+'uniform float '                       +'ufFlag;'                                                   +N //>
+
 +'uniform sampler2D '                   +'usampler2d0_Video;'                                        +N //> Texture unit 0 (oF at least 8) is video input (because?). sampler2D is just a way to get data from an array.   https://stackoverflow.com/questions/63322297/what-are-the-use-cases-of-sampler2d-uniforms-in-webgl-opengl
 +'uniform sampler2D '                   +'usampler2d1_Flag;'                                         +N //> Texture unit 1
 +'uniform sampler2D '                   +'usampler2d2_Dave;'                                         +N //> Texture unit 2
                                                                                                         //>
 +'void '                                +'main('// /// // // // // // // // // // // // // // // // // ///> Takes gl_FragCoord,
-+'){'+N                                 // // // // // // // // // // // // // // // // // // // // // ///> Changes gl_FragColor.
++'){'+N                                                                                                                                                                                                                                                                                            // // // // // // // // // // // // // // // // // // // // // ///> Changes gl_FragColor.
 + 'float '                              +'u0 = gl_FragCoord.x/uvec2CanvasSize.x;'                    +N //> Convert pixel co-
 + 'float '                              +'v0 = gl_FragCoord.y/uvec2CanvasSize.y;'                    +N //> ordinates to a range of 0 to 1.
 + 'float '                              +'u1 = 0.0;'                                                 +N //> Co-
@@ -59,18 +64,20 @@ const                                   g_sCodeFragmentShader   =               
 + 'float '                              +'b1 = 0.0;'                                                 +N //>
 + 'float '                              +'dFlutter'             +'= 0.0;'                            +N //> ".
 + 'float '                              +'dSun'                 +'= 0.0;'                            +N //> Lightness to add to create a 3-D highlight effect on the flag.
-+ 'bool '                               +'bSideL_NotR '         +'= true;'                           +N //> TODO
-+ 'bool '                               +'bFlip '               +'= false;'                          +N //> TODO
++ 'bool '                               +'bSideL_NotR '         +'= ( ufSide < 0.0 );'               +N //> TODO
++ 'bool '                               +'bFlip '               +'= ( ufFlip < 0.0 );'               +N //> TODO
 
 //TODO - adjust image?
 
 + 'if( 0.85 < v0   &&   v0 < 0.92 ){'                                                                +N //> and if near top
-+  'u1 = ( u0 - 0.2  )* 2.0;'                                                                        +N //>  + ?
++  'u1 = ( u0 - 0.2  )* 2.0 - 0.5;'                                                                  +N //>  + ?
 +  'v1 = ( v0 - 0.85 )*15.0;'                                                                        +N //> 1/0.3
-+  'r1 = texture2D( usampler2d2_Dave ,vec2(u1-0.5 ,v1) ).r;'                                         +N //> deprecated. Retrieves texels from texture uniformsampler2d1_Flag
-+  'g1 = texture2D( usampler2d2_Dave ,vec2(u1-0.5 ,v1) ).g;'                                         +N //>
-+  'b1 = texture2D( usampler2d2_Dave ,vec2(u1-0.5 ,v1) ).b;'                                         +N //>
-+  'if( 0.0 == r1   &&   0.0 == g1   &&   0.0 == b1 ){ gl_FragColor = vec4(r0,g0,b0,1.0);    return;}'+N//> Use background as is.
++  'if( u1 < 0.0   ||   v1 < 0.0                   ){ gl_FragColor = vec4(r0,g0,b0,1.0);    return;}'+N //> Use background as is.
++  'if( 1.0 < u1   ||   1.0 < v1                   ){ gl_FragColor = vec4(r0,g0,b0,1.0);    return;}'+N //> Use background as is.
++  'r1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).r;'                                             +N //> deprecated. Retrieves texels from logo texture
++  'g1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).g;'                                             +N //>
++  'b1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).b;'                                             +N //>
++  'if( r1 < 0.01   &&   g1 < 0.01   &&   b1 < 0.01 ){ gl_FragColor = vec4(r0,g0,b0,1.0);  return;}' +N //> Use background as is.
 +  'gl_FragColor = vec4(r1*0.2 + r0*0.8'                                                                //> Calculate mixture of tag-line and video,
 +                     ',g1*0.2 + g0*0.8'                                                                //> "
 +                     ',b1*0.2 + b0*0.8'                                                                //> "
@@ -147,22 +154,25 @@ class                                   ShaderRenderer//////////////////////////
  ,                                      a_sDaveIn                                                       //#
  ){                                     //////////////////////////////////////////////////////////////////#
   const                                 me                      = this;                                 /*DEV*/G_ASSERT( 'ShaderRenderer' === me.constructor.name ,'me bad "'+ me.constructor.name +'"');//> Code clarity. Remember this for making a clear reference to the object being constructed in callbacks.
-      this._eleCanvasOut           = a_eleCanvasOut;                                                    //> private: Remember the given canvas (for output) and
-      this._eleVideoIn             = a_eleVideoIn  ;                                                    //> private: video (source?).
-      this._eleFlagIn              = new Image()   ; me._eleFlagIn.src = a_sFlagIn;                     //> Image constructor. Source of flag graphic.
-      this._eleDaveIn              = new Image()   ; me._eleDaveIn.src = a_sDaveIn;                     //> Image constructor, source of DavidWalley.ca.
-      this._g                      = me._eleCanvasOut.getContext( 'webgl'                            ); //> private: Remember the webGL object that represents the 3D graphics state and behavior of the canvas.
-      this._program                = me.createProgram(    g_sCodeVertexShader ,g_sCodeFragmentShader ); //> private: Combine the 2 shaders into a complete program.
-      this._textureVideoIn         = me._g.createTexture(                                            ); //> private: Creates and initializes a WebGLTexture object for the video - a named texture = an unsigned integer.
-      this._textureFlagIn          = me._g.createTexture(                                            ); //> private: Creates and initializes a WebGLTexture object for the flag graphic - a named texture = an unsigned integer.
-      this._textureDaveIn          = me._g.createTexture(                                            ); //>
-      this._usampler2d0_Video      = me._g.getUniformLocation( me._program, 'usampler2d0_Video'      ); //> Get the uniform location before the draw loop.   https://dens.website/tutorials/webgl/textures
-      this._usampler2d1_Flag       = me._g.getUniformLocation( me._program, 'usampler2d1_Flag'       ); //> Get the uniform location before the draw loop.
-      this._usampler2d2_Dave       = me._g.getUniformLocation( me._program, 'usampler2d2_Dave'       ); //> Get the uniform location before the draw loop.
-      this._location_vec2Size      = me._g.getUniformLocation( me._program ,'uvec2CanvasSize'        ); //> private: Image size - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
-      this._location_ufNow_ms      = me._g.getUniformLocation( me._program ,'ufNow_ms'               ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
-      this._bufferPosition         = me._g.createBuffer(                                             ); //> private: Buffer to hold ???
-      this._attriblocationPosition = me._g.getAttribLocation(  me._program ,'attributePosition'      ); //> private: Returns the location of an attribute variable in a given WebGLProgram.   Queries the program for the vertex shader attribute variable specified, and returns the index of the generic vertex attribute bound to the attribute.
+         this._eleCanvasOut           = a_eleCanvasOut;                                                 //> private: Remember the given canvas (for output) and
+         this._eleVideoIn             = a_eleVideoIn  ;                                                 //> private: video (source?).
+         this._eleFlagIn              = new Image()   ;   me._eleFlagIn.src = a_sFlagIn;                //> Image constructor. Source of flag graphic.
+         this._eleDaveIn              = new Image()   ;   me._eleDaveIn.src = a_sDaveIn;                //> Image constructor, source of DavidWalley.ca.
+         this._g                      = me._eleCanvasOut.getContext( 'webgl'                         ); //> private: Remember the webGL object that represents the 3D graphics state and behavior of the canvas.
+         this._program                = me.createProgram( g_sCodeVertexShader ,g_sCodeFragmentShader ); //> private: Combine the 2 shaders into a complete program.
+         this._textureVideoIn         = me._g.createTexture(                                         ); //> private: Creates and initializes a WebGLTexture object for the video - a named texture = an unsigned integer.
+         this._textureFlagIn          = me._g.createTexture(                                         ); //> private: Creates and initializes a WebGLTexture object for the flag graphic - a named texture = an unsigned integer.
+         this._textureDaveIn          = me._g.createTexture(                                         ); //>
+         this._usampler2d0_Video      = me._g.getUniformLocation( me._program ,'usampler2d0_Video'   ); //> Get the uniform location before the draw loop.   https://dens.website/tutorials/webgl/textures
+         this._usampler2d1_Flag       = me._g.getUniformLocation( me._program ,'usampler2d1_Flag'    ); //> Get the uniform location before the draw loop.
+         this._usampler2d2_Dave       = me._g.getUniformLocation( me._program ,'usampler2d2_Dave'    ); //> Get the uniform location before the draw loop.
+         this._location_vec2Size      = me._g.getUniformLocation( me._program ,'uvec2CanvasSize'     ); //> private: Image size - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
+         this._location_ufNow_ms      = me._g.getUniformLocation( me._program ,'ufNow_ms'            ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
+         this._location_ufSide        = me._g.getUniformLocation( me._program ,'ufSide'              ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
+         this._location_ufFlip        = me._g.getUniformLocation( me._program ,'ufFlip'              ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
+                                                                                                        //>
+         this._bufferPosition         = me._g.createBuffer(                                          ); //> private: Buffer to hold ???
+         this._attriblocationPosition = me._g.getAttribLocation(  me._program ,'attributePosition'   ); //> private: Returns the location of an attribute variable in a given WebGLProgram.   Queries the program for the vertex shader attribute variable specified, and returns the index of the generic vertex attribute bound to the attribute.
                                                                                                         //>
   me._g.bindBuffer(                    me._g.ARRAY_BUFFER       ,me._bufferPosition                  ); //> ?Binds to a target of vertex attributes (such as vertex color data), the given WebGLBuffer.
   me._g.bufferData(                    me._g.ARRAY_BUFFER                                               //> Creates and initializes a buffer object's data store, with Vertex attributes,
@@ -205,18 +215,33 @@ class                                   ShaderRenderer//////////////////////////
                                         render(//ShaderRenderer///////////////////////////////////////////#
                                         a_whenNow_ms                                                    //#
  ){                                     //////////////////////////////////////////////////////////////////#
+
+  var eleSide = document.getElementById('intextWebcam_Extension_Side');     //> get data from a field on a configuration page? Text in input field.
+  var eleFlip = document.getElementById('intextWebcam_Extension_Flip');     //> get data from a field on a configuration page? Text in input field.
+  var eleFlag = document.getElementById('intextWebcam_Extension_Flag');      //> get data from a field on a configuration page? Text in input field.
+
   const                                 me                      = this;                                 /*DEV*/G_ASSERT( 'ShaderRenderer' === me.constructor.name ,'me bad "'+ me.constructor.name +'"');//> Code clarity. Remember this for making a clear reference to the object being constructed in callbacks.
   const                                 g                       = me._g;                                //> Collapse the following a bit:
                                                                                                         //>
   g.enableVertexAttribArray( me._attriblocationPosition                          );                     //> Index of the generic vertex attribute bound to the attribute '_attriblocationPosition'. attributes in a vertex shader are disabled by default. To use one, you have to first enable it with this function.
   g.bindBuffer(              g.ARRAY_BUFFER         ,me._bufferPosition          );                     //>
   g.vertexAttribPointer(     me._attriblocationPosition                                                 //> Specify how to interpret data: '_attriblocationPosition' takes
-  ,                          2   ,g.FLOAT                                                                 //> 2 floats, 
+  ,                          2   ,g.FLOAT                                                               //> 2 floats, 
   ,                          false                                                                      //> not normalized,
   ,                          0 ,0                                                                       //> no offset or stride (single value)?
   );                                                                                                    //>
                                                                                                         //>
   me.render_Texture( g.TEXTURE0 ,me._textureVideoIn ,me._eleVideoIn );                                  //>
+  var sinFlag = eleFlag.value;
+  if( '0' === sinFlag ){ me._eleFlagIn.src = g_sFLAG_UKRAINE ; }
+  if( '1' === sinFlag ){ me._eleFlagIn.src = g_sFLAG_CANADA  ; }
+  if( '2' === sinFlag ){ me._eleFlagIn.src = g_sFLAG_USA     ; }
+  if( '3' === sinFlag ){ me._eleFlagIn.src = g_sFLAG_UK      ; }
+  if( '4' === sinFlag ){ me._eleFlagIn.src = g_sFLAG_RAINBOW ; }
+  if( '5' === sinFlag ){ me._eleFlagIn.src = g_sFLAG_CHILD   ; }
+  if( '6' === sinFlag ){ me._eleFlagIn.src = g_sFLAG_JAMAICA ; }
+  if( '7' === sinFlag ){ me._eleFlagIn.src = g_sFLAG_PIRATE  ; }
+
   me.render_Texture( g.TEXTURE1 ,me._textureFlagIn  ,me._eleFlagIn  );                                  //>
   me.render_Texture( g.TEXTURE2 ,me._textureDaveIn  ,me._eleDaveIn  );                                  //>
                                                                                                         //>
@@ -227,6 +252,10 @@ class                                   ShaderRenderer//////////////////////////
   g.uniform1f(               me._location_ufNow_ms                                                      //> Pass in the current time.
   ,                          ( Date.now()%100000 )*0.0001                                               //> ???Overcome  some kind of number format issue - can't seem to pass in a float as is?
   );                                                                                                    //>
+                                                                                                        //>
+  g.uniform1f(               me._location_ufSide ,(eleSide.value < 1)?1 :-1 );                                               //>
+  g.uniform1f(               me._location_ufFlip ,(eleFlip.value < 1)?1 :-1 );                                               //>
+                                                                                                        //>
   g.uniform2f(               me._location_vec2Size                                                      //> Specify values of u variables - pass into GPU program, 2 float values for:
   ,                          g.canvas.width                                                             //> the size of the image
   ,                          g.canvas.height                                                            //> "
@@ -289,6 +318,7 @@ class                                   ShaderRenderer//////////////////////////
 
 let                                     g_shaderrenderer        = null;                                 //> 
 
+
 function                                Tick(//FilterStream///////////////////////////////////////////////# Periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
  g_shaderrenderer.render();                                                                             //> Use a WebGL renderer.
@@ -302,7 +332,7 @@ async function                          ModifyMediaFunctions(///////////////////
                                                                                                         //>
  const                                  enumerateDevicesWas  = MediaDevices.prototype.enumerateDevices; //> Get existing version of system function to get a list of cameras.
  MediaDevices['prototype']            ['enumerateDevices'] = async function(// // // // // // // // // ///# Redefine this system function locally, to include the virtual camera.
- ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
+ ){                                                                                                                                                                                                                                                                                                // // // // // // // // // // // // // // // // // // // // // ///#
   const                                result = await enumerateDevicesWas.call(navigator.mediaDevices); //> Get all the current cameras (should not include the virtual camera?)
   const                                x                = {'deviceId' : 'virtual'                       //>
                                                           ,'groupID'  : 'uh'                            //>
@@ -317,11 +347,11 @@ async function                          ModifyMediaFunctions(///////////////////
                                                                                                         //>
  const                                  getUserMediaWas         = MediaDevices.prototype.getUserMedia;  //> Get existing version of system function to get a camera's video stream.
  MediaDevices['prototype']            ['getUserMedia'] = async function(// // // // // // // // // // ////# Redefine this system function locally, to include the virtual camera.
- ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
+ ){                                                                                                                                                                                                                                                                                                // // // // // // // // // // // // // // // // // // // // // ///#
   const                                 args                    = arguments;                            //>
   if(   args.length   &&   args[0].video   &&   args[0].video.deviceId   ){                             //>
-   if( 'virtual' === args[0].video.deviceId                                                             //>
-    || 'virtual' === args[0].video.deviceId.exact                                                       //>
+   if(  'virtual' === args[0].video.deviceId                                                            //>
+    ||  'virtual' === args[0].video.deviceId.exact                                                      //>
    ){                                                                                                   //>
     const                               usermedia = await getUserMediaWas.call(                         //>
                                                            navigator.mediaDevices                       //>
@@ -335,6 +365,17 @@ async function                          ModifyMediaFunctions(///////////////////
     if( usermedia ){                                                                                    //> If devices found?, then
      const                              eleCanvas            = document.createElement( 'canvas' );      //>
      const                              eleVideo             = document.createElement( 'video'  );      //>
+
+     const                              eleGui               = document.createElement('div'); // Create div that can be used to set options?
+     eleGui.style.display      =  'inline-block';
+     eleGui.style.width        =  '400px'       ;
+     eleGui.style.height       =  '100px'       ;
+     eleGui.style.background   =  '#FFFFEE'     ;    //> Pale yellow
+     eleGui.innerHTML          =  '<input type="text" id="intextWebcam_Extension_Side"><label for="intextWebcam_Extension_Side">Side</label><br>'
+                                + '<input type="text" id="intextWebcam_Extension_Flip"><label for="intextWebcam_Extension_Flip">Flip</label><br>'
+                                + '<input type="text" id="intextWebcam_Extension_Flag"><label for="intextWebcam_Extension_Flag">Flag</label><br>'
+                                ;
+     document.body.appendChild(eleGui);
                                                                                                         //>
      eleVideo.srcObject = usermedia;                                                                    //>
      eleVideo.autoplay  = true;                                                                         //>
@@ -352,8 +393,13 @@ async function                          ModifyMediaFunctions(///////////////////
                                 g_shaderrenderer.setSize( eleVideo.videoWidth ,eleVideo.videoHeight );  //> Use a WebGL Renderer.
                                 Tick();                                                                 //> Start periodic routine
      }                         );                                                                       //> .
+     eleVideo.addEventListener('pause',                                                                 //>
+      function(e){                                                                                      //>
+       console.log(e);                                                                                  //>
+      }                                                                                                 //>
+     );                                                                                                 //>
                                                                                                         //>
- return eleCanvas.captureStream();                                                                      //> Get a real-time video capture of the surface of the canvas.
+ return eleCanvas.captureStream();                                                                      //> Report a real-time video capture of the surface of the canvas.
     }//if                                                                                               //>
     // ??? What happens now, if fullfilledpromiseMediaStream was null?                                  //>
   }}//if virtual//if                                                                                    //>
@@ -369,6 +415,7 @@ async function                          ModifyMediaFunctions(///////////////////
 
 
 ModifyMediaFunctions();                                                                                 //> Add virtual camera to system's list of cameras.
+
 
 // Can use an online tool like https://onlineimagetools.com/convert-image-to-data-uri to convert images to data uri inline format.
 // In order to ensure that Closure Compiler will deal with the following long lines properly, in Notepad++ you can do a Regular Expressions search using (?<=.{250}) , $0'\n+' is replacement text

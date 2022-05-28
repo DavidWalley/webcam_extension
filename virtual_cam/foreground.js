@@ -1,7 +1,7 @@
-//
+// foreground.js - foreground or content script
 //.https://youtu.be/-dhMbVEreII
-//.foreground.js
 
+  
 console.log('from foreground.'));
 
 //End of file.

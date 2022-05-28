@@ -15,7 +15,7 @@ echo   '<br><button id="buttonGoList">'.                    "1) Initialize List"
 echo   '<br><label for="selectSource">'.                    "2) Choose video source:" .'</label>' ;     //>
 echo       '<select id="selectSource" name="selectSource">'                           .'</select>';     //>
 echo   '<br><button id="buttonCamera">'.                    "3) Start Camera"         .'</button>';     //>
-echo   '<br><video  id="video0" autoplay playsinline>'                                .'</video>' ;     //>
+echo   '<br><video  id="videoExample" autoplay playsinline>'                          .'</video>' ;     //> Example of video element that might be found on someone's website.
                                                                                                         //>
 /*DEV*/  echo '<script src="./$_main.js_php" type="application/javascript"></script>';                  //> Main application source money code.
 //*PRO*/ echo '<script src="./main.js" type="application/javascript"></script>';                        //> Main application compiled code.

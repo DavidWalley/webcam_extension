@@ -18,5 +18,19 @@ const                                   head              =    document.head    
 //head.insertBefore( script0 ,head.lastChild );                                                           //> Insert script into web page's <head> section.
 head.insertBefore( script1 ,head.lastChild );                                                           //> Insert script into web page's <head> section.
 
+chrome.runtime.onMessage.addListener(   function(a){ console.log(a); }   );
+
+//? chrome.runtime.onMessage.addListener(   changeClass   );
+//? 
+//? function                                changeClass(//////////////////////////////>
+//?                                         message
+//? ){                                      ///////////////////////////////////////////>
+//?  reset();
+//?  if( message.newClass ){
+//?   document.getElementById("mdl-color--white").className = message.newClass;
+//?  }
+//? }
+
+
 
 //End of file.
