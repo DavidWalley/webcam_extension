@@ -15,7 +15,7 @@
 }]
 ,"options_page":"./options.html"
 ,"action":{"default_popup":"popup.html"}
-,"permissions":["tabs"]
+,"permissions":["tabs","storage"]
 ,"web_accessible_resources":[{"resources":["js/*"]
    ,"matches":["<all_urls>"]
 }]

@@ -24,7 +24,7 @@ echo                                      '}]'                                  
 //echo ',"background"'                  .':{"service_worker"'   .':['.'"background.js"'.']}'    ."\n";  //> https://youtu.be/-dhMbVEreII   ???Don't need it?
 echo ',"options_page"'                  .':'                    .     '"./options.html"'        ."\n";  //> Can navigate via puzzle piece menu.
 echo ',"action"'                        .':{"default_popup"'    .':'   .'"popup.html"' .'}'     ."\n";  //> https://developer.chrome.com/docs/extensions/mv3/mv3-migration-checklist/
-echo ',"permissions"'                   .':["tabs"]'                                            ."\n";  //> Gives your extension access to privileged fields of the Tab objects, an API to interact with the browser's tab system - need to keep track of what the user is doing.
+echo ',"permissions"'                   .':["tabs","storage"]'                                  ."\n";  //> Gives your extension access to privileged fields of the Tab objects, an API to interact with the browser's tab system - need to keep track of what the user is doing.
 echo ',"web_accessible_resources"'      .':[{"resources"'       .':['.'"js/*"'         .']'     ."\n";  //> Explicit permissions: Files inside an extension that can be accessed by web pages or other extensions. Extensions typically use this feature to expose images or other assets that need to be loaded in web pages, but any asset included in an extension's bundle can be made web accessible.
 echo                                    '   ,"matches"'         .':['.'"<all_urls>"'   .']'     ."\n";  //> Any URL
 echo                                      '}]'                                                  ."\n";  //>
