@@ -42,6 +42,7 @@ const                                   g_sCodeFragmentShader   =               
 +'uniform float '                       +'ufNow_ms;'                                                 +N //>
 +'uniform float '                       +'ufSide;'                                                   +N //>
 +'uniform float '                       +'ufFlip;'                                                   +N //>
++'uniform float '                       +'ufZoom;'                                                   +N //>
 
 +'uniform sampler2D '                   +'usampler2d0_Video;'                                        +N //> Texture unit 0 (oF at least 8) is video input (because?). sampler2D is just a way to get data from an array.   https://stackoverflow.com/questions/63322297/what-are-the-use-cases-of-sampler2d-uniforms-in-webgl-opengl
 +'uniform sampler2D '                   +'usampler2d1_Flag;'                                         +N //> Texture unit 1
@@ -49,8 +50,8 @@ const                                   g_sCodeFragmentShader   =               
                                                                                                         //>
 +'void '                                +'main('// /// // // // // // // // // // // // // // // // // ///> Takes gl_FragCoord,
 +'){'+N                                                                                                                                                                                                                                                                                            // // // // // // // // // // // // // // // // // // // // // ///> Changes gl_FragColor.
-+ 'float '                              +'u0 = gl_FragCoord.x/uvec2CanvasSize.x;'                    +N //> Convert pixel co-
-+ 'float '                              +'v0 = gl_FragCoord.y/uvec2CanvasSize.y;'                    +N //> ordinates to a range of 0 to 1.
++ 'float '                              +'u0 = gl_FragCoord.x/uvec2CanvasSize.x*ufZoom;'                    +N //> Convert pixel co-
++ 'float '                              +'v0 = gl_FragCoord.y/uvec2CanvasSize.y*ufZoom;'                    +N //> ordinates to a range of 0 to 1.
 + 'float '                              +'u1 = 0.0;'                                                 +N //> Co-
 + 'float '                              +'v1 = 0.0;'                                                 +N //> ordinates within texture (image).
                                                                                                         //>
@@ -66,7 +67,7 @@ const                                   g_sCodeFragmentShader   =               
 + 'bool '                               +'bSideL_NotR '         +'= ( ufSide < 0.0 );'               +N //> TODO
 + 'bool '                               +'bFlip '               +'= ( ufFlip < 0.0 );'               +N //> TODO
 
-//TODO - adjust image?
+//TODO - adjust image?     ufZoom
 
 + 'if( 0.85 < v0   &&   v0 < 0.92 ){'                                                                +N //> and if near top
 +  'u1 = ( u0 - 0.2  )* 2.0 - 0.5;'                                                                  +N //>  + ?
@@ -181,6 +182,7 @@ class                                   ShaderRenderer//////////////////////////
          this._location_ufNow_ms      = me._g.getUniformLocation( me._program ,'ufNow_ms'            ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
          this._location_ufSide        = me._g.getUniformLocation( me._program ,'ufSide'              ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
          this._location_ufFlip        = me._g.getUniformLocation( me._program ,'ufFlip'              ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
+         this._location_ufZoom        = me._g.getUniformLocation( me._program ,'ufZoom'              );  
                                                                                                         //>
          this._bufferPosition         = me._g.createBuffer(                                          ); //> private: Buffer to hold ???
          this._attriblocationPosition = me._g.getAttribLocation(  me._program ,'attributePosition'   ); //> private: Returns the location of an attribute variable in a given WebGLProgram.   Queries the program for the vertex shader attribute variable specified, and returns the index of the generic vertex attribute bound to the attribute.
@@ -234,45 +236,44 @@ class                                   ShaderRenderer//////////////////////////
                                                                                                         //>
   var                                   eleSides       = document.getElementsByName( g_sINoPTIONsIDE ); //> get data from a field on a configuration page? Text in input field.
   var                                   eleFlips       = document.getElementsByName( g_sINoPTIONfLIP ); //> get data from a field on a configuration page? Text in input field.
-  var                                   eleFlag_0      = document.getElementById(    g_sDIVfLAG +'_0'); //> get data from a field on a configuration page? Text in input field.
-  var                                   eleFlag_2      = document.getElementById(    g_sDIVfLAG +'_2'); //> get data from a field on a configuration page? Text in input field.
-  G_ASSERT(   eleSides  ,"eleSides not got."   );                                                       //>
-  G_ASSERT(   eleFlips  ,"eleFlips not got."   );                                                       //>
-  G_ASSERT(   eleFlag_0 ,"eleFlag not got."    );                                                       //>
-  G_ASSERT(   eleFlag_2 ,"eleFlag not got."    );                                                       //>
-  if( ! eleSides   ){                                                                           return;}//>
-  if( ! eleFlips   ){                                                                           return;}//>
-  if( ! eleFlag_0  ){                                                                           return;}//>
-  if( ! eleFlag_2  ){                                                                           return;}//>
-  if( !me._bEventHandlersGo ){                                                                          //>
-   eleFlag_0.addEventListener( 'click' ,function(){ me._iFlag = (me._iFlag + 7)%8; } );                 //>
-   eleFlag_2.addEventListener( 'click' ,function(){ me._iFlag = (me._iFlag + 1)%8; } );                 //>
-   me._bEventHandlersGo = true;                                                                         //>
-  }//if                                                                                                 //>
+  var                                   elePrevious    = document.getElementById(    g_sDIVfLAG +'_0'); //> get data from a field on a configuration page? Text in input field.
+  var                                   eleNext        = document.getElementById(    g_sDIVfLAG +'_2'); //> get data from a field on a configuration page? Text in input field.
+  var                                   eleZoom        = document.getElementById(    'inrangeZoom'   ); //>
+  G_ASSERT(   eleSides    ,"eleSides    not got."   );                                                  //>
+  G_ASSERT(   eleFlips    ,"eleFlips    not got."   );                                                  //>
+  G_ASSERT(   elePrevious ,"elePrevious not got."   );                                                  //>
+  G_ASSERT(   eleNext     ,"eleNext     not got."   );                                                  //>
+  G_ASSERT(   eleZoom     ,"eleZoom     not got."   );                                                  //>
+  if( !eleSides    ){                                                                           return;}//>
+  if( !eleFlips    ){                                                                           return;}//>
+  if( !elePrevious ){                                                                           return;}//>
+  if( !eleNext     ){                                                                           return;}//>
                                                                                                         //>
-  g.enableVertexAttribArray( me._attriblocationPosition                          );                     //> Index of the generic vertex attribute bound to the attribute '_attriblocationPosition'. attributes in a vertex shader are disabled by default. To use one, you have to first enable it with this function.
-  g.bindBuffer(              g.ARRAY_BUFFER         ,me._bufferPosition          );                     //>
+  if( !me._bEventHandlersGo ){                                                                          //> If popup initialization has not been done, then
+   elePrevious.addEventListener( 'click' ,function(){ me._iFlag = (me._iFlag + 7)%8; } );               //> Handle clicks on previous and
+   eleNext.addEventListener(     'click' ,function(){ me._iFlag = (me._iFlag + 1)%8; } );               //> next flag buttons.
+   me._bEventHandlersGo = true;                                                                         //> Remember this initialization has been done
+  }//if                                                                                                 //> .
+  switch( me._iFlag ){                                                                                  //>
+  case        0:   me._eleFlagIn.src = g_sFLAG_UKRAINE;                                                 //>
+  break; case 1:   me._eleFlagIn.src = g_sFLAG_CANADA ;                                                 //>
+  break; case 2:   me._eleFlagIn.src = g_sFLAG_USA    ;                                                 //>
+  break; case 3:   me._eleFlagIn.src = g_sFLAG_UK     ;                                                 //>
+  break; case 4:   me._eleFlagIn.src = g_sFLAG_RAINBOW;                                                 //>
+  break; case 5:   me._eleFlagIn.src = g_sFLAG_CHILD  ;                                                 //>
+  break; case 6:   me._eleFlagIn.src = g_sFLAG_JAMAICA;                                                 //>
+  break; case 7:   me._eleFlagIn.src = g_sFLAG_PIRATE ;                                                 //>
+  }//switch                                                                                             //>
+                                                                                                        //>
+  g.enableVertexAttribArray( me._attriblocationPosition                     );                          //> Index of the generic vertex attribute bound to the attribute '_attriblocationPosition'. attributes in a vertex shader are disabled by default. To use one, you have to first enable it with this function.
+  g.bindBuffer(              g.ARRAY_BUFFER             ,me._bufferPosition );                          //>
   g.vertexAttribPointer(     me._attriblocationPosition                                                 //> Specify how to interpret data: '_attriblocationPosition' takes
   ,                          2   ,g.FLOAT                                                               //> 2 floats, 
   ,                          false                                                                      //> not normalized,
   ,                          0 ,0                                                                       //> no offset or stride (single value)?
   );                                                                                                    //>
-
-  var sSide = ''; for( var i = 0; i<eleSides.length; i++ ){ if( eleSides[i].checked ){sSide = eleSides[i].value; break;} }
-  var sFlip = ''; for( var i = 0; i<eleFlips.length; i++ ){ if( eleFlips[i].checked ){sFlip = eleFlips[i].value; break;} }
+                                                                                                        //>
   me.render_Texture( g.TEXTURE0 ,me._textureVideoIn ,me._eleVideoIn );                                  //>
-
-  switch( me._iFlag ){
-  case        0: me._eleFlagIn.src = g_sFLAG_UKRAINE ;
-  break; case 1: me._eleFlagIn.src = g_sFLAG_CANADA  ;
-  break; case 2: me._eleFlagIn.src = g_sFLAG_USA     ;
-  break; case 3: me._eleFlagIn.src = g_sFLAG_UK      ;
-  break; case 4: me._eleFlagIn.src = g_sFLAG_RAINBOW ;
-  break; case 5: me._eleFlagIn.src = g_sFLAG_CHILD   ;
-  break; case 6: me._eleFlagIn.src = g_sFLAG_JAMAICA ;
-  break; case 7: me._eleFlagIn.src = g_sFLAG_PIRATE  ;
-  }//switch
-
   me.render_Texture( g.TEXTURE1 ,me._textureFlagIn  ,me._eleFlagIn  );                                  //>
   me.render_Texture( g.TEXTURE2 ,me._textureDaveIn  ,me._eleDaveIn  );                                  //>
                                                                                                         //>
@@ -280,12 +281,24 @@ class                                   ShaderRenderer//////////////////////////
   g.uniform1i(               me._usampler2d0_Video ,0 );                                                //> Bind our texture to texture unit 0.
   g.uniform1i(               me._usampler2d1_Flag  ,1 );                                                //> Bind our texture to texture unit 1.
   g.uniform1i(               me._usampler2d2_Dave  ,2 );                                                //> Bind our texture to texture unit 1.
+                                                                                                        //>
   g.uniform1f(               me._location_ufNow_ms                                                      //> Pass in the current time.
   ,                          ( Date.now()%100000 )*0.0001                                               //> ???Overcome  some kind of number format issue - can't seem to pass in a float as is?
   );                                                                                                    //>
                                                                                                         //>
-  g.uniform1f(               me._location_ufSide ,('R' === sSide)?1 :-1   );                          //>
-  g.uniform1f(               me._location_ufFlip ,('N' === sFlip)?1 :-1   );                          //> Normal or F=flip
+// user input                                                                                           //>
+  var                                   sSide                   = '';                                   //>
+  var                                   sFlip                   = '';                                   //>
+  var                                   i                       = 0;
+  for( i = 0; i<eleSides.length; i++ ){ if( eleSides[i].checked ){ sSide = eleSides[i].value; break;} } //>
+  for( i = 0; i<eleFlips.length; i++ ){ if( eleFlips[i].checked ){ sFlip = eleFlips[i].value; break;} } //>
+                                                                                                        //>
+  var                                   dZoom                   = eleZoom.value;                        //>
+  dZoom = Math.pow( 2 , parseFloat(100-dZoom)*0.02 )*0.5;                                               //> 0.5 to 2
+                                                                                                        //>
+  g.uniform1f( me._location_ufSide ,('R' === sSide)?1 :-1 );                                            //>
+  g.uniform1f( me._location_ufFlip ,('N' === sFlip)?1 :-1 );                                            //> Normal or F=flip
+  g.uniform1f( me._location_ufZoom ,         dZoom        );                                            //> Video zoom factor.
                                                                                                         //>
   g.uniform2f(               me._location_vec2Size                                                      //> Specify values of u variables - pass into GPU program, 2 float values for:
   ,                          g.canvas.width                                                             //> the size of the image
@@ -412,9 +425,13 @@ async function                          ModifyMediaFunctions(///////////////////
      +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+ g_sINoPTIONfLIP +'_N" value="N" checked>'+'<label for="'+ g_sINoPTIONfLIP +'_N">'+'Normal'+'</label>'
      +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+ g_sINoPTIONfLIP +'_F" value="F">'        +'<label for="'+ g_sINoPTIONfLIP +'_F">'+'Flip'  +'</label>'
      +' &nbsp; &nbsp; &nbsp; '
-     +'<span id="'+ g_sDIVfLAG+'_0" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold"> < </span>' //> Select previous flag.
-     +'<span id="'+ g_sDIVfLAG+'_2" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold"> > </span>' //> Select next flag.
+     +'<span id="'+ g_sDIVfLAG+'_0" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold">'+ " < " +'</span>' //> Select previous flag.
+     +'<span id="'+ g_sDIVfLAG+'_2" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold">'+ " > " +'</span>' //> Select next flag.
      +'<br>'
+     +'<div>'
+     + '<input type="range" id="'+ 'inrangeZoom' +'" name="'+ 'inrangeZoom' +'" min="0" max="100"><label for="'+ 'inrangeZoom' +'">'+ "Zoom" +'</label>'
+     +'</div>'
+
      ;
      document.body.appendChild(eleGui);
                                                                                                         //>
