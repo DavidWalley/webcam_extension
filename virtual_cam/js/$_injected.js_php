@@ -42,7 +42,6 @@ const                                   g_sCodeFragmentShader   =               
 +'uniform float '                       +'ufNow_ms;'                                                 +N //>
 +'uniform float '                       +'ufSide;'                                                   +N //>
 +'uniform float '                       +'ufFlip;'                                                   +N //>
-//+'uniform float '                       +'ufFlag;'                                                   +N //>
 
 +'uniform sampler2D '                   +'usampler2d0_Video;'                                        +N //> Texture unit 0 (oF at least 8) is video input (because?). sampler2D is just a way to get data from an array.   https://stackoverflow.com/questions/63322297/what-are-the-use-cases-of-sampler2d-uniforms-in-webgl-opengl
 +'uniform sampler2D '                   +'usampler2d1_Flag;'                                         +N //> Texture unit 1
@@ -413,8 +412,8 @@ async function                          ModifyMediaFunctions(///////////////////
      +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+ g_sINoPTIONfLIP +'_N" value="N" checked>'+'<label for="'+ g_sINoPTIONfLIP +'_N">'+'Normal'+'</label>'
      +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+ g_sINoPTIONfLIP +'_F" value="F">'        +'<label for="'+ g_sINoPTIONfLIP +'_F">'+'Flip'  +'</label>'
      +' &nbsp; &nbsp; &nbsp; '
-     +'<span id="'+ g_sDIVfLAG+'_0" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold"> < </span>'
-     +'<span id="'+ g_sDIVfLAG+'_2" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold"> > </span>'
+     +'<span id="'+ g_sDIVfLAG+'_0" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold"> < </span>' //> Select previous flag.
+     +'<span id="'+ g_sDIVfLAG+'_2" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold"> > </span>' //> Select next flag.
      +'<br>'
      ;
      document.body.appendChild(eleGui);
