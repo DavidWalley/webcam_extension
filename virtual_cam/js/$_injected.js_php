@@ -429,12 +429,13 @@ let                                     g_eleCanvasFlags        = null;         
 let                                     g_context2dFlags        = null;
 let                                     g_imageFlags            = null;                                 //>
 let                                     g_imageDataFlags        = null;
+let                                     g_whenGo_ms             = null;
 
 
 function                                Tick(//FilterStream///////////////////////////////////////////////# Periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
-//g_shaderrenderer.render();                                                                             //> Use a WebGL renderer.
-console.log(g_imageDataFlags);
+ //g_shaderrenderer.render();                                                                           //> Use a WebGL renderer.
+ console.log(g_imageDataFlags);
 
  if( g_context2dVideo ){                                                                                //>
   var                                   eleZoom        = document.getElementById(    'inrangeZoom'   ); //>
@@ -447,40 +448,52 @@ console.log(g_imageDataFlags);
   ,                                       g_nW_px*dZoom                                                 //> zoom in by user selected amount
   ,                                       g_nH_px*dZoom                                                 //> .
   );                                                                                                    //> this.height   Copy frame from video to canvas
-  let                                   imagedata               = g_context2dVideo.getImageData( 0,0    //> Intermediate result we need at end of changing pixel data
+  let                                   imagedataVideo          = g_context2dVideo.getImageData( 0,0    //> Intermediate result we need at end of changing pixel data
                                                                   ,g_nW_px ,g_nH_px                     //>
                                                                   );                                    //> .
-  let                                   ad                      = imagedata.data;                       //> Get array of all pixels, in 4-byte format. (This is the goods we want after intermediate result.)
-  let                                   l                       = ad.length;                            //>
+  let                                   adVideo                 = imagedataVideo.data;                  //> Get array of all pixels, in 4-byte format. (This is the goods we want after intermediate result.)
+  let                                   l                       = adVideo.length;                       //>
   var                                   i                       = 0;                                    //>
+  let                                   nFlagH                  = g_eleCanvasFlags.height;              //>
+  let                                   nFlagW                  = g_eleCanvasFlags.width ;              //>
+  let                                   tookNow_s              = (Date.now() - g_whenGo_ms)*0.001;             //>
   for( let iCell = 0; iCell < g_nW_px; iCell++ ){                                                       //>
+   var                                  u                       = iCell/g_nW_px;                        //>
    i = iCell*4;                                                                                         //>
-   var                                  dFlutter                = 30*Math.sin( iCell*0.03 );            //Pre-calculate flutter for row of cells
+   var                                  dFlutter     = (0.06 *Math.cos( iCell*0.022 - tookNow_s*0.08 ) //> Pre-calculate flutter for row of cells
+                                                       +0.037*Math.sin( iCell*0.031 - tookNow_s*0.18 ) //> Pre-calculate flutter for row of cells
+                                                       +0.029*Math.sin( iCell*0.045 - tookNow_s*2.6  ) //> Pre-calculate flutter for row of cells
+                                                       );                                               //>
    for(  let iRow  = 0; iRow  < g_nH_px; iRow++  ){                                                     //>
-    let                                 r                       = ad[i    ];                            //>
-    let                                 g                       = ad[i + 1];                            //>
-    let                                 b                       = ad[i + 2];                            //>
-
-    // Color adjustments                                                                                    //>
+    var                                 v                       = iRow/g_nH_px;                         //>
+                                                                                                        //>
+    let                                 r                       = adVideo[i    ];                       //>
+    let                                 g                       = adVideo[i + 1];                       //>
+    let                                 b                       = adVideo[i + 2];                       //>
+                                                                                                        //>
+    // Color adjustments                                                                                //>
                                                                                                         //> Add pre-calculated flutter for cell. Check range.
-    if( g_imageDataFlags ){
-//console.log('here here here here here here here here here ');
-     if(   iCell < g_nW_px/2   &&   g_nH_px/2 + dFlutter < iRow   ){                                     //>
-//  ?????????????? get from resized images of flags?
-      r =   0 + g_imageDataFlags.data[i];   //???                                                         //>
-      g =  g ;                                                                                           //>
-      b = 255;                                                                                           //>
-     }//if                                                                                               //>
-    }//if
-
-    ad[i    ] =  r ;                                                                                    //>
-    ad[i + 1] =  g ;                                                                                    //>
-    ad[i + 2] =  b ;                                                                                    //>
-    ad[i + 3] = 255;                                                                                    //>
+    if( g_imageDataFlags ){                                                                             //>
+     if(    0   <= u   &&   u < 0.4 ){                                                                  //>
+      let                               uFlag               = Math.floor(    u                *nFlagW/0.4   );     //>
+      if(   0.7 + u*dFlutter <= v   &&   v < 1 + u*dFlutter ){                                                     //>
+       let                              vFlag               = Math.floor(   (v - u*dFlutter-0.7)*nFlagH/0.3   ); //>
+       let                              iFlag                   = (vFlag*nFlagW + uFlag)*4;             //>
+       r = 500*dFlutter + r*0.5 + g_imageDataFlags.data[ iFlag    ]*0.5;                              //>
+       g = 500*dFlutter + g*0.5 + g_imageDataFlags.data[ iFlag + 1]*0.5;                              //>
+       b = 500*dFlutter + b*0.5 + g_imageDataFlags.data[ iFlag + 2]*0.5;                              //>
+      }//if                                                                                             //>
+     }//if                                                                                              //>
+    }//if                                                                                               //>
+                                                                                                        //>
+    adVideo[i    ] = ( r < 0 )?0   :(   255<r ?255 :Math.floor(r)   );                                   //>
+    adVideo[i + 1] = ( g < 0 )?0   :(   255<g ?255 :Math.floor(g)   );                                   //>
+    adVideo[i + 2] = ( b < 0 )?0   :(   255<b ?255 :Math.floor(b)   );                                   //>
+    adVideo[i + 3] = 255;                                                                               //>
     i += g_nW_px*4;                                                                                     //>
    }//for iCell                                                                                         //>
   }//for iRow                                                                                           //>
-  g_context2dVideo.putImageData( imagedata ,0,0 );                                                     //> data back to canvas.
+  g_context2dVideo.putImageData( imagedataVideo ,0,0 );                                                     //> data back to canvas.
  }//if                                                                                                  //>
                                                                                                         //>
  requestAnimationFrame(   function(){ Tick(); }   );                                                    //> Run this periodic routine again.
@@ -605,6 +618,7 @@ console.log(g_imageDataFlags);
 //*                             g_shaderrenderer.setSize( eleVideo.videoWidth ,eleVideo.videoHeight );  //> Use a WebGL Renderer.
                                 g_eleCanvasVideo.width  = g_nW_px;                                           //>
                                 g_eleCanvasVideo.height = g_nH_px;                                           //>
+                                g_whenGo_ms             = Date.now();
                                 Tick();                                                                 //> Start periodic routine
      }                         );                                                                       //> .
                                                                                                         //>
