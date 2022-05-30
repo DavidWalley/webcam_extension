@@ -420,30 +420,34 @@ let                                     g_shaderrenderer        = null;         
 //* image.src = base64EncodedImage;
 
 
-let                                     g_eleCanvasVideo             = null;
 let                                     g_eleVideo              = null;
+let                                     g_eleCanvasVideo        = null;
+let                                     g_context2dVideo        = null;
 let                                     g_nW_px                 = 640 ;
 let                                     g_nH_px                 = 480 ;
-let                                     g_context2dVideo       = null;
+let                                     g_eleCanvasFlags        = null;                                 //>
 let                                     g_context2dFlags        = null;
+let                                     g_imageFlags            = null;                                 //>
+let                                     g_imageDataFlags        = null;
 
 
 function                                Tick(//FilterStream///////////////////////////////////////////////# Periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
 //g_shaderrenderer.render();                                                                             //> Use a WebGL renderer.
+console.log(g_imageDataFlags);
 
- if( g_context2dVideo ){                                                                               //>
+ if( g_context2dVideo ){                                                                                //>
   var                                   eleZoom        = document.getElementById(    'inrangeZoom'   ); //>
   var                                   dZoom                   = eleZoom.value;                        //> 0 to 100
   dZoom = Math.pow( 3 , parseFloat(dZoom)*0.01 );                                                       //> 1 to 3, log scale
                                                                                                         //>
-  g_context2dVideo.drawImage( g_eleVideo                                                               //>
+  g_context2dVideo.drawImage( g_eleVideo                                                                //>
   ,                            (g_nW_px - g_nW_px*dZoom)*0.5                                            //> Keep centered, left-right and
   ,                            (g_nH_px - g_nH_px*dZoom)*0.5                                            //> top-bottom.
   ,                                       g_nW_px*dZoom                                                 //> zoom in by user selected amount
   ,                                       g_nH_px*dZoom                                                 //> .
   );                                                                                                    //> this.height   Copy frame from video to canvas
-  let                                   imagedata               = g_context2dVideo.getImageData( 0,0   //> Intermediate result we need at end of changing pixel data
+  let                                   imagedata               = g_context2dVideo.getImageData( 0,0    //> Intermediate result we need at end of changing pixel data
                                                                   ,g_nW_px ,g_nH_px                     //>
                                                                   );                                    //> .
   let                                   ad                      = imagedata.data;                       //> Get array of all pixels, in 4-byte format. (This is the goods we want after intermediate result.)
@@ -457,16 +461,17 @@ function                                Tick(//FilterStream/////////////////////
     let                                 g                       = ad[i + 1];                            //>
     let                                 b                       = ad[i + 2];                            //>
 
-// Color adjustments                                                                                    //>
+    // Color adjustments                                                                                    //>
                                                                                                         //> Add pre-calculated flutter for cell. Check range.
-    if(   iCell < g_nW_px/2   &&   g_nH_px/2 + dFlutter < iRow   ){                                     //>
-
-// ?????????????? get from resized images of flags?
-
-     r = 255;                                                                                           //>
-     g = 255;                                                                                           //>
-     b =   0;                                                                                           //>
-    }//if                                                                                               //>
+    if( g_imageDataFlags ){
+//console.log('here here here here here here here here here ');
+     if(   iCell < g_nW_px/2   &&   g_nH_px/2 + dFlutter < iRow   ){                                     //>
+//  ?????????????? get from resized images of flags?
+      r =   0 + g_imageDataFlags.data[i];   //???                                                         //>
+      g =  g ;                                                                                           //>
+      b = 255;                                                                                           //>
+     }//if                                                                                               //>
+    }//if
 
     ad[i    ] =  r ;                                                                                    //>
     ad[i + 1] =  g ;                                                                                    //>
@@ -519,34 +524,56 @@ async function                          ModifyMediaFunctions(///////////////////
                                                            ,audio : false                               //> No audio.
                                                           });                                           //>
     if( usermedia ){                                                                                    //> If devices found?, then
-     g_eleCanvasFlags = document.createElement( 'canvas' );                                                  //>
-     g_eleCanvasVideo = document.createElement( 'canvas' );                                                  //>
-     g_eleVideo       = document.createElement( 'video'  );                                                  //>
-     g_context2dFlags = g_eleCanvasFlags.getContext('2d');                                              //>
+     g_eleVideo       = document.createElement( 'video'  );                                             //>
+     g_eleCanvasVideo = document.createElement( 'canvas' );                                             //>
+     g_eleCanvasFlags = document.createElement( 'canvas' );                                             //>
      g_context2dVideo = g_eleCanvasVideo.getContext('2d');                                              //>
+     g_context2dFlags = g_eleCanvasFlags.getContext('2d');                                              //>
                                                                                                         //>
-     const                              eleGui               = document.createElement('div');           //>Create div that can be used to set options?
-     eleGui.style.display      = 'inline-block';                                                        //>
-     eleGui.position           = 'absolute'    ;                                                        //>
-     eleGui.left               = '10px'        ;                                                        //>
-     eleGui.top                = '20px'        ;                                                        //>
-     eleGui.style.width        = '400px'       ;                                                        //>
-     eleGui.style.height       = '100px'       ;                                                        //>
-     eleGui.style.background   = '#FFFFCC'     ;                                                        //> Pale yellow
-     eleGui.innerHTML          =                                                                        //>
+                                                                                                        //>
+     g_imageFlags        = new Image();                                                                 //>read image into g_context2dFlags
+     g_imageFlags.onload = function(){                                                                  //>
+                            g_eleCanvasFlags.width  = g_imageFlags.width ;                              //>
+                            g_eleCanvasFlags.height = g_imageFlags.height;                              //>
+                            g_context2dFlags.drawImage( g_imageFlags, 0, 0 );                           //>
+                            g_imageDataFlags        = g_context2dFlags.getImageData(        //>
+                                                       0 ,0                                 //>
+                                                      ,g_eleCanvasFlags.width               //>
+                                                      ,g_eleCanvasFlags.height              //>
+                                                      );                                    //>
+console.log('-------------');
+console.log(g_imageDataFlags);
+                            // var index = (y*imageData.width + x) * 4;                                 //> Now you can access pixel data from imageData.data.  It's a one-dimensional array of RGBA values. Here's an example of how to get a pixel's color at (x,y)
+                            // var red   = imageData.data[index    ];
+                            // var green = imageData.data[index + 1];
+                            // var blue  = imageData.data[index + 2];
+                            // var alpha = imageData.data[index + 3];
+                           };//function
+     g_imageFlags.src = g_sFLAG_JAMAICA;
+
+                                                                                                        //>
+     const                              eleGui                  = document.createElement('div');        //>Create div that can be used to set options?
+     eleGui.style.display    = 'inline-block';                                                          //>
+     eleGui.position         = 'absolute'    ;                                                          //>
+     eleGui.left             = '10px'        ;                                                          //>
+     eleGui.top              = '20px'        ;                                                          //>
+     eleGui.style.width      = '400px'       ;                                                          //>
+     eleGui.style.height     = '100px'       ;                                                          //>
+     eleGui.style.background = '#FFFFCC'     ;                                                          //> Pale yellow
+     eleGui.innerHTML        =                                                                          //> HTML for a simple pop-up control panel:
       '<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+ g_sINoPTIONsIDE +'_L" value="L" checked>'+'<label for="'+ g_sINoPTIONsIDE +'_L">'+'L'     +'</label>'
      +'<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+ g_sINoPTIONsIDE +'_R" value="R">'        +'<label for="'+ g_sINoPTIONsIDE +'_R">'+'R'     +'</label>'
      +' &nbsp; &nbsp; &nbsp; '
      +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+ g_sINoPTIONfLIP +'_N" value="N" checked>'+'<label for="'+ g_sINoPTIONfLIP +'_N">'+'Normal'+'</label>'
      +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+ g_sINoPTIONfLIP +'_F" value="F">'        +'<label for="'+ g_sINoPTIONfLIP +'_F">'+'Flip'  +'</label>'
      +' &nbsp; &nbsp; &nbsp; '                                                                          //>
-     +'<span id="'+ g_sDIVfLAG+'_0" style="'                                                            //> Select previous flag.
+     +'<span id="'+ g_sDIVfLAG +'_0" style="'                                                            //> Select previous flag.
      +                                   'cursor'               +':pointer'                             //>
      +                                  ';width'                +':4rem'                                //>
      +                                  ';font-size'            +':2em'                                 //>
      +                                  ';font-weight'          +':bold'                                //>
      +'">'+ " < " +'</span>'                                                                            //>
-     +'<span id="'+ g_sDIVfLAG+'_2" style="'                                                            //> Select next flag.
+     +'<span id="'+ g_sDIVfLAG +'_2" style="'                                                            //> Select next flag.
      +                                   'cursor'               +':pointer'                             //>
      +                                  ';width'                +':4rem'                                //>
      +                                  ';font-size'            +':2em'                                 //>
@@ -555,14 +582,14 @@ async function                          ModifyMediaFunctions(///////////////////
      +'<br>'                                                                                            //>
      +'<div>'                                                                                           //>
      + '<input type="range" id="'+ 'inrangeZoom'                                                        //>
-     +                 '" name="'+ 'inrangeZoom' +'" min="0" max="100">'                                //>
+     +                 '" name="'+ 'inrangeZoom' +'" min="0" max="100">'                                //> Arbitrary scale of 100.
      + '<label for="'+             'inrangeZoom' +'">'+ "Zoom" +'</label>'                              //>
      +'</div>'                                                                                          //>
      ;                                                                                                  //>
      document.body.appendChild(eleGui);                                                                 //>
                                                                                                         //>
-     g_eleVideo.srcObject = usermedia;                                                                  //>
-     g_eleVideo.autoplay  = true;                                                                       //>
+     g_eleVideo.srcObject    = usermedia;                                                               //>
+     g_eleVideo.autoplay     = true;                                                                    //>
 
 // TODO Shut down and restart g_shaderrenderer???                                                       //>
 //*             g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_UKRAINE ,g_sLOGO_DAVE); //> Create instance of ShaderRenderer - the connection to the GPU.
