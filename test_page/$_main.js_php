@@ -45,16 +45,16 @@ function                                OnClick_GoCamera(///////////////////////
  }//if                                                                                                  //> .
  g_currentStream = null;                                                                                //> ???Is this needed? Does cleanup occur when we set it another stream? Is this clearer?
                                                                                                         //>
- const                                  videoConstraints            = {};                               //>
- if( g_eleSelectSource.value === '' ){        videoConstraints.facingMode = 'user';                         } //>
- else                          {        videoConstraints.deviceId   = { exact : g_eleSelectSource.value };  } //>
+ const                                 videoConstraints             = {};                               //>
+ if( g_eleSelectSource.value === '' ){ videoConstraints.facingMode = 'user';                          } //>
+ else                                { videoConstraints.deviceId   = {exact:g_eleSelectSource.value}; } //>
  navigator.mediaDevices.getUserMedia(                                                                   //> Ask user for permission?
   {video : videoConstraints                                                                             //>
   ,audio : false                                                                                        //>
   }                                                                                                     //>
  ).then(   function(a_stream){                                                                          //>
-            g_currentStream      = a_stream;                                                            //> Set the stream to the given? stream.
-            g_eleVideoExample.srcObject = a_stream;                                                            //> Into some page's video element, send the stream.
+            g_currentStream             = a_stream;                                                     //> Set the stream to the given? stream.
+            g_eleVideoExample.srcObject = a_stream;                                                     //> Into some page's video element, send the stream.
   }        )                                                                                            //>
  .catch(   function(a_error){ console.log(a_error); }   );                                              //>
 }//UpdateVideoSourcesList/////////////////////////////////////////////////////////////////////////////////>

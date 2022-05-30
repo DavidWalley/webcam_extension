@@ -26,10 +26,10 @@ const                                   g_sCodeVertexShader     =               
  'attribute vec4 '                      +'attributePosition;'                                        +N //> DEPRECATED 'attribute' qualifier is effectively equivalent to an input qualifier in vertex shaders. It cannot be used in any other shader stage. It cannot be used in interface blocks.
                                                                                                         //>
 +'void '                                +'main('// /// // // // // // // // // // // // // // // // // ///>
-+'){'+N                                                                                                                                                                                                                                                                                            // // // // // // // // // // // // // // // // // // // // // ///>
-+ 'gl_Position = attributePosition;'                                                                 +N //> ???No longer used? gl_Position is intended for writing the homogeneous vertex position at any time during vertexshader execution. Will be used by primitive assembly, clipping, culling, and other fixed functionality operations, if present, that operate on primitives after vertex processing has occurred.
++'){'+N                                 // // // // // // // // // // // // // // // // // // // // // ///>
++ 'gl_Position = attributePosition;'                                                                 +N //> Clip-space output position of the current vertex. ???No longer used? gl_Position is intended for writing the homogeneous vertex position at any time during vertexshader execution. Will be used by primitive assembly, clipping, culling, and other fixed functionality operations, if present, that operate on primitives after vertex processing has occurred.
 +'}'+N// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
-;                                                                                                                                                                                                                                                                                                                                                                  // /*DEV*/console.log( g_sCodeVertexShader );
+;                                                                                                       // /*DEV*/console.log( g_sCodeVertexShader );
 
 
 const                                   g_dFLAGSIZEx            = 0.4 ;                                 //>
@@ -37,43 +37,53 @@ const                                   g_dFLAGDAVEx            = 0.4 ;         
 const                                   g_dFLAGSIZEy            = 0.35;                                 //>
 const                                   g_dOPACITY              = 0.6 ;                                 //>
 const                                   g_sCodeFragmentShader   =                                       //> Fragment shader GLSL code for execution on the GPU...
- 'precision lowp float;'                                                                             +N //> Don't seem to need highest available precision. ???Doesn't fix problem with passing in the current time?
+ 'precision highp float;'                                                                             +N //> Don't seem to need highest available precision. ???Doesn't fix problem with passing in the current time?
 +'uniform vec2 '                        +'uvec2CanvasSize;'                                          +N //> Size of the output canvas passed in.
 +'uniform float '                       +'ufNow_ms;'                                                 +N //>
 +'uniform float '                       +'ufSide;'                                                   +N //>
 +'uniform float '                       +'ufFlip;'                                                   +N //>
-+'uniform float '                       +'ufZoom;'                                                   +N //>
++'uniform float '                       +'ufZoom;'                                                   +N //> Video Zoom factor
 
 +'uniform sampler2D '                   +'usampler2d0_Video;'                                        +N //> Texture unit 0 (oF at least 8) is video input (because?). sampler2D is just a way to get data from an array.   https://stackoverflow.com/questions/63322297/what-are-the-use-cases-of-sampler2d-uniforms-in-webgl-opengl
 +'uniform sampler2D '                   +'usampler2d1_Flag;'                                         +N //> Texture unit 1
 +'uniform sampler2D '                   +'usampler2d2_Dave;'                                         +N //> Texture unit 2
                                                                                                         //>
 +'void '                                +'main('// /// // // // // // // // // // // // // // // // // ///> Takes gl_FragCoord,
-+'){'+N                                                                                                                                                                                                                                                                                            // // // // // // // // // // // // // // // // // // // // // ///> Changes gl_FragColor.
-+ 'float '                              +'u0 = gl_FragCoord.x/uvec2CanvasSize.x*ufZoom;'                    +N //> Convert pixel co-
-+ 'float '                              +'v0 = gl_FragCoord.y/uvec2CanvasSize.y*ufZoom;'                    +N //> ordinates to a range of 0 to 1.
-+ 'float '                              +'u1 = 0.0;'                                                 +N //> Co-
-+ 'float '                              +'v1 = 0.0;'                                                 +N //> ordinates within texture (image).
++'){'+N                                 // // // // // // // // // // // // // // // // // // // // // ///> Changes gl_FragColor.
++ 'float '                              +'u0'                  +'= gl_FragCoord.x/uvec2CanvasSize.x;'+N //> Fragment shader input (https://www.khronos.org/opengl/wiki/Built-in_Variable_(GLSL)) - location of the fragment in window space. The X, Y and Z components are the window-space position of the fragment. Convert pixel co-
++ 'float '                              +'v0'                  +'= gl_FragCoord.y/uvec2CanvasSize.y;'+N //> ordinates to a range of 0 to 1. The Z value will be written to the depth buffer if gl_FragDepth is not written to by this shader stage.
++ 'float '                              +'u1'                  +'= 0.0;'                             +N //> Co-
++ 'float '                              +'v1'                  +'= 0.0;'                             +N //> ordinates within texture (image).
                                                                                                         //>
-+ 'float '                              +'r0 = texture2D( usampler2d0_Video ,vec2(u0 ,v0) ).r;'      +N //> deprecated. Retrieves texels from texture usampler2d0_Video (video feed), including the Red
-+ 'float '                              +'g0 = texture2D( usampler2d0_Video ,vec2(u0 ,v0) ).g;'      +N //> Green and
-+ 'float '                              +'b0 = texture2D( usampler2d0_Video ,vec2(u0 ,v0) ).b;'      +N //> Blue values of the pixel.
++ 'float '                              +'uZoom'                +'= (u0 - 0.5)*ufZoom + 0.5;'        +N //> Convert pixel co-
++ 'float '                              +'vZoom'                +'= (v0 - 0.5)*ufZoom + 0.5;'        +N //> ordinates to a range of 0 to 1.
                                                                                                         //>
-+ 'float '                              +'r1 = 0.0;'                                                 +N //> deprecated. Retrieves texels from texture usampler2d1_Flag
-+ 'float '                              +'g1 = 0.0;'                                                 +N //>
-+ 'float '                              +'b1 = 0.0;'                                                 +N //>
++ 'float '                              +'r0'                   +'= 0.0;'                            +N //> deprecated. Retrieves texels from texture usampler2d0_Video (video feed), including the Red
++ 'float '                              +'g0'                   +'= 0.0;'                            +N //> Green and
++ 'float '                              +'b0'                   +'= 0.0;'                            +N //> Blue values of the pixel.
+                                                                                                        //>
++ 'if( 0.0 <= uZoom   &&   uZoom <= 1.0 '                                                               //>
++  '&& 0.0 <= vZoom   &&   vZoom <= 1.0'                                                                //>
++ '){'                                                                                               +N //>
++  'r0 = texture2D( usampler2d0_Video ,vec2(uZoom ,vZoom) ).r;'                                      +N //> deprecated. Retrieves texels from texture usampler2d0_Video (video feed), including the Red
++  'g0 = texture2D( usampler2d0_Video ,vec2(uZoom ,vZoom) ).g;'                                      +N //> Green and
++  'b0 = texture2D( usampler2d0_Video ,vec2(uZoom ,vZoom) ).b;'                                      +N //> Blue values of the pixel.
++ '}'//if                                                                                            +N //>
+                                                                                                        //>
++ 'float '                              +'r1'                   +'= 0.0;'                            +N //> deprecated. Retrieves texels from texture usampler2d1_Flag
++ 'float '                              +'g1'                   +'= 0.0;'                            +N //>
++ 'float '                              +'b1'                   +'= 0.0;'                            +N //>
 + 'float '                              +'dFlutter'             +'= 0.0;'                            +N //> ".
 + 'float '                              +'dSun'                 +'= 0.0;'                            +N //> Lightness to add to create a 3-D highlight effect on the flag.
 + 'bool '                               +'bSideL_NotR '         +'= ( ufSide < 0.0 );'               +N //> TODO
 + 'bool '                               +'bFlip '               +'= ( ufFlip < 0.0 );'               +N //> TODO
-
-//TODO - adjust image?     ufZoom
-
+                                                                                                        //>
+                                                                                                        //> DAVE'S LOGO:
 + 'if( 0.85 < v0   &&   v0 < 0.92 ){'                                                                +N //> and if near top
 +  'u1 = ( u0 - 0.2  )* 2.0 - 0.5;'                                                                  +N //>  + ?
 +  'v1 = ( v0 - 0.85 )*15.0;'                                                                        +N //> 1/0.3
-+  'if( u1 < 0.0   ||   v1 < 0.0                   ){ gl_FragColor = vec4(r0,g0,b0,1.0);    return;}'+N //> Use background as is.
-+  'if( 1.0 < u1   ||   1.0 < v1                   ){ gl_FragColor = vec4(r0,g0,b0,1.0);    return;}'+N //> Use background as is.
++  'if( u1 < 0.0        ||   v1 < 0.0              ){ gl_FragColor = vec4(1.0,0.0,0.1 ,1.0);    return;}'+N //> Use background as is.
++  'if(      1.0 < u1   ||        1.0 < v1         ){ gl_FragColor = vec4(0.0,1.0,0.0 ,1.0);    return;}'+N //> Use background as is.
 +  'r1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).r;'                                             +N //> deprecated. Retrieves texels from logo texture
 +  'g1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).g;'                                             +N //>
 +  'b1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).b;'                                             +N //>
@@ -138,10 +148,11 @@ const                                   g_sCodeFragmentShader   =               
 + 'return;'                                                                                          +N //> We are done in this case.
 + '}}}'//if//if//if                                                                                     //>
                                                                                                      +N //> Otherwise
+
+
 + 'gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                                                            +N //> copy color as is.
 +'}'+N//main// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
 ;                                                                                                       //> /*DEV*/console.log( g_sCodeFragmentShader );
-
 
 const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side';       //>
 const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip';       //>
@@ -171,6 +182,28 @@ class                                   ShaderRenderer//////////////////////////
                                                                                                         //> g_sFLAG_PIRATE 
          this._eleDaveIn              = new Image()   ;   me._eleDaveIn.src = a_sDaveIn;                //> Image constructor, source of DavidWalley.ca.
          this._g                      = me._eleCanvasOut.getContext( 'webgl'                         ); //> private: Remember the webGL object that represents the 3D graphics state and behavior of the canvas.
+
+//. //me._g.enable( me._g.GL_FRAMEBUFFER_SRGB );
+//. 
+//. //me._g.enable(    me._g.GL_FRAMEBUFFER_SRGB );
+//. //console.log( me._g );
+//. //. me._g.enable(    me._g.BLEND);
+//. //. me._g.blendFunc( me._g.ONE, me._g.ZERO);
+//. 
+//. //me._g.enable( me._g.GL_FRAMEBUFFER_SRGB );
+//. //var framebuffer = me._g.createFramebuffer();
+//. //me._g.bindFramebuffer( me._g.FRAMEBUFFER ,framebuffer );
+//. 
+//. me._g.bindFramebuffer( me._g.FRAMEBUFFER ,null );
+//. me._g.disable(         me._g.GL_FRAMEBUFFER_SRGB );
+//. 
+//. //me._g.bindFramebuffer( me._g.FRAMEBUFFER ,null );
+//. //me._g.enable( me._g.BLEND );                           //> To use the blend function, you first have to activate blending with WebGLRenderingContext.enable() with the argument gl.BLEND.   https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendFunc
+//. //me._g.blendFunc(                                //> Defines which function is used for blending pixel arithmetic.   https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendFunc
+//. // me._g.ONE  // ZERO    // SRC_COLOR                                //> Multiplier for the source blending factors. The default value is gl.ONE. 
+//. //,me._g.ZERO // ONE   // DST_COLOR                                         //> Multiplier for the destination blending factors. The default value is gl.ZERO
+//. //); 
+
          this._program                = me.createProgram( g_sCodeVertexShader ,g_sCodeFragmentShader ); //> private: Combine the 2 shaders into a complete program.
          this._textureVideoIn         = me._g.createTexture(                                         ); //> private: Creates and initializes a WebGLTexture object for the video - a named texture = an unsigned integer.
          this._textureFlagIn          = me._g.createTexture(                                         ); //> private: Creates and initializes a WebGLTexture object for the flag graphic - a named texture = an unsigned integer.
@@ -182,13 +215,11 @@ class                                   ShaderRenderer//////////////////////////
          this._location_ufNow_ms      = me._g.getUniformLocation( me._program ,'ufNow_ms'            ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
          this._location_ufSide        = me._g.getUniformLocation( me._program ,'ufSide'              ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
          this._location_ufFlip        = me._g.getUniformLocation( me._program ,'ufFlip'              ); //> private: Current time - Remember the location of a specific uniform variable used in g_sCodeFragmentShader.
-         this._location_ufZoom        = me._g.getUniformLocation( me._program ,'ufZoom'              );  
+         this._location_ufZoom        = me._g.getUniformLocation( me._program ,'ufZoom'              ); //>
                                                                                                         //>
          this._bufferPosition         = me._g.createBuffer(                                          ); //> private: Buffer to hold ???
          this._attriblocationPosition = me._g.getAttribLocation(  me._program ,'attributePosition'   ); //> private: Returns the location of an attribute variable in a given WebGLProgram.   Queries the program for the vertex shader attribute variable specified, and returns the index of the generic vertex attribute bound to the attribute.
          this._bEventHandlersGo       = false;                                                          //>
-
-
                                                                                                         //>
   me._g.bindBuffer(                    me._g.ARRAY_BUFFER       ,me._bufferPosition                  ); //> ?Binds to a target of vertex attributes (such as vertex color data), the given WebGLBuffer.
   me._g.bufferData(                    me._g.ARRAY_BUFFER                                               //> Creates and initializes a buffer object's data store, with Vertex attributes,
@@ -210,21 +241,20 @@ class                                   ShaderRenderer//////////////////////////
  ,                                      a_ele                                                           //#
  ){                                     //////////////////////////////////////////////////////////////////#
   const                                 me                      = this;                                 /*DEV*/G_ASSERT( 'ShaderRenderer' === me.constructor.name ,'me bad "'+ me.constructor.name +'"');//> Code clarity. Remember this for making a clear reference to the object being constructed in callbacks.
-  const                                 g                       = me._g;                                //> Collapse the following a bit:
-  g.activeTexture( a_textureunit                                                );                      //> Specifies which texture unit to make active (in subsequent calls?).
-  g.pixelStorei(   g.UNPACK_FLIP_Y_WEBGL ,true                                  );                      //> Specifies the pixel storage modes: Flips the source data along its vertical axis if true. For some reason WebGL textures are flipped vertically in comparasion to OpenGL
-  g.bindTexture(   g.TEXTURE_2D          ,a_texture                             );                      //> Bind to a texturing target (2-D plane), a named texture - an unsigned integer.
-  g.texImage2D(    g.TEXTURE_2D                                                                         //> Specifies a 2-D texture image:   
+  me._g.activeTexture( a_textureunit                        );                                          //> Specifies which texture unit to make active (in subsequent calls?).
+  me._g.pixelStorei(   me._g.UNPACK_FLIP_Y_WEBGL ,true      );                                          //> Specifies the pixel storame._ge modes: Flips the source data along its vertical axis if true. For some reason WebGL textures are flipped vertically in comparasion to OpenGL
+  me._g.bindTexture(   me._g.TEXTURE_2D          ,a_texture );                                          //> Bind to a texturing target (2-D plane), a named texture - an unsigned integer.
+  me._g.texImage2D(    me._g.TEXTURE_2D                                                                 //> Specifies a 2-D texture image:   
   ,                0                                                                                    //> level 0 is the base image level of detail (of a set of mipmaps);
-  ,                g.RGBA                                                                               //> internal format is RGBA components read from the color buffer;
-  ,                g.RGBA                                                                               //> texel format is RGBA, 
-  ,                g.UNSIGNED_BYTE                                                                      //> 8-bit values; 
+  ,                me._g.RGBA                                                                           //> internal format is RGBA components read from the color buffer;
+  ,                me._g.RGBA                                                                           //> texel format is RGBA, 
+  ,                me._g.UNSIGNED_BYTE                                                                  //> 8-bit values; 
   ,                a_ele                                                                                //> DOM element is the source of data.
   );                                                                                                    //>
-  g.texParameteri( g.TEXTURE_2D          ,g.TEXTURE_MAG_FILTER ,g.LINEAR        );                      //> How it should filter upon scaling up. Set texture parameters: target is a two-dimensional texture; texture magnification filter; default.   https://dens.website/tutorials/webgl/textures
-  g.texParameteri( g.TEXTURE_2D          ,g.TEXTURE_MIN_FILTER ,g.LINEAR        );                      //> How i should filter upon scaling down. Target is a two-dimensional texture; texture minification filter; default?
-  g.texParameteri( g.TEXTURE_2D          ,g.TEXTURE_WRAP_S     ,g.CLAMP_TO_EDGE );                      //> Specify how to handle co-ords outside range - wrapping function for texture coordinate s.
-  g.texParameteri( g.TEXTURE_2D          ,g.TEXTURE_WRAP_T     ,g.CLAMP_TO_EDGE );                      //> Specify how to handle co-ords outside range - wrapping function for texture coordinate t.
+  me._g.texParameteri( me._g.TEXTURE_2D          ,me._g.TEXTURE_MAG_FILTER ,me._g.LINEAR        );      //> How it should filter upon scaling up. Set texture parameters: target is a two-dimensional texture; texture magnification filter; default.   https://dens.website/tutorials/webgl/textures
+  me._g.texParameteri( me._g.TEXTURE_2D          ,me._g.TEXTURE_MIN_FILTER ,me._g.LINEAR        );      //> How i should filter upon scaling down. Target is a two-dimensional texture; texture minification filter; default?
+  me._g.texParameteri( me._g.TEXTURE_2D          ,me._g.TEXTURE_WRAP_S     ,me._g.CLAMP_TO_EDGE );      //> Specify how to handle co-ords outside range - wrapping function for texture coordinate s.
+  me._g.texParameteri( me._g.TEXTURE_2D          ,me._g.TEXTURE_WRAP_T     ,me._g.CLAMP_TO_EDGE );      //> Specify how to handle co-ords outside range - wrapping function for texture coordinate t.
  }//render_Texture////////////////////////////////////////////////////////////////////////////////////////>
 
 
@@ -259,10 +289,10 @@ class                                   ShaderRenderer//////////////////////////
   break; case 1:   me._eleFlagIn.src = g_sFLAG_CANADA ;                                                 //>
   break; case 2:   me._eleFlagIn.src = g_sFLAG_USA    ;                                                 //>
   break; case 3:   me._eleFlagIn.src = g_sFLAG_UK     ;                                                 //>
-  break; case 4:   me._eleFlagIn.src = g_sFLAG_RAINBOW;                                                 //>
-  break; case 5:   me._eleFlagIn.src = g_sFLAG_CHILD  ;                                                 //>
-  break; case 6:   me._eleFlagIn.src = g_sFLAG_JAMAICA;                                                 //>
-  break; case 7:   me._eleFlagIn.src = g_sFLAG_PIRATE ;                                                 //>
+  break; case 4:   me._eleFlagIn.src = g_sFLAG_JAMAICA;                                                 //>
+  break; case 5:   me._eleFlagIn.src = g_sFLAG_PIRATE ;                                                 //>
+  break; case 6:   me._eleFlagIn.src = g_sFLAG_RAINBOW;                                                 //>
+  break; case 7:   me._eleFlagIn.src = g_sFLAG_CHILD  ;                                                 //>
   }//switch                                                                                             //>
                                                                                                         //>
   g.enableVertexAttribArray( me._attriblocationPosition                     );                          //> Index of the generic vertex attribute bound to the attribute '_attriblocationPosition'. attributes in a vertex shader are disabled by default. To use one, you have to first enable it with this function.
@@ -280,7 +310,7 @@ class                                   ShaderRenderer//////////////////////////
   g.useProgram(              me._program                  );                                            //> Sets the specified WebGLProgram as part of the current rendering state (must preceed the following...)
   g.uniform1i(               me._usampler2d0_Video ,0 );                                                //> Bind our texture to texture unit 0.
   g.uniform1i(               me._usampler2d1_Flag  ,1 );                                                //> Bind our texture to texture unit 1.
-  g.uniform1i(               me._usampler2d2_Dave  ,2 );                                                //> Bind our texture to texture unit 1.
+  g.uniform1i(               me._usampler2d2_Dave  ,2 );                                                //> Bind our texture to texture unit 2.
                                                                                                         //>
   g.uniform1f(               me._location_ufNow_ms                                                      //> Pass in the current time.
   ,                          ( Date.now()%100000 )*0.0001                                               //> ???Overcome  some kind of number format issue - can't seem to pass in a float as is?
@@ -289,12 +319,12 @@ class                                   ShaderRenderer//////////////////////////
 // user input                                                                                           //>
   var                                   sSide                   = '';                                   //>
   var                                   sFlip                   = '';                                   //>
-  var                                   i                       = 0;
+  var                                   i                       = 0;                                    //>
   for( i = 0; i<eleSides.length; i++ ){ if( eleSides[i].checked ){ sSide = eleSides[i].value; break;} } //>
   for( i = 0; i<eleFlips.length; i++ ){ if( eleFlips[i].checked ){ sFlip = eleFlips[i].value; break;} } //>
                                                                                                         //>
   var                                   dZoom                   = eleZoom.value;                        //>
-  dZoom = Math.pow( 2 , parseFloat(100-dZoom)*0.02 )*0.5;                                               //> 0.5 to 2
+  dZoom = Math.pow( 2 , parseFloat(100 -dZoom)*0.02 )*0.5;                                               //> 0.5 to 2
                                                                                                         //>
   g.uniform1f( me._location_ufSide ,('R' === sSide)?1 :-1 );                                            //>
   g.uniform1f( me._location_ufFlip ,('N' === sFlip)?1 :-1 );                                            //> Normal or F=flip
@@ -358,14 +388,102 @@ class                                   ShaderRenderer//////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
-
-
 let                                     g_shaderrenderer        = null;                                 //> 
+
+let                                     g_eleCanvas             = null; // document.createElement( 'canvas' );      //>
+let                                     g_eleVideo              = null; // document.createElement( 'video'  );      //>
+let                                     g_nW_px                 = 640;
+let                                     g_nH_px                 = 480;
+let                                     g_context2dCanvas       = null;
 
 
 function                                Tick(//FilterStream///////////////////////////////////////////////# Periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
- g_shaderrenderer.render();                                                                             //> Use a WebGL renderer.
+//* g_shaderrenderer.render();                                                                             //> Use a WebGL renderer.
+
+ if( g_context2dCanvas ){
+console.log('gggggggggggggggg');
+  g_context2dCanvas.drawImage( g_eleVideo ,0,0   ,g_nW_px ,g_nH_px );                                    //> this.height   Copy frame from video to canvas
+  let                                   frame                   = g_context2dCanvas.getImageData( 0,0   //>
+                                                                  ,g_nW_px ,g_nH_px                     //>
+                                                                  );                                    //>
+  let                                   l                       = frame.data.length / 4;                //>
+  for( let i = 0; i < l; i++ ){                                                                         //>
+   let                                  r                       = frame.data[i * 4 + 1];                //>
+   let                                  g                       = frame.data[i * 4 + 0];                //>
+   let                                  b                       = frame.data[i * 4 + 2];                //>
+//   if( g > 100   &&   r > 100   &&   b < 43 ){   frame.data[i * 4 + 3] = 0;   }                          //>
+   frame.data[i * 4    ] = r;
+   frame.data[i * 4 + 1] = g;
+   frame.data[i * 4 + 2] = b;
+
+  }//for                                                                                                 //>
+  g_context2dCanvas.putImageData( frame ,0,0 );                                                      //>    copy frame from video to canvas
+ }//if
+
+
+//> let                                     processor = //////////////////////////////////////////////////////>
+//> {/////////////////////////////////////////////////////////////////////////////////////////////////////////>
+//> 
+//>                                         timerCallback: function(//////////////////////////////////////////>
+//>  ){                                     //////////////////////////////////////////////////////////////////>
+//>   if( this.video.paused   ||   this.video.ended ){                                              return;}//>
+//>   this.computeFrame();                                                                                  //>
+//>   let                                   self                    = this;                                 //>
+//>   setTimeout(                                                                                           //>
+//>    function(){ self.timerCallback(); }                                                                  //>
+//>   ,0                                                                                                    //>
+//>   );                                                                                                    //>
+//>  }////////////////////////////////////////////////////////////////////////////////////////////////////////>
+//>                                                                                                         
+//>  ,                                      doLoad: function(/////////////////////////////////////////////////>
+//>  ){                                     //////////////////////////////////////////////////////////////////>
+//>   this.video = document.getElementById("video");                                                        //>
+//>   this.c1    = document.getElementById("c1"   );                                                              //>
+//>   this.ctx1  = this.c1.getContext('2d');                                                                 //>
+//>   this.c2    = document.getElementById("c2");                                                              //>
+//>   this.ctx2  = this.c2.getContext("2d");                                                                 //>
+//>   let                                   self                    = this;                                                                                      //>
+//>   this.video.addEventListener("play"
+//>   ,function() {                                                      //>
+//>     self.width          = self.video.videoWidth  / 2;                                                           //>
+//>     self.height         = self.video.videoHeight / 2;                                                         //>
+//>     self.timerCallback();                                                                             //>
+//>    }
+//>   ,false
+//>   );                                                                                          //>
+//>  }////////////////////////////////////////////////////////////////////////////////////////////////////////>
+//> 
+//>  
+//>  ,                                      computeFrame: function(///////////////////////////////////////////>
+//>  ){                                     //////////////////////////////////////////////////////////////////>
+//>   this.ctx1.drawImage(this.video, 0, 0, this.width, this.height);                                       //>
+//>   let frame = this.ctx1.getImageData(0, 0, this.width, this.height);                                    //>
+//>       let l = frame.data.length / 4;                                                                    //>
+//>                                                                                                         //>
+//>   for (let i = 0; i < l; i++) {                                                                         //>
+//>     let r = frame.data[i * 4 + 0];                                                                      //>
+//>     let g = frame.data[i * 4 + 1];                                                                      //>
+//>     let b = frame.data[i * 4 + 2];                                                                      //>
+//>     if (g > 100 && r > 100 && b < 43)                                                                   //>
+//>       frame.data[i * 4 + 3] = 0;                                                                        //>
+//>   }                                                                                                     //>
+//>   this.ctx2.putImageData(frame, 0, 0);                                                                  //>
+//>  return;                                                                                                //>
+//>  }////////////////////////////////////////////////////////////////////////////////////////////////////////>
+//>  
+//>  
+//> };////////////////////////////////////////////////////////////////////////////////////////////////////////>
+//> //////////////////////////////////////////////////////////////////////////////////////////////////////////>
+//> 
+//> 
+//> document.addEventListener("DOMContentLoaded"
+//> ,() => {
+//>   processor.doLoad();
+//>  }
+//> );
+
+
  requestAnimationFrame(   function(){ Tick(); }   );                                                    //> Run this periodic routine again.
 }//Tick///////////////////////////////////////////////////////////////////////////////////////////////////>
 
@@ -376,7 +494,7 @@ async function                          ModifyMediaFunctions(///////////////////
                                                                                                         //>
  const                                  enumerateDevicesWas  = MediaDevices.prototype.enumerateDevices; //> Get existing version of system function to get a list of cameras.
  MediaDevices['prototype']            ['enumerateDevices'] = async function(// // // // // // // // // ///# Redefine this system function locally, to include the virtual camera.
- ){                                                                                                                                                                                                                                                                                                // // // // // // // // // // // // // // // // // // // // // ///#
+ ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
   const                                result = await enumerateDevicesWas.call(navigator.mediaDevices); //> Get all the current cameras (should not include the virtual camera?)
   const                                x                = {'deviceId' : 'virtual'                       //>
                                                           ,'groupID'  : 'uh'                            //>
@@ -391,54 +509,71 @@ async function                          ModifyMediaFunctions(///////////////////
                                                                                                         //>
  const                                  getUserMediaWas         = MediaDevices.prototype.getUserMedia;  //> Get existing version of system function to get a camera's video stream.
  MediaDevices['prototype']            ['getUserMedia'] = async function(// // // // // // // // // // ////# Redefine this system function locally, to include the virtual camera.
- ){                                                                                                                                                                                                                                                                                                // // // // // // // // // // // // // // // // // // // // // ///#
+ ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
   const                                 args                    = arguments;                            //>
   if(   args.length   &&   args[0].video   &&   args[0].video.deviceId   ){                             //>
    if(  'virtual' === args[0].video.deviceId                                                            //>
     ||  'virtual' === args[0].video.deviceId.exact                                                      //>
    ){                                                                                                   //>
+//    g_nW_px = args[0].video.width ;                                                                     //>
+//    g_nH_px = args[0].video.height;                                                                     //>
     const                               usermedia = await getUserMediaWas.call(                         //>
                                                            navigator.mediaDevices                       //>
                                                           ,{video : {facingMode: args[0].facingMode     //> This constraints could mimic closely the request. Also, there could be a preferred webcam on the options. Right now it defaults to the predefined input.
                                                                     ,advanced  : args[0].video.advanced //>
-                                                                    ,width     : args[0].video.width    //>
-                                                                    ,height    : args[0].video.height   //>
+                                                                    ,width     : g_nW_px                //>
+                                                                    ,height    : g_nH_px                //>
                                                                     }                                   //>
                                                            ,audio : false                               //> No audio.
                                                           });                                           //>
     if( usermedia ){                                                                                    //> If devices found?, then
-     const                              eleCanvas            = document.createElement( 'canvas' );      //>
-     const                              eleVideo             = document.createElement( 'video'  );      //>
-
-     const                              eleGui               = document.createElement('div');           // Create div that can be used to set options?
-     eleGui.style.display      = 'inline-block';
-     eleGui.position           = 'absolute';
-     eleGui.left               = '10px';
-     eleGui.top                = '20px';
-     eleGui.style.width        = '400px'       ;
-     eleGui.style.height       = '100px'       ;
-     eleGui.style.background   = '#FFFFCC'     ;                                                       //> Pale yellow
-     eleGui.innerHTML          = 
+//     const                              eleCanvas            = document.createElement( 'canvas' );      //>
+//     const                              eleVideo             = document.createElement( 'video'  );      //>
+     g_eleCanvas = document.createElement( 'canvas' );      //>
+     g_eleVideo  = document.createElement( 'video'  );      //>
+     g_context2dCanvas = g_eleCanvas.getContext( '2d' ); 
+                                                                                                        //>
+     const                              eleGui               = document.createElement('div');           //>Create div that can be used to set options?
+     eleGui.style.display      = 'inline-block';                                                        //>
+     eleGui.position           = 'absolute'    ;                                                        //>
+     eleGui.left               = '10px'        ;                                                        //>
+     eleGui.top                = '20px'        ;                                                        //>
+     eleGui.style.width        = '400px'       ;                                                        //>
+     eleGui.style.height       = '100px'       ;                                                        //>
+     eleGui.style.background   = '#FFFFCC'     ;                                                        //> Pale yellow
+     eleGui.innerHTML          =                                                                        //>
       '<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+ g_sINoPTIONsIDE +'_L" value="L" checked>'+'<label for="'+ g_sINoPTIONsIDE +'_L">'+'L'     +'</label>'
      +'<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+ g_sINoPTIONsIDE +'_R" value="R">'        +'<label for="'+ g_sINoPTIONsIDE +'_R">'+'R'     +'</label>'
      +' &nbsp; &nbsp; &nbsp; '
      +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+ g_sINoPTIONfLIP +'_N" value="N" checked>'+'<label for="'+ g_sINoPTIONfLIP +'_N">'+'Normal'+'</label>'
      +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+ g_sINoPTIONfLIP +'_F" value="F">'        +'<label for="'+ g_sINoPTIONfLIP +'_F">'+'Flip'  +'</label>'
-     +' &nbsp; &nbsp; &nbsp; '
-     +'<span id="'+ g_sDIVfLAG+'_0" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold">'+ " < " +'</span>' //> Select previous flag.
-     +'<span id="'+ g_sDIVfLAG+'_2" style="background-color:#FF00FF;cursor:pointer;width:4rem;font-size:2em;font-weight:bold">'+ " > " +'</span>' //> Select next flag.
-     +'<br>'
-     +'<div>'
-     + '<input type="range" id="'+ 'inrangeZoom' +'" name="'+ 'inrangeZoom' +'" min="0" max="100"><label for="'+ 'inrangeZoom' +'">'+ "Zoom" +'</label>'
-     +'</div>'
-
-     ;
-     document.body.appendChild(eleGui);
+     +' &nbsp; &nbsp; &nbsp; '                                                                          //>
+     +'<span id="'+ g_sDIVfLAG+'_0" style="'                                                            //> Select previous flag.
+     +                                   'cursor'               +':pointer'                             //>
+     +                                  ';width'                +':4rem'                                //>
+     +                                  ';font-size'            +':2em'                                 //>
+     +                                  ';font-weight'          +':bold'                                //>
+     +'">'+ " < " +'</span>'                                                                            //>
+     +'<span id="'+ g_sDIVfLAG+'_2" style="'                                                            //> Select next flag.
+     +                                   'cursor'               +':pointer'                             //>
+     +                                  ';width'                +':4rem'                                //>
+     +                                  ';font-size'            +':2em'                                 //>
+     +                                  ';font-weight'          +':bold'                                //>
+     +'">'+ " > " +'</span>'                                                                            //>
+     +'<br>'                                                                                            //>
+     +'<div>'                                                                                           //>
+     + '<input type="range" id="'+ 'inrangeZoom'                                                        //>
+     +                 '" name="'+ 'inrangeZoom' +'" min="0" max="100">'                                //>
+     + '<label for="'+             'inrangeZoom' +'">'+ "Zoom" +'</label>'                              //>
+     +'</div>'                                                                                          //>
+     ;                                                                                                  //>
+     document.body.appendChild(eleGui);                                                                 //>
                                                                                                         //>
-     eleVideo.srcObject = usermedia;                                                                    //>
-     eleVideo.autoplay  = true;                                                                         //>
+     g_eleVideo.srcObject = usermedia;                                                                    //>
+     g_eleVideo.autoplay  = true;                                                                         //>
+
 // TODO Shut down and restart g_shaderrenderer???                                                       //>
-             g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_UKRAINE ,g_sLOGO_DAVE); //> Create instance of ShaderRenderer - the connection to the GPU.
+//*             g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_UKRAINE ,g_sLOGO_DAVE); //> Create instance of ShaderRenderer - the connection to the GPU.
 //           g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_CANADA  ,g_sLOGO_DAVE); //>
 //           g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_USA     ,g_sLOGO_DAVE); //>
 //           g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_UK      ,g_sLOGO_DAVE); //>
@@ -446,18 +581,22 @@ async function                          ModifyMediaFunctions(///////////////////
 //           g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_USA     ,g_sLOGO_DAVE); //>
 //           g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_JAMAICA ,g_sLOGO_DAVE); //>
 //           g_shaderrenderer = new ShaderRenderer(eleCanvas ,eleVideo ,g_sFLAG_PIRATE  ,g_sLOGO_DAVE); //>
-     eleVideo.addEventListener('playing'                                                                //>
+     g_eleVideo.addEventListener('playing'                                                                //>
      ,                         function(){                                                              //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;                               //>
-                                g_shaderrenderer.setSize( eleVideo.videoWidth ,eleVideo.videoHeight );  //> Use a WebGL Renderer.
+//*                                g_shaderrenderer.setSize( eleVideo.videoWidth ,eleVideo.videoHeight );  //> Use a WebGL Renderer.
+
+  g_eleCanvas.width  = g_nW_px;                                                                       //>
+  g_eleCanvas.height = g_nH_px;                                                                       //>
+
                                 Tick();                                                                 //> Start periodic routine
      }                         );                                                                       //> .
-     eleVideo.addEventListener('pause',                                                                 //>
-      function(e){                                                                                      //>
-       console.log(e);                                                                                  //>
-      }                                                                                                 //>
-     );                                                                                                 //>
+//   eleVideo.addEventListener('pause',                                                                 //>
+//    function(e){                                                                                      //>
+//     console.log(e);                                                                                  //>
+//    }                                                                                                 //>
+//   );                                                                                                 //>
                                                                                                         //>
- return eleCanvas.captureStream();                                                                      //> Report a real-time video capture of the surface of the canvas.
+ return g_eleCanvas.captureStream();                                                                      //> Report a real-time video capture of the surface of the canvas.
     }//if                                                                                               //>
     // ??? What happens now, if fullfilledpromiseMediaStream was null?                                  //>
   }}//if virtual//if                                                                                    //>

@@ -3,34 +3,17 @@
 
 'use strict';                                                                                           //>
                                                                                                         //>
-//. const                                   script0                 = document.createElement('script');     //>
-//. script0.setAttribute( 'type' ,'text/javascript'                                   );                    //>
-//. script0.setAttribute( 'src'  ,window['chrome']['runtime']['getURL']('js/data.js') );                    //> For development and production.
-
 const                                   script1                 = document.createElement('script');     //>
 script1.setAttribute( 'type' ,'text/javascript'                                                    );   //>
 /*DEV*/ script1.setAttribute( 'src' ,window['chrome']['runtime']['getURL']('js/$_injected.js_php') );   //> Form a URL to get to this file. For development.
 //*PRO*/script1.setAttribute( 'src' ,window['chrome']['runtime']['getURL'](  'js/injected.js'    ) );   //> For production with Closure Compiled code.
-
+                                                                                                        //>
 const                                   head              =    document.head                            //>
                                                            ||  document.getElementsByTagName('head')[0] //>
                                                             || document.documentElement;                //>
-//head.insertBefore( script0 ,head.lastChild );                                                           //> Insert script into web page's <head> section.
 head.insertBefore( script1 ,head.lastChild );                                                           //> Insert script into web page's <head> section.
 
 chrome.runtime.onMessage.addListener(   function(a){ console.log(a); }   );
-
-//? chrome.runtime.onMessage.addListener(   changeClass   );
-//? 
-//? function                                changeClass(//////////////////////////////>
-//?                                         message
-//? ){                                      ///////////////////////////////////////////>
-//?  reset();
-//?  if( message.newClass ){
-//?   document.getElementById("mdl-color--white").className = message.newClass;
-//?  }
-//? }
-
 
 
 //End of file.
