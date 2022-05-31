@@ -157,6 +157,10 @@ const                                   g_sCodeFragmentShader   =               
 const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side';       //>
 const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip';       //>
 const                                   g_sDIVfLAG              = 'divWebcam_Extension_Flag'    ;       //>
+const                                   g_sGUIzOOM              = 'inrangeGuiZoom'              ;
+const                                   g_sGUIbRIGHTNESS        = 'inrangeGuiBrightness'        ;
+const                                   g_sGUIcONTRAST          = 'inrangeGuiContrast'          ;
+
 
 class                                   ShaderRenderer////////////////////////////////////////////////////#
 {/////////////////////////////////////////////////////////////////////////////////////////////////////////>
@@ -238,9 +242,9 @@ class                                   ShaderRenderer//////////////////////////
 //  var                                eleFlips      = document.getElementsByName( g_sINoPTIONfLIP     ); //> get data from a field on a configuration page? Text in input field.
 //  var                                elePrevious   = document.getElementById(    g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
 //  var                                eleNext       = document.getElementById(    g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
-//  var                                eleZoom       = document.getElementById(    'inrangeGuiZoom'       ); //>
-//  var                                eleBrightness = document.getElementById(    'inrangeBrightness' ); //>
-//  var                                eleContrast   = document.getElementById(    'inrangeContrast'   ); //>
+//  var                                eleZoom       = document.getElementById(    g_sGUIzOOM       ); //>
+//  var                                eleBrightness = document.getElementById(    g_sGUIbRIGHTNESS ); //>
+//  var                                eleContrast   = document.getElementById(    g_sGUIcONTRAST   ); //>
 //  /*DEV*/ G_ASSERT(   eleSides      ,"eleSides      not got."   );                                          //>
 //  /*DEV*/ G_ASSERT(   eleFlips      ,"eleFlips      not got."   );                                          //>
 //  /*DEV*/ G_ASSERT(   elePrevious   ,"elePrevious   not got."   );                                          //>
@@ -372,9 +376,9 @@ function                                Tick(//FilterStream/////////////////////
  //g_shaderrenderer.render();                                                                           //> Use a WebGL renderer.
                                                                                                         //>
  if( g_context2dOut ){                                                                                  //>
-  var                                   eleZoom       = document.getElementById( 'inrangeGuiZoom'       ); //>
-  var                                   eleBrightness = document.getElementById( 'inrangeBrightness' ); //>
-  var                                   eleContrast   = document.getElementById( 'inrangeContrast'   ); //>
+  var                                   eleZoom       = document.getElementById( g_sGUIzOOM       ); //>
+  var                                   eleBrightness = document.getElementById( g_sGUIbRIGHTNESS ); //>
+  var                                   eleContrast   = document.getElementById( g_sGUIcONTRAST   ); //>
   /*DEV*/ G_ASSERT(   eleZoom         ,"eleZoom       not got."   );                                    //>
   /*DEV*/ G_ASSERT(   eleBrightness   ,"eleBrightness not got."   );                                    //>
   /*DEV*/ G_ASSERT(   eleContrast     ,"eleContrast   not got."   );                                    //>
@@ -464,11 +468,10 @@ function                                Tick(//FilterStream/////////////////////
 }//Tick///////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
-async function                          ModifyMediaFunctions(/////////////////////////////////////////////#
+async function                          Go_ModifyMediaDevices_EnumerateDevices(///////////////////////////#
 ){                                      //////////////////////////////////////////////////////////////////#
-                                                                                                        //>
-                                                                                                        //>
  const                                  enumerateDevicesWas  = MediaDevices.prototype.enumerateDevices; //> Get existing version of system function to get a list of cameras.
+                                                                                                        //>
  MediaDevices['prototype']            ['enumerateDevices'] = async function(// // // // // // // // // ///# Redefine this system function locally, to include the virtual camera.
  ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
   const                                result = await enumerateDevicesWas.call(navigator.mediaDevices); //> Get all the current cameras (should not include the virtual camera?)
@@ -481,18 +484,40 @@ async function                          ModifyMediaFunctions(///////////////////
   result.push( /** @type {!MediaDeviceInfo|!undefined} */ (x) );                                        //> Append new device info to the list. We could add "Virtual VHS" or "Virtual Median Filter" and map devices with filters. @type is required to get past a Closure Compiler error.
  return result;                                                                                         //> Report the new list.
  };//enumerateDevices// // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
-                                                                                                        //>
-                                                                                                        //>
+}//Go_ModifyMediaDevices_EnumerateDevices/////////////////////////////////////////////////////////////////>
+
+
+function                                Go_LoadFlags(/////////////////////////////////////////////////////>
+){                                      //////////////////////////////////////////////////////////////////>
+ g_eleCanvasFlags = document.createElement('canvas'); g_context2dFlags = g_eleCanvasFlags.getContext('2d'); //>
+ g_imageFlags        = new Image();                                                                     //> Read image into g_context2dFlags (and g_imagedataFlags)
+ g_imageFlags.onload = function(){                                                                      //>
+                        g_eleCanvasFlags.width    = g_imageFlags.width ;                                //>
+                        g_eleCanvasFlags.height   = g_imageFlags.height;                                //>
+                        g_context2dFlags.drawImage( g_imageFlags, 0, 0 );                               //>
+                        g_imagedataFlags          = g_context2dFlags.getImageData(                      //>
+                                                     0,0                                                //>
+                                                    ,g_eleCanvasFlags.width                             //>
+                                                    ,g_eleCanvasFlags.height                            //>
+                                                    );                                                  //>
+                       };//function                                                                     //>
+ g_imageFlags.src       = g_sDATAuRIFLAGS;                                                              //> Kick-start the above, using a data URI text string.
+}//Go_LoadFlags///////////////////////////////////////////////////////////////////////////////////////////>
+
+
+async function                          Go_ModifyMediaDevices_GetUserMedia(///////////////////////////////# Redefine locally system function to get list of cameras, to include the virtual camera.
+){                                      //////////////////////////////////////////////////////////////////#
  const                                  getUserMediaWas         = MediaDevices.prototype.getUserMedia;  //> Get existing version of system function to get a camera's video stream.
+                                                                                                        //>
  MediaDevices['prototype']            ['getUserMedia'] = async function(// // // // // // // // // // ////# Redefine this system function locally, to include the virtual camera.
  ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
   const                                 args                    = arguments;                            //>
-  if(   args.length   &&   args[0].video   &&   args[0].video.deviceId   ){                             //>
-   if(  'virtual' === args[0].video.deviceId                                                            //>
-    ||  'virtual' === args[0].video.deviceId.exact                                                      //>
-   ){                                                                                                   //>
-    const                               usermedia = await getUserMediaWas.call(                         //>
-                                                           navigator.mediaDevices                       //>
+  if(   !args.length   ||   !args[0].video   ||   !args[0].video.deviceId                               //>
+   || (  'virtual' !== args[0].video.deviceId   &&   'virtual' !== args[0].video.deviceId.exact )       //>
+  ){                                                                                                    //>
+                             return await getUserMediaWas.call( navigator.mediaDevices ,...arguments ) ;//> Report result of unmodified routine.
+  }//if                                                                                                 //>
+  const                 usermedia = await getUserMediaWas.call( navigator.mediaDevices                  //>
                                                           ,{video : {facingMode: args[0].facingMode     //> This constraints could mimic closely the request. Also, there could be a preferred webcam on the options. Right now it defaults to the predefined input.
                                                                     ,advanced  : args[0].video.advanced //>
                                                                     ,width     : g_nW_px                //>
@@ -500,110 +525,94 @@ async function                          ModifyMediaFunctions(///////////////////
                                                                     }                                   //>
                                                            ,audio : false                               //> No audio.
                                                           });                                           //>
-    if( usermedia ){                                                                                    //> If devices found?, then
-     g_eleVideoIn     = document.createElement('video' );                                               //>
-     g_eleCanvasOut   = document.createElement('canvas'); g_context2dOut   = g_eleCanvasOut.getContext(  '2d'); //>
-     g_eleCanvasFlags = document.createElement('canvas'); g_context2dFlags = g_eleCanvasFlags.getContext('2d'); //>
-     g_imageFlags        = new Image();                                                                 //> Read image into g_context2dFlags (and g_imagedataFlags)
-     g_imageFlags.onload = function(){                                                                  //>
-                            g_eleCanvasFlags.width    = g_imageFlags.width ;                            //>
-                            g_eleCanvasFlags.height   = g_imageFlags.height;                            //>
-                            g_context2dFlags.drawImage( g_imageFlags, 0, 0 );                           //>
-                            g_imagedataFlags          = g_context2dFlags.getImageData(                  //>
-                                                         0,0                                            //>
-                                                        ,g_eleCanvasFlags.width                         //>
-                                                        ,g_eleCanvasFlags.height                        //>
-                                                        );                                              //>
-                           };//function                                                                 //>
-     g_imageFlags.src = g_sDATAuRIFLAGS;                                                                //> Kick-start the above, using a data URI text string.
+  if( !usermedia ){          return await getUserMediaWas.call( navigator.mediaDevices ,...arguments );}//> If devices not found, then report result of unmodified routine.
                                                                                                         //>
-     const                              eleGui                  = document.createElement('div');        //> Create div that can be used for user to set options.
-     eleGui.style.display    = 'inline-block';                                                          //>
-     eleGui.position         = 'absolute'    ;                                                          //>
-     eleGui.left             = '10px'        ;                                                          //>
-     eleGui.top              = '20px'        ;                                                          //>
-     eleGui.style.width      = '400px'       ;                                                          //>
-     eleGui.style.height     = '100px'       ;                                                          //>
-     eleGui.style.background = '#FFFFCC'     ;                                                          //> Pale yellow
-     eleGui.innerHTML        =                                                                          //> HTML for a simple pop-up control panel:
-//      '<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_L" value="L" checked><label for="'+g_sINoPTIONsIDE+'_L">'+"L"     +'</label>'
-//     +'<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_R" value="R">'     +'<label for="'+g_sINoPTIONsIDE+'_R">'+"R"     +'</label>'
-//     +' &nbsp; &nbsp; &nbsp; '
-//     +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_N" value="N" checked><label for="'+g_sINoPTIONfLIP+'_N">'+"Normal"+'</label>'
-//     +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_F" value="F">'     +'<label for="'+g_sINoPTIONfLIP+'_F">'+"Flip"  +'</label>'
-//     +' &nbsp; &nbsp; &nbsp; '                                                                          //>
-      '<span id="'+ g_sDIVfLAG +'_0" style="'                                                           //> Select previous flag.
-     +                                   'cursor'               +':pointer'                             //>
-     +                                  ';width'                +':4rem'                                //>
-     +                                  ';font-size'            +':2em'                                 //>
-     +                                  ';font-weight'          +':bold'                                //>
-     +'">'+ " < " +'</span>'                                                                            //>
-     +'<span id="'+ g_sDIVfLAG +'_2" style="'                                                           //> Select next flag.
-     +                                   'cursor'               +':pointer'                             //>
-     +                                  ';width'                +':4rem'                                //>
-     +                                  ';font-size'            +':2em'                                 //>
-     +                                  ';font-weight'          +':bold'                                //>
-     +'">'+ " > " +'</span>'                                                                            //>
-
-     +'<br>'                                                                                            //>
-     +'<div>'                                                                                           //>
-     + '<input type="range" id="'+ 'inrangeGuiZoom'                                                        //>
-     +                 '" name="'+ 'inrangeGuiZoom'       +'" min="0" max="100">'                          //> Arbitrary scale of 100.
-     + '<label for="'+             'inrangeGuiZoom'       +'">'+ "Zoom"       +'</label>'                  //>
-     + '<br>'                                                                                           //>
-     + '<input type="range" id="'+ 'inrangeBrightness'                                                  //>
-     +                 '" name="'+ 'inrangeBrightness' +'" min="0" max="100">'                          //> Arbitrary scale of 100.
-     + '<label for="'+             'inrangeBrightness' +'">'+ "Brightness" +'</label>'                  //>
-     + '<br>'                                                                                           //>
-     + '<input type="range" id="'+ 'inrangeContrast'                                                    //>
-     +                 '" name="'+ 'inrangeContrast'   +'" min="0" max="100">'                          //> Arbitrary scale of 100.
-     + '<label for="'+             'inrangeContrast'   +'">'+ "Contrast"   +'</label>'                  //>
-     +'</div>'                                                                                          //>
-     ;                                                                                                  //>
-     document.body.appendChild(eleGui);                                                                 //>
+  g_eleVideoIn    = document.createElement('video' );                                                   //>
+  g_eleCanvasOut  = document.createElement('canvas'); g_context2dOut = g_eleCanvasOut.getContext('2d'); //>
+  g_eleVideoIn.srcObject = usermedia;                                                                   //>
+  g_eleVideoIn.autoplay  = true;                                                                        //> TODO Shut down and restart g_shaderrenderer???         
+  g_eleVideoIn.addEventListener( 'playing'                                                              //>
+  ,function(){                                                                                          //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
+    g_eleCanvasOut.width    = g_nW_px;                                                                  //>
+    g_eleCanvasOut.height   = g_nH_px;                                                                  //>
+    g_imagedataWas          = g_context2dOut.createImageData(g_nW_px+2 ,g_nH_px+2);                     //>
+    g_whenGo_ms             = Date.now();                                                               //>
+    var                                 elePrevious   = document.getElementById( g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
+    var                                 eleNext       = document.getElementById( g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
+    /*DEV*/ G_ASSERT(   elePrevious     ,"elePrevious   not got."   );                                  //>
+    /*DEV*/ G_ASSERT(   eleNext         ,"eleNext       not got."   );                                  //>
+    elePrevious.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                  //> Handle clicks on previous and
+    eleNext.addEventListener(     'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );                  //> next flag buttons.
                                                                                                         //>
-     g_eleVideoIn.srcObject    = usermedia;                                                               //>
-     g_eleVideoIn.autoplay     = true;                                                                    //>
+    Tick();                                                                                             //> Start periodic routine
+  });                                                                                                   //> .
                                                                                                         //>
-// TODO Shut down and restart g_shaderrenderer???                                                       //>
-     g_eleVideoIn.addEventListener('playing'                                                              //>
-     ,function(){                                                                                       //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
-//*    g_shaderrenderer.setSize(eleVideo.videoWidth ,eleVideo.videoHeight);                             //> Use a WebGL Renderer.
-       g_eleCanvasOut.width    = g_nW_px;   
-       g_eleCanvasOut.height   = g_nH_px;                                                               //>
-       g_imagedataWas          = g_context2dOut.createImageData(g_nW_px+2 ,g_nH_px+2);                      //>
-       g_whenGo_ms             = Date.now();                                                            //>
-       var                              elePrevious   = document.getElementById( g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
-       var                              eleNext       = document.getElementById( g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
-       /*DEV*/ G_ASSERT(   elePrevious     ,"elePrevious   not got."   );                               //>
-       /*DEV*/ G_ASSERT(   eleNext         ,"eleNext       not got."   );                               //>
-       elePrevious.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );               //> Handle clicks on previous and
-       eleNext.addEventListener(     'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );               //> next flag buttons.
-                                                                                                        //>
-       Tick();                                                                                          //> Start periodic routine
-     });                                                                                                //> .
-                                                                                                        //>
- return g_eleCanvasOut.captureStream();                                                               //> Report a real-time video capture of the surface of the canvas.
-    }//if                                                                                               //>
-    // ??? What happens now, if fullfilledpromiseMediaStream was null?                                  //>
-  }}//if virtual//if                                                                                    //>
-                                                                                                        //>
-  const                            fullfilledpromiseMediaStream = await getUserMediaWas.call(           //>
-                                                                   navigator.mediaDevices               //>
-                                                                  ,...arguments                         //>
-                                                                  );                                    //>
- return fullfilledpromiseMediaStream;                                                                   //>
+ return g_eleCanvasOut.captureStream();                                                                 //> Report a real-time video capture of the surface of the canvas.
  };//function// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ///>
+}//Go_ModifyMediaDevices_GetUserMedia/////////////////////////////////////////////////////////////////////>
+
+
+function                                Go_Gui(///////////////////////////////////////////////////////////# Create div to be used for user to set options.
+){                                      //////////////////////////////////////////////////////////////////# 
+ const                                  eleGui                  = document.createElement('div');        //> Create div that can be used for user to set options.
+ eleGui.style.display    = 'inline-block';                                                              //>
+ eleGui.position         = 'absolute'    ;                                                              //>
+ eleGui.left             = '10px'        ;                                                              //>
+ eleGui.top              = '20px'        ;                                                              //>
+ eleGui.style.width      = '400px'       ;                                                              //>
+ eleGui.style.height     = '100px'       ;                                                              //>
+ eleGui.style.background = '#FFFFCC'     ;                                                              //> Pale yellow
+ eleGui.innerHTML        =                                                                              //> HTML for a simple pop-up control panel:
+   '<span id="'+ g_sDIVfLAG +'_0" style="'                                                              //> Select previous flag.
+  +                                      'cursor'               +':pointer'                             //>
+  +                                     ';width'                +':4rem'                                //>
+  +                                     ';font-size'            +':2em'                                 //>
+  +                                     ';font-weight'          +':bold'                                //>
+  +'">'+ " < " +'</span>'                                                                               //>
+  +'<span id="'+ g_sDIVfLAG +'_2" style="'                                                              //> Select next flag.
+  +                                      'cursor'               +':pointer'                             //>
+  +                                     ';width'                +':4rem'                                //>
+  +                                     ';font-size'            +':2em'                                 //>
+  +                                     ';font-weight'          +':bold'                                //>
+  +'">'+ " > " +'</span>'                                                                               //>
                                                                                                         //>
-}//ModifyMediaFunctions///////////////////////////////////////////////////////////////////////////////////>
+  +'<br>'                                                                                               //>
+  +'<div>'                                                                                              //>
+  + '<input type="range" id="'+ g_sGUIzOOM                                                              //>
+  +                 '" name="'+ g_sGUIzOOM       +'" min="0" max="100">'                                //> Arbitrary scale of 100.
+  + '<label for="'+             g_sGUIzOOM       +'">'+ "Zoom"       +'</label>'                        //>
+  + '<br>'                                                                                              //>
+  + '<input type="range" id="'+ g_sGUIbRIGHTNESS                                                        //>
+  +                 '" name="'+ g_sGUIbRIGHTNESS +'" min="0" max="100">'                                //> Arbitrary scale of 100.
+  + '<label for="'+             g_sGUIbRIGHTNESS +'">'+ "Brightness" +'</label>'                        //>
+  + '<br>'                                                                                              //>
+  + '<input type="range" id="'+ g_sGUIcONTRAST                                                          //>
+  +                 '" name="'+ g_sGUIcONTRAST   +'" min="0" max="100">'                                //> Arbitrary scale of 100.
+  + '<label for="'+             g_sGUIcONTRAST   +'">'+ "Contrast"   +'</label>'                        //>
+  +'</div>'                                                                                             //>
+//  '<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_L" value="L" checked><label for="'+g_sINoPTIONsIDE+'_L">'+"L"     +'</label>'
+// +'<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_R" value="R">'     +'<label for="'+g_sINoPTIONsIDE+'_R">'+"R"     +'</label>'
+// +' &nbsp; &nbsp; &nbsp; '
+// +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_N" value="N" checked><label for="'+g_sINoPTIONfLIP+'_N">'+"Normal"+'</label>'
+// +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_F" value="F">'     +'<label for="'+g_sINoPTIONfLIP+'_F">'+"Flip"  +'</label>'
+// +' &nbsp; &nbsp; &nbsp; '                                                                            //>
+ ;                                                                                                      //>
+ document.body.appendChild(eleGui);                                                                     //>
+}//sGo_Gui////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
-ModifyMediaFunctions();                                                                                 //> Add virtual camera to system's list of cameras.
+async function                          Go(///////////////////////////////////////////////////////////////#
+){                                      //////////////////////////////////////////////////////////////////#
+ Go_ModifyMediaDevices_EnumerateDevices();                                                              //>
+ Go_ModifyMediaDevices_GetUserMedia();                                                                  //>
+ Go_LoadFlags();                                                                                        //>
+ Go_Gui();                                                                                              //>
+}//Go/////////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
 // Can use an online tool like https://onlineimagetools.com/convert-image-to-data-uri to convert images to data uri inline format.
 // In order to ensure that Closure Compiler will deal with the following long lines properly, in Notepad++ you can do a Regular Expressions search using (?<=.{250}) , $0'\n+' is replacement text
-const g_sDATAuRIFLAGS =
+const                                   g_sDATAuRIFLAGS         =
  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABkAAAAZACAYAAAAhDI6nAAAACXBIWXMAAB8/AAAfPwHBe4GKAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAIABJREFUeJzs3Xm4nGV9P/732XKy7wRIgECCEDZZBRQRRdRavy5t1Vq72vpttdRqbdVWay9caivu1IobqyBQRa1arUuhgmxuICCyo6xC'
 +'IGRPTnLOzO+P+5dvEBJyzsnMPDNzXq/rmisnyczzvDNnzsD1vOe+Pz35k3o9AAAALVA/u6fqCNC26rffnp6lS6uOAUAnufba5Igjqk4Bbau36gAAAABA4tOJAACNpQABAAAAAAC6jgIEAAAAAADoOgoQAAAAAACg6yhAAAAAAACArqMAAQAAAAAAuo4CBAAAAAAA6DoKEAAAAAAAoOsoQAAAAAAAgK6jAAEAAAAAALqOAgQAAAAAAOg6'
 +'ChAAAAAAAKDrKEAAAAAAAICuowABAAAAAAC6jgIEAAAAAADoOgoQAAAAAACg6yhAAAAAAACArqMAAQAAAAAAuo4CBAAAAAAA6DoKEAAAAAAAoOsoQAAAAAAAgK6jAAEAAAAAALqOAgQAAAAAAOg6ChAAAAAAAKDrKEAAAAAAAICuowABAAAAAAC6jgIEAAAAAADoOgoQAAAAAACg6yhAAAAAAACArqMAAQAAAAAAuo4CBAAAAAAA6DoK'
@@ -1448,5 +1457,8 @@ const g_sDATAuRIFLAGS =
 +'lDoGIJIkSZIkSZIkKXUMQCRJkiRJkiRJUuoYgEiSJEmSJEmSpNQxAJEkSZIkSZIkSaljACJJkiRJkiRJklLHAESSJEmSJEmSJKWOAYgkSZIkSZIkSUodAxBJkiRJkiRJkpQ6BiCSJEmSJEmSJCl1DEAkSZIkSZIkSVLqGIBIkiRJkiRJkqTUMQCRJEmSJEmSJEmpYwAiSZIkSZIkSZJSxwBEkiRJkiRJkiSljgGIJEmSJEmSJElKHQMQ'
 +'SZIkSZIkSZKUOgYgkiRJkiRJkiQpdQxAJEmSJEmSJElS6hiASJIkSZIkSZKk1DEAkSRJkiRJkiRJqWMAIkmSJEmSJEmSUscARJIkSZIkSZIkpY4BiCRJkiRJkiRJSh0DEEmSJEmSJEmSlDoGIJIkSZIkSZIkKXUMQCRJkiRJkiRJUuoYgEiSJEmSJEmSpNQxAJEkSZIkSZIkSaljACJJkiRJkiRJklLHAESSJEmSJEmSJKWOAYgkSZIk'
 +'SZIkSUqd/w+NKpCw7v0oZgAAAABJRU5ErkJggg==';
+
+
+Go();                                                                                                   //>
 
 //End of file.
