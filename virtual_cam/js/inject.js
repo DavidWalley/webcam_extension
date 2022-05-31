@@ -10,3 +10,6 @@ const head =
   document.getElementsByTagName("head")[0] ||
   document.documentElement;
 head.insertBefore(script1, head.lastChild);
+window["chrome"]["runtime.onMessage"]["addListener"](function (a) {
+  console.log(a);
+});

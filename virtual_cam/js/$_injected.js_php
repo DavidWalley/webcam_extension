@@ -238,7 +238,7 @@ class                                   ShaderRenderer//////////////////////////
 //  var                                eleFlips      = document.getElementsByName( g_sINoPTIONfLIP     ); //> get data from a field on a configuration page? Text in input field.
 //  var                                elePrevious   = document.getElementById(    g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
 //  var                                eleNext       = document.getElementById(    g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
-//  var                                eleZoom       = document.getElementById(    'inrangeZoom'       ); //>
+//  var                                eleZoom       = document.getElementById(    'inrangeGuiZoom'       ); //>
 //  var                                eleBrightness = document.getElementById(    'inrangeBrightness' ); //>
 //  var                                eleContrast   = document.getElementById(    'inrangeContrast'   ); //>
 //  /*DEV*/ G_ASSERT(   eleSides      ,"eleSides      not got."   );                                          //>
@@ -356,6 +356,7 @@ let                                     g_shaderrenderer        = null;         
                                                                                                         //>
 let                                     g_eleVideoIn            = null;                                 //>
 let                                     g_eleCanvasOut          = null; let g_context2dOut   = null;    //>
+let                                     g_imagedataWas          = null;                                 //>
 let                                     g_eleCanvasFlags        = null; let g_context2dFlags = null;    //>
 let                                     g_imageFlags            = null;                                 //>
 let                                     g_imagedataFlags        = null;                                 //>
@@ -371,7 +372,7 @@ function                                Tick(//FilterStream/////////////////////
  //g_shaderrenderer.render();                                                                           //> Use a WebGL renderer.
                                                                                                         //>
  if( g_context2dOut ){                                                                                  //>
-  var                                   eleZoom       = document.getElementById( 'inrangeZoom'       ); //>
+  var                                   eleZoom       = document.getElementById( 'inrangeGuiZoom'       ); //>
   var                                   eleBrightness = document.getElementById( 'inrangeBrightness' ); //>
   var                                   eleContrast   = document.getElementById( 'inrangeContrast'   ); //>
   /*DEV*/ G_ASSERT(   eleZoom         ,"eleZoom       not got."   );                                    //>
@@ -382,46 +383,65 @@ function                                Tick(//FilterStream/////////////////////
   var    dBrightness = eleBrightness.value; dBrightness = dBrightness*2.55 - 128                        //> -128 to 128
   var    dContrast   = eleContrast.value  ; dContrast   = 3*(dContrast - 50);                           //> -150 to 150
                                                                                                         //>
-  g_context2dOut.globalAlpha = 1.0;                                                                     //> Opaque addition.
+  g_context2dOut.globalAlpha = 1.0;                                                                     //> Restore opaque addition.
   g_context2dOut.drawImage( g_eleVideoIn                                                                //>
   ,                           (g_nW_px - g_nW_px*dZoom)*0.5                                             //> Keep centered, left-right and
   ,                           (g_nH_px - g_nH_px*dZoom)*0.5                                             //> top-bottom.
   ,                                      g_nW_px*dZoom                                                  //> zoom in by user selected amount
   ,                                      g_nH_px*dZoom                                                  //> .
   );                                                                                                    //> this.height   Copy frame from video to canvas
-
-
-
                                                                                                         //>
-  var                                   adAdjust                = [];                                   //>
+  var                                   adAdjust                = [];                                   //> Construct a table for quick conversions of color levels.
   var                                   dF               = 259*(dContrast + 255)/255/(259 - dContrast); //>
   for( i = 0; i <= 255; i++ ){   adAdjust[i] = 128 + dF*(i-128) + dBrightness;   }                      //>
                                                                                                         //>
   let                                   imagedata0              = g_context2dOut.getImageData(          //> Intermediate result we need at end of changing pixel data
                                                                    0 ,0   ,g_nW_px ,g_nH_px             //>
                                                                   );                                    //> .
+  var                                   adWas                   = g_imagedataWas.data;                  //>
   var                                   ad0                     = imagedata0.data;                      //> Pull the pixel color data array from the imageData object
   var                                   k                       = 0;                                    //>
+  var                                   jL                      = k +   g_nW_px    ;
+  var                                   jT                      = k +             4;
+  var                                   j0                      = k +   g_nW_px + 4;
+  var                                   jB                      = k + 2*g_nW_px + 4;
+  var                                   jR                      = k +   g_nW_px + 8;
   for(  var iRow  = 0; iRow  < g_nH_px; iRow++  ){                                                      //>
    for( var iCell = 0; iCell < g_nW_px; iCell++ ){                                                      //>
     var                                 r                       = ad0[ k     ];                         //> the RGBA info for pixel [x,y]
     var                                 g                       = ad0[ k + 1 ];                         //>
     var                                 b                       = ad0[ k + 2 ];                         //>
-    if( r < g   &&   b < g ){                                                                           //>
-     r = 255;                                                                                           //>
-     g = 255;                                                                                           //>
-     b =  30;                                                                                           //>
+    adWas[j0] = adWas[j0] >>1;                                                                            //>
+    if( r + b < g*1.8 ){                                                                  //>
+     adWas[j0] |= 0x80;                                                                                  //>
+     if( 0x40 < adWas[j0] ){                                                                             //>
+      //r = 255;                                                                                          //>
+      //g = 255;                                                                                          //>
+      //b =  90;                                                                                          //>
+      r = ( adAdjust[r]+255 )*0.5;                                                                                  //>
+      g = ( adAdjust[g]+255 )*0.5;                                                                                  //>
+      b = ( adAdjust[b]+255 )*0.5;                                                                                  //>
+     }else{                                                                                             //>
+      r = adAdjust[r];                                                                                  //>
+      g = adAdjust[g];                                                                                  //>
+      b = adAdjust[b];                                                                                  //>
+     }                                                                                                  //>
     }else{                                                                                              //>
-     r = adAdjust[r];                                                                                   //>
-     g = adAdjust[g];                                                                                   //>
-     b = adAdjust[b];                                                                                   //>
+     r  = adAdjust[r];                                                                                  //>
+     g  = adAdjust[g];                                                                                  //>
+     b  = adAdjust[b];                                                                                  //>
     }//if                                                                                               //>
                                                                                                         //>
-    ad0[ k     ] = ( r < 0 )?0   :(   ( 255 < r )?255 :Math.floor(r)   );                               //>
-    ad0[ k + 1 ] = ( g < 0 )?0   :(   ( 255 < g )?255 :Math.floor(g)   );                               //>
-    ad0[ k + 2 ] = ( b < 0 )?0   :(   ( 255 < b )?255 :Math.floor(b)   );                               //>
+    ad0[ k     ] = ( r < 0 )?0   :(   ( 255 < r )?255 :Math.floor( r )   );                             //>
+    ad0[ k + 1 ] = ( g < 0 )?0   :(   ( 255 < g )?255 :Math.floor( g )   );                             //>
+    ad0[ k + 2 ] = ( b < 0 )?0   :(   ( 255 < b )?255 :Math.floor( b )   );                             //>
   //ad0[ k + 3 ] = 255;                                                                                 //>
-    k += 4;                                                                                             //>
+    k  += 4;                                                                                             //>
+    jL += 4;
+    jT += 4;
+    j0 += 4;
+    jB += 4;
+    jR += 4;
    }//for k                                                                                             //>
   }//for k                                                                                              //>
   g_context2dOut.putImageData( imagedata0 ,0 ,0 );                                                      //>
@@ -483,7 +503,6 @@ async function                          ModifyMediaFunctions(///////////////////
     if( usermedia ){                                                                                    //> If devices found?, then
      g_eleVideoIn     = document.createElement('video' );                                               //>
      g_eleCanvasOut   = document.createElement('canvas'); g_context2dOut   = g_eleCanvasOut.getContext(  '2d'); //>
-
      g_eleCanvasFlags = document.createElement('canvas'); g_context2dFlags = g_eleCanvasFlags.getContext('2d'); //>
      g_imageFlags        = new Image();                                                                 //> Read image into g_context2dFlags (and g_imagedataFlags)
      g_imageFlags.onload = function(){                                                                  //>
@@ -528,9 +547,9 @@ async function                          ModifyMediaFunctions(///////////////////
 
      +'<br>'                                                                                            //>
      +'<div>'                                                                                           //>
-     + '<input type="range" id="'+ 'inrangeZoom'                                                        //>
-     +                 '" name="'+ 'inrangeZoom'       +'" min="0" max="100">'                          //> Arbitrary scale of 100.
-     + '<label for="'+             'inrangeZoom'       +'">'+ "Zoom"       +'</label>'                  //>
+     + '<input type="range" id="'+ 'inrangeGuiZoom'                                                        //>
+     +                 '" name="'+ 'inrangeGuiZoom'       +'" min="0" max="100">'                          //> Arbitrary scale of 100.
+     + '<label for="'+             'inrangeGuiZoom'       +'">'+ "Zoom"       +'</label>'                  //>
      + '<br>'                                                                                           //>
      + '<input type="range" id="'+ 'inrangeBrightness'                                                  //>
      +                 '" name="'+ 'inrangeBrightness' +'" min="0" max="100">'                          //> Arbitrary scale of 100.
@@ -550,8 +569,9 @@ async function                          ModifyMediaFunctions(///////////////////
      g_eleVideoIn.addEventListener('playing'                                                              //>
      ,function(){                                                                                       //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
 //*    g_shaderrenderer.setSize(eleVideo.videoWidth ,eleVideo.videoHeight);                             //> Use a WebGL Renderer.
-       g_eleCanvasOut.width  = g_nW_px;                                                               //>
-       g_eleCanvasOut.height = g_nH_px;                                                               //>
+       g_eleCanvasOut.width    = g_nW_px;   
+       g_eleCanvasOut.height   = g_nH_px;                                                               //>
+       g_imagedataWas          = g_context2dOut.createImageData(g_nW_px+2 ,g_nH_px+2);                      //>
        g_whenGo_ms             = Date.now();                                                            //>
        var                              elePrevious   = document.getElementById( g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
        var                              eleNext       = document.getElementById( g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
