@@ -150,12 +150,13 @@ const                                   g_sCodeFragmentShader   =               
 +'}'+N//main// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
 ;                                                                                                       //> /*DEV*/console.log( g_sCodeFragmentShader );
 
-const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side';       //>
-const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip';       //>
-const                                   g_sDIVfLAG              = 'divWebcam_Extension_Flag'    ;       //>
-const                                   g_sGUIzOOM              = 'inrangeGuiZoom'              ;       //>
-const                                   g_sGUIbRIGHTNESS        = 'inrangeGuiBrightness'        ;       //>
-const                                   g_sGUIcONTRAST          = 'inrangeGuiContrast'          ;       //>
+const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side'  ;     //>
+const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip'  ;     //>
+const                                   g_sDIVfLAG_BEFORE       = 'divWebcam_Extension_FlagBefore';     //>
+const                                   g_sDIVfLAG_NEXT         = 'divWebcam_Extension_FlagNext'  ;     //>
+const                                   g_sGUIzOOM              = 'inrangeGuiZoom'                ;     //>
+const                                   g_sGUIbRIGHTNESS        = 'inrangeGuiBrightness'          ;     //>
+const                                   g_sGUIcONTRAST          = 'inrangeGuiContrast'            ;     //>
 
 
 class                                   ShaderRenderer////////////////////////////////////////////////////#
@@ -236,8 +237,8 @@ class                                   ShaderRenderer//////////////////////////
                                                                                                         //>
 //  var                                eleSides      = document.getElementsByName( g_sINoPTIONsIDE     ); //> get data from a field on a configuration page? Text in input field.
 //  var                                eleFlips      = document.getElementsByName( g_sINoPTIONfLIP     ); //> get data from a field on a configuration page? Text in input field.
-//  var                                elePrevious   = document.getElementById(    g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
-//  var                                eleNext       = document.getElementById(    g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
+//  var                                elePrevious   = document.getElementById(    g_sDIVfLAG_BEFORE     ); //> get data from a field on a configuration page? Text in input field.
+//  var                                eleNext       = document.getElementById(    g_sDIVfLAG_NEXT     ); //> get data from a field on a configuration page? Text in input field.
 //  var                                eleZoom       = document.getElementById(    g_sGUIzOOM       ); //>
 //  var                                eleBrightness = document.getElementById(    g_sGUIbRIGHTNESS ); //>
 //  var                                eleContrast   = document.getElementById(    g_sGUIcONTRAST   ); //>
@@ -464,8 +465,8 @@ function                                Tick(//FilterStream/////////////////////
 function                                Go_Tick(//////////////////////////////////////////////////////////>
 ){                                      //////////////////////////////////////////////////////////////////>
  g_whenGo_ms = Date.now();                                                                              //>
- var                                    elePrevious   = document.getElementById( g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
- var                                    eleNext       = document.getElementById( g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
+ var                                    elePrevious          = document.getElementById( g_sDIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
+ var                                    eleNext              = document.getElementById( g_sDIVfLAG_NEXT ); //> get data from a field on a configuration page? Text in input field.
  /*DEV*/ G_ASSERT(   elePrevious     ,"elePrevious   not got."   );                                     //>
  /*DEV*/ G_ASSERT(   eleNext         ,"eleNext       not got."   );                                     //>
  elePrevious.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                     //> Handle clicks on previous and
@@ -475,8 +476,8 @@ function                                Go_Tick(////////////////////////////////
 }//Go_Tick////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
-async function                          Go_ModifyMediaDevices_EnumerateDevices(///////////////////////////#
-){                                      //////////////////////////////////////////////////////////////////#
+async function                          Go_ModifyMediaDevices_EnumerateDevices(///////////////////////////# Locally redefine system function to get list of media devices (cameras and microphones).
+){                                      //////////////////////////////////////////////////////////////////# Change system function locally.
  const                                  enumerateDevicesWas  = MediaDevices.prototype.enumerateDevices; //> Get existing version of system function to get a list of cameras.
                                                                                                         //>
  MediaDevices['prototype']            ['enumerateDevices'] = async function(// // // // // // // // // ///# Redefine this system function locally, to include the virtual camera.
@@ -494,8 +495,8 @@ async function                          Go_ModifyMediaDevices_EnumerateDevices(/
 }//Go_ModifyMediaDevices_EnumerateDevices/////////////////////////////////////////////////////////////////>
 
 
-async function                          Go_ModifyMediaDevices_GetUserMedia(///////////////////////////////# Redefine locally system function to get list of cameras, to include the virtual camera.
-){                                      //////////////////////////////////////////////////////////////////#
+async function                          Go_ModifyMediaDevices_GetUserMedia(///////////////////////////////# Locally redefine system function to get list of cameras, to include the virtual camera.
+){                                      //////////////////////////////////////////////////////////////////# Change system function locally.
  const                                  getUserMediaWas         = MediaDevices.prototype.getUserMedia;  //> Get existing version of system function to get a camera's video stream.
                                                                                                         //>
  MediaDevices['prototype']            ['getUserMedia'] = async function(// // // // // // // // // // ////# Redefine this system function locally, to include the virtual camera.
@@ -533,9 +534,11 @@ async function                          Go_ModifyMediaDevices_GetUserMedia(/////
 }//Go_ModifyMediaDevices_GetUserMedia/////////////////////////////////////////////////////////////////////>
 
 
-function                                Go_LoadFlags(/////////////////////////////////////////////////////>
-){                                      //////////////////////////////////////////////////////////////////>
- g_eleCanvasFlags = document.createElement('canvas'); g_context2dFlags = g_eleCanvasFlags.getContext('2d'); //>
+function                                Go_LoadFlags(/////////////////////////////////////////////////////# Load image with all predefined flags.
+){                                      //////////////////////////////////////////////////////////////////# Report nothing. Initialize global variables.
+ g_eleCanvasFlags    = document.createElement('canvas');                                                //>
+ g_context2dFlags    = g_eleCanvasFlags.getContext('2d');                                               //>
+                                                                                                        //>
  g_imageFlags        = new Image();                                                                     //> Read image into g_context2dFlags (and g_imagedataFlags)
  g_imageFlags.onload = function(){                                                                      //>
                         g_eleCanvasFlags.width    = g_imageFlags.width ;                                //>
@@ -547,7 +550,7 @@ function                                Go_LoadFlags(///////////////////////////
                                                     ,g_eleCanvasFlags.height                            //>
                                                     );                                                  //>
                        };//function                                                                     //>
- g_imageFlags.src       = g_sDATAuRIFLAGS;                                                              //> Kick-start the above, using a data URI text string.
+ g_imageFlags.src    = g_sDATAuRIFLAGS;                                                                 //> Kick-start the above, using a data URI text string.
 }//Go_LoadFlags///////////////////////////////////////////////////////////////////////////////////////////>
 
 
@@ -562,13 +565,13 @@ function                                Go_Gui(/////////////////////////////////
  eleGui.style.height     = '100px'       ;                                                              //>
  eleGui.style.background = '#FFFFCC'     ;                                                              //> Pale yellow
  eleGui.innerHTML        =                                                                              //> HTML for a simple pop-up control panel:
-   '<span id="'+ g_sDIVfLAG +'_0" style="'                                                              //> Select previous flag.
+   '<span id="'+ g_sDIVfLAG_BEFORE +'" style="'                                                              //> Select previous flag.
   +                                      'cursor'               +':pointer'                             //>
   +                                     ';width'                +':4rem'                                //>
   +                                     ';font-size'            +':2em'                                 //>
   +                                     ';font-weight'          +':bold'                                //>
   +'">'+ " < " +'</span>'                                                                               //>
-  +'<span id="'+ g_sDIVfLAG +'_2" style="'                                                              //> Select next flag.
+  +'<span id="'+ g_sDIVfLAG_NEXT +'" style="'                                                              //> Select next flag.
   +                                      'cursor'               +':pointer'                             //>
   +                                     ';width'                +':4rem'                                //>
   +                                     ';font-size'            +':2em'                                 //>
@@ -600,8 +603,8 @@ function                                Go_Gui(/////////////////////////////////
 }//Go_Gui/////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
-async function                          Go(///////////////////////////////////////////////////////////////#
-){                                      //////////////////////////////////////////////////////////////////#
+async function                          Go(///////////////////////////////////////////////////////////////# Main execution starts here.
+){                                      //////////////////////////////////////////////////////////////////# Report nothing.
  Go_ModifyMediaDevices_EnumerateDevices();                                                              //>
  Go_ModifyMediaDevices_GetUserMedia();                                                                  //>
  Go_LoadFlags();                                                                                        //>
