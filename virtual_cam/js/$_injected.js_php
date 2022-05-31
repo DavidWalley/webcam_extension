@@ -152,11 +152,11 @@ const                                   g_sCodeFragmentShader   =               
 
 const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side'  ;     //>
 const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip'  ;     //>
-const                                   g_sDIVfLAG_BEFORE       = 'divWebcam_Extension_FlagBefore';     //>
-const                                   g_sDIVfLAG_NEXT         = 'divWebcam_Extension_FlagNext'  ;     //>
-const                                   g_sGUIzOOM              = 'inrangeGuiZoom'                ;     //>
-const                                   g_sGUIbRIGHTNESS        = 'inrangeGuiBrightness'          ;     //>
-const                                   g_sGUIcONTRAST          = 'inrangeGuiContrast'            ;     //>
+const                                   g_sGUIdIVfLAG_BEFORE    = 'divWebcam_Extension_FlagBefore';     //>
+const                                   g_sGUIdIVfLAG_NEXT      = 'divWebcam_Extension_FlagNext'  ;     //>
+const                                   g_sGUIiNrANGEzOOM       = 'inrangeGuiZoom'                ;     //>
+const                                   g_sGUIiNrNAGEbRIGHT     = 'inrangeGuiBright'              ;     //>
+const                                   g_sGUIiNrANGEcONTRAST   = 'inrangeGuiContrast'            ;     //>
 
 
 class                                   ShaderRenderer////////////////////////////////////////////////////#
@@ -235,30 +235,30 @@ class                                   ShaderRenderer//////////////////////////
   const                                 me                      = this;                                 /*DEV*/G_ASSERT( 'ShaderRenderer' === me.constructor.name ,'me bad "'+ me.constructor.name +'"');//> Code clarity. Remember this for making a clear reference to the object being constructed in callbacks.
   const                                 g                       = me._g;                                //> Collapse the following a bit:
                                                                                                         //>
-//  var                                eleSides      = document.getElementsByName( g_sINoPTIONsIDE     ); //> get data from a field on a configuration page? Text in input field.
-//  var                                eleFlips      = document.getElementsByName( g_sINoPTIONfLIP     ); //> get data from a field on a configuration page? Text in input field.
-//  var                                elePrevious   = document.getElementById(    g_sDIVfLAG_BEFORE     ); //> get data from a field on a configuration page? Text in input field.
-//  var                                eleNext       = document.getElementById(    g_sDIVfLAG_NEXT     ); //> get data from a field on a configuration page? Text in input field.
-//  var                                eleZoom       = document.getElementById(    g_sGUIzOOM       ); //>
-//  var                                eleBrightness = document.getElementById(    g_sGUIbRIGHTNESS ); //>
-//  var                                eleContrast   = document.getElementById(    g_sGUIcONTRAST   ); //>
-//  /*DEV*/ G_ASSERT(   eleSides      ,"eleSides      not got."   );                                          //>
-//  /*DEV*/ G_ASSERT(   eleFlips      ,"eleFlips      not got."   );                                          //>
-//  /*DEV*/ G_ASSERT(   elePrevious   ,"elePrevious   not got."   );                                          //>
-//  /*DEV*/ G_ASSERT(   eleNext       ,"eleNext       not got."   );                                          //>
-//  /*DEV*/ G_ASSERT(   eleZoom       ,"eleZoom       not got."   );                                          //>
-//  /*DEV*/ G_ASSERT(   eleBrightness ,"eleBrightness not got."   );                                          //>
-//  /*DEV*/ G_ASSERT(   eleContrast   ,"eleContrast   not got."   );                                          //>
-//  if( !eleSides    ){                                                                           return;}//>
-//  if( !eleFlips    ){                                                                           return;}//>
-//  if( !elePrevious ){                                                                           return;}//>
-//  if( !eleNext     ){                                                                           return;}//>
-//                                                                                                        //>
-//  if( !me._bEventHandlersGo ){                                                                          //> If popup initialization has not been done, then
-//   elePrevious.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );               //> Handle clicks on previous and
-//   eleNext.addEventListener(     'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );               //> next flag buttons.
-//   me._bEventHandlersGo = true;                                                                         //> Remember this initialization has been done
-//  }//if                                                                                                 //> .
+//  var                                eleSides    = document.getElementsByName(g_sINoPTIONsIDE      ); //> get data from a field on a configuration page? Text in input field.
+//  var                                eleFlips    = document.getElementsByName(g_sINoPTIONfLIP      ); //> get data from a field on a configuration page? Text in input field.
+//  var                                eleBefore = document.getElementById(     g_sGUIdIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
+//  var                                eleNext     = document.getElementById(   g_sGUIdIVfLAG_NEXT   ); //> get data from a field on a configuration page? Text in input field.
+//  var                                eleZoom     = document.getElementById(   g_sGUIiNrANGEzOOM    ); //>
+//  var                                eleBright   = document.getElementById(   g_sGUIiNrNAGEbRIGHT  ); //>
+//  var                                eleContrast = document.getElementById(   g_sGUIiNrANGEcONTRAST); //>
+//  /*DEV*/ G_ASSERT( eleSides    ,"eleSides    not got." );                                            //>
+//  /*DEV*/ G_ASSERT( eleFlips    ,"eleFlips    not got." );                                            //>
+//  /*DEV*/ G_ASSERT( eleBefore   ,"eleBefore   not got." );                                            //>
+//  /*DEV*/ G_ASSERT( eleNext     ,"eleNext     not got." );                                            //>
+//  /*DEV*/ G_ASSERT( eleZoom     ,"eleZoom     not got." );                                            //>
+//  /*DEV*/ G_ASSERT( eleBright   ,"eleBright   not got." );                                            //>
+//  /*DEV*/ G_ASSERT( eleContrast ,"eleContrast not got." );                                            //>
+//  if( !eleSides  ){                                                                           return;}//>
+//  if( !eleFlips  ){                                                                           return;}//>
+//  if( !eleBefore ){                                                                           return;}//>
+//  if( !eleNext   ){                                                                           return;}//>
+//                                                                                                      //>
+//  if( !me._bEventHandlersGo ){                                                                        //> If popup initialization has not been done, then
+//   eleBefore.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                   //> Handle clicks on previous and
+//   eleNext.addEventListener(   'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );                   //> next flag buttons.
+//   me._bEventHandlersGo = true;                                                                       //> Remember this initialization has been done
+//  }//if                                                                                               //> .
                                                                                                         //>
   g.enableVertexAttribArray( me._attriblocationPosition                     );                          //> Index of the generic vertex attribute bound to the attribute '_attriblocationPosition'. attributes in a vertex shader are disabled by default. To use one, you have to first enable it with this function.
   g.bindBuffer(              g.ARRAY_BUFFER             ,me._bufferPosition );                          //>
@@ -372,16 +372,16 @@ function                                Tick(//FilterStream/////////////////////
                                                                                                         //>
  if( !g_context2dOut ){ requestAnimationFrame( Tick );                                          return;}//> Run this periodic routine again.
                                                                                                         //>
- var                                    eleZoom          = document.getElementById( g_sGUIzOOM       ); //>
- var                                    eleBrightness    = document.getElementById( g_sGUIbRIGHTNESS ); //>
- var                                    eleContrast      = document.getElementById( g_sGUIcONTRAST   ); //>
- /*DEV*/ G_ASSERT(   eleZoom          ,"eleZoom       not got."   );                                    //>
- /*DEV*/ G_ASSERT(   eleBrightness    ,"eleBrightness not got."   );                                    //>
- /*DEV*/ G_ASSERT(   eleContrast      ,"eleContrast   not got."   );                                    //>
+ var                                    eleZoom     = document.getElementById( g_sGUIiNrANGEzOOM     ); //>
+ var                                    eleBright   = document.getElementById( g_sGUIiNrNAGEbRIGHT   ); //>
+ var                                    eleContrast = document.getElementById( g_sGUIiNrANGEcONTRAST ); //>
+ /*DEV*/ G_ASSERT( eleZoom     ,"eleZoom       not got." );                                             //>
+ /*DEV*/ G_ASSERT( eleBright   ,"eleBright not got."     );                                             //>
+ /*DEV*/ G_ASSERT( eleContrast ,"eleContrast   not got." );                                             //>
                                                                                                         //>
- var        dZoom       = eleZoom.value      ; dZoom       = Math.pow( 3 ,parseFloat(dZoom    )*0.01 ); //>    1 to   3
- var        dBrightness = eleBrightness.value; dBrightness = dBrightness*2.55 - 128                     //> -128 to 128
- var        dContrast   = eleContrast.value  ; dContrast   = 3*(dContrast - 50);                        //> -150 to 150
+ var        dZoom       = eleZoom.value    ;   dZoom       = Math.pow( 3 ,parseFloat(dZoom    )*0.01 ); //>    1 to   3
+ var        dBrightness = eleBright.value  ;   dBrightness = dBrightness*2.55 - 128                     //> -128 to 128
+ var        dContrast   = eleContrast.value;   dContrast   = 3*(dContrast - 50);                        //> -150 to 150
                                                                                                         //>
  g_context2dOut.globalAlpha = 1.0;                                                                      //> Restore opaque addition.
  g_context2dOut.drawImage( g_eleVideoIn                                                                 //>
@@ -465,12 +465,12 @@ function                                Tick(//FilterStream/////////////////////
 function                                Go_Tick(//////////////////////////////////////////////////////////>
 ){                                      //////////////////////////////////////////////////////////////////>
  g_whenGo_ms = Date.now();                                                                              //>
- var                                    elePrevious          = document.getElementById( g_sDIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
- var                                    eleNext              = document.getElementById( g_sDIVfLAG_NEXT ); //> get data from a field on a configuration page? Text in input field.
- /*DEV*/ G_ASSERT(   elePrevious     ,"elePrevious   not got."   );                                     //>
- /*DEV*/ G_ASSERT(   eleNext         ,"eleNext       not got."   );                                     //>
- elePrevious.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                     //> Handle clicks on previous and
- eleNext.addEventListener(     'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );                     //> next flag buttons.
+ var                                    eleBefore    = document.getElementById( g_sGUIdIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
+ var                                    eleNext      = document.getElementById( g_sGUIdIVfLAG_NEXT   ); //> get data from a field on a configuration page? Text in input field.
+ /*DEV*/ G_ASSERT( eleBefore ,"eleBefore not got." );                                                   //>
+ /*DEV*/ G_ASSERT( eleNext   ,"eleNext   not got." );                                                   //>
+ eleBefore.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                       //> Handle clicks on previous and
+ eleNext.addEventListener(   'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );                       //> next flag buttons.
                                                                                                         //>
  Tick();                                                                                                //> Start periodic routine
 }//Go_Tick////////////////////////////////////////////////////////////////////////////////////////////////>
@@ -565,13 +565,13 @@ function                                Go_Gui(/////////////////////////////////
  eleGui.style.height     = '100px'       ;                                                              //>
  eleGui.style.background = '#FFFFCC'     ;                                                              //> Pale yellow
  eleGui.innerHTML        =                                                                              //> HTML for a simple pop-up control panel:
-   '<span id="'+ g_sDIVfLAG_BEFORE +'" style="'                                                              //> Select previous flag.
+   '<span id="'+ g_sGUIdIVfLAG_BEFORE +'" style="'                                                      //> Select previous flag.
   +                                      'cursor'               +':pointer'                             //>
   +                                     ';width'                +':4rem'                                //>
   +                                     ';font-size'            +':2em'                                 //>
   +                                     ';font-weight'          +':bold'                                //>
   +'">'+ " < " +'</span>'                                                                               //>
-  +'<span id="'+ g_sDIVfLAG_NEXT +'" style="'                                                              //> Select next flag.
+  +'<span id="'+ g_sGUIdIVfLAG_NEXT +'" style="'                                                        //> Select next flag.
   +                                      'cursor'               +':pointer'                             //>
   +                                     ';width'                +':4rem'                                //>
   +                                     ';font-size'            +':2em'                                 //>
@@ -580,17 +580,17 @@ function                                Go_Gui(/////////////////////////////////
                                                                                                         //>
   +'<br>'                                                                                               //>
   +'<div>'                                                                                              //>
-  + '<input type="range" id="'+ g_sGUIzOOM                                                              //>
-  +                 '" name="'+ g_sGUIzOOM       +'" min="0" max="100">'                                //> Arbitrary scale of 100.
-  + '<label for="'+             g_sGUIzOOM       +'">'+ "Zoom"       +'</label>'                        //>
+  + '<input type="range" id="'+ g_sGUIiNrANGEzOOM                                                       //>
+  +                 '" name="'+ g_sGUIiNrANGEzOOM     +'" min="0" max="100">'                           //> Arbitrary scale of 100.
+  + '<label for="'+             g_sGUIiNrANGEzOOM     +'">'+ "Zoom"       +'</label>'                   //>
   + '<br>'                                                                                              //>
-  + '<input type="range" id="'+ g_sGUIbRIGHTNESS                                                        //>
-  +                 '" name="'+ g_sGUIbRIGHTNESS +'" min="0" max="100">'                                //> Arbitrary scale of 100.
-  + '<label for="'+             g_sGUIbRIGHTNESS +'">'+ "Brightness" +'</label>'                        //>
+  + '<input type="range" id="'+ g_sGUIiNrNAGEbRIGHT                                                     //>
+  +                 '" name="'+ g_sGUIiNrNAGEbRIGHT   +'" min="0" max="100">'                           //> Arbitrary scale of 100.
+  + '<label for="'+             g_sGUIiNrNAGEbRIGHT   +'">'+ "Brightness" +'</label>'                   //>
   + '<br>'                                                                                              //>
-  + '<input type="range" id="'+ g_sGUIcONTRAST                                                          //>
-  +                 '" name="'+ g_sGUIcONTRAST   +'" min="0" max="100">'                                //> Arbitrary scale of 100.
-  + '<label for="'+             g_sGUIcONTRAST   +'">'+ "Contrast"   +'</label>'                        //>
+  + '<input type="range" id="'+ g_sGUIiNrANGEcONTRAST                                                   //>
+  +                 '" name="'+ g_sGUIiNrANGEcONTRAST +'" min="0" max="100">'                           //> Arbitrary scale of 100.
+  + '<label for="'+             g_sGUIiNrANGEcONTRAST +'">'+ "Contrast"   +'</label>'                   //>
   +'</div>'                                                                                             //>
 //  '<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_L" value="L" checked><label for="'+g_sINoPTIONsIDE+'_L">'+"L"     +'</label>'
 // +'<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_R" value="R">'     +'<label for="'+g_sINoPTIONsIDE+'_R">'+"R"     +'</label>'
