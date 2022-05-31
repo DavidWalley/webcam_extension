@@ -1,11 +1,11 @@
 // $_injected.js_php - JavaScript with PHP macros for Daves Virtual Webcam
-// (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
+// (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3).
 // Refactoring of https://github.com/spite/virtual-webcam
 
 // GLOSSARY AND ABBREVIATIONS:
 // Shader          = a program running on a GPU.
 // Vertex Shader   = 1st part of GPU program - In 3-D rendering program, this code is run in parallel on a per-triangle-vertex order.
-// Fragment Shader = 2nd part of GPU program - In 3-D rendering program, this code is run more-or-less on a per-output pixel order. Do as much work as you can in the vertex shader, rather than in the fragment shader. 
+// Fragment Shader = 2nd part of GPU program - In 3-D rendering program, this code is run more-or-less on a per-output pixel order. Do as much work as you can in the vertex shader, rather than in the fragment shader.
 // u               = uniform
 
 
@@ -82,12 +82,12 @@ const                                   g_sCodeFragmentShader   =               
 + 'if( 0.85 < v0   &&   v0 < 0.92 ){'                                                                +N //> and if near top
 +  'u1 = ( u0 - 0.2  )* 2.0 - 0.5;'                                                                  +N //>  + ?
 +  'v1 = ( v0 - 0.85 )*15.0;'                                                                        +N //> 1/0.3
-+  'if( u1 < 0.0        ||   v1 < 0.0              ){ gl_FragColor = vec4(1.0,0.0,0.1 ,1.0);    return;}'+N //> Use background as is.
-+  'if(      1.0 < u1   ||        1.0 < v1         ){ gl_FragColor = vec4(0.0,1.0,0.0 ,1.0);    return;}'+N //> Use background as is.
++  'if( u1 < 0.0        ||   v1 < 0.0          ){ gl_FragColor = vec4(1.0,0.0,0.1 ,1.0);    return;}'+N //> Use background as is.
++  'if(      1.0 < u1   ||        1.0 < v1     ){ gl_FragColor = vec4(0.0,1.0,0.0 ,1.0);    return;}'+N //> Use background as is.
 +  'r1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).r;'                                             +N //> deprecated. Retrieves texels from logo texture
 +  'g1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).g;'                                             +N //>
 +  'b1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).b;'                                             +N //>
-+  'if( r1 < 0.01   &&   g1 < 0.01   &&   b1 < 0.01 ){ gl_FragColor = vec4(r0,g0,b0,1.0);  return;}' +N //> Use background as is.
++  'if( r1<0.01   &&   g1<0.01   &&   b1<0.01  ){ gl_FragColor = vec4(r0 ,g0 ,b0  ,1.0);    return;}'+N //> Use background as is.
 +  'gl_FragColor = vec4(r1*0.2 + r0*0.8'                                                                //> Calculate mixture of tag-line and video,
 +                     ',g1*0.2 + g0*0.8'                                                                //> "
 +                     ',b1*0.2 + b0*0.8'                                                                //> "
@@ -95,7 +95,7 @@ const                                   g_sCodeFragmentShader   =               
 +                     ');'                                                                           +N //> .
 +'return;'                                                                                              //> Report and we are done in this case
 + '}'//if                                                                                               //> .
-
+                                                                                                        //>
 + 'if( bSideL_NotR ){'                                                                               +N //> If flag is shown attached to left side of display, then...
 +  'dFlutter = (0.06 *sin( 11.0*(u0 - 0.4*ufNow_ms) )'                                                  //> "
 +             '+0.037*sin( 15.3*(u0 - 0.9*ufNow_ms) )'                                                  //> "
@@ -108,7 +108,7 @@ const                                   g_sCodeFragmentShader   =               
 +   'if( v0 < '+    g_dFLAGSIZEy +' + dFlutter ){'                                                   +N //> and if at bottom (bottom 35% plus flutter)
 +    'u1 = ( u0 '        +')*'+ ( 1/g_dFLAGSIZEx  ).toFixed(5) +';'                                  +N //>  + ?
 +    'v1 = ( v0 - dFlutter )*'+ ( 1/g_dFLAGSIZEy  ).toFixed(5) +';'                                  +N //> 1/0.3
-+    'if( v1 < 0.0 ){ gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                               +'return;}'+N//>
++    'if( v1 < 0.0 ){ gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                              +'return;}'+N //>
 +    'if( bFlip ){ u1 = 1.0 - u1; }'                                                                 +N //>
 +    'r1 = texture2D( usampler2d1_Flag ,vec2(u1 ,v1) ).r;'                                           +N //> deprecated. Retrieves texels from texture uniformsampler2d1_Flag
 +    'g1 = texture2D( usampler2d1_Flag ,vec2(u1 ,v1) ).g;'                                           +N //>
@@ -119,9 +119,7 @@ const                                   g_sCodeFragmentShader   =               
 +                       ',1.0'                                                                          //> Completely opaque result
 +                       ');'                                                                         +N //> .
 + 'return;'                                                                                          +N //> We are done in this case.
-+   '}'//if
-+  '}'//if                                                                                          //> .
-
++  '}}'//if//if                                                                                         //> .
                                                                                                         //> But, if on the right side...
 + '}else{'                                                                                              //>
 +  'dFlutter = (0.06 *sin( 11.0*(u0 + 0.4*ufNow_ms) )'                                                  //> "
@@ -135,7 +133,7 @@ const                                   g_sCodeFragmentShader   =               
                                                                                                         //>
 +    'u1 = ( u0 - '+ (1 - g_dFLAGSIZEx) +' )*'+   ( 1/g_dFLAGSIZEx  ).toFixed(5)   +';'              +N //>  + ?
 +    'v1 = ( v0 - dFlutter'+             ' )*'+   ( 1/g_dFLAGSIZEy  ).toFixed(5)   +';'              +N //> 1/0.3
-+    'if( v1 < 0.0 ){ gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                               +'return;}'+N//>
++    'if( v1 < 0.0 ){ gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                              +'return;}'+N //>
 +    'if( !bFlip ){ u1 = 1.0 - u1; }'                                                                +N //>
 +    'r1 = texture2D( usampler2d1_Flag ,vec2(u1 ,v1) ).r;'                                           +N //> deprecated. Retrieves texels from texture uniformsampler2d1_Flag
 +    'g1 = texture2D( usampler2d1_Flag ,vec2(u1 ,v1) ).g;'                                           +N //>
@@ -148,8 +146,6 @@ const                                   g_sCodeFragmentShader   =               
 + 'return;'                                                                                          +N //> We are done in this case.
 + '}}}'//if//if//if                                                                                     //>
                                                                                                      +N //> Otherwise
-
-
 + 'gl_FragColor = vec4(r0 ,g0 ,b0 ,1.0);'                                                            +N //> copy color as is.
 +'}'+N//main// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
 ;                                                                                                       //> /*DEV*/console.log( g_sCodeFragmentShader );
@@ -157,9 +153,9 @@ const                                   g_sCodeFragmentShader   =               
 const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side';       //>
 const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip';       //>
 const                                   g_sDIVfLAG              = 'divWebcam_Extension_Flag'    ;       //>
-const                                   g_sGUIzOOM              = 'inrangeGuiZoom'              ;
-const                                   g_sGUIbRIGHTNESS        = 'inrangeGuiBrightness'        ;
-const                                   g_sGUIcONTRAST          = 'inrangeGuiContrast'          ;
+const                                   g_sGUIzOOM              = 'inrangeGuiZoom'              ;       //>
+const                                   g_sGUIbRIGHTNESS        = 'inrangeGuiBrightness'        ;       //>
+const                                   g_sGUIcONTRAST          = 'inrangeGuiContrast'          ;       //>
 
 
 class                                   ShaderRenderer////////////////////////////////////////////////////#
@@ -218,11 +214,11 @@ class                                   ShaderRenderer//////////////////////////
   me._g.activeTexture( a_textureunit                        );                                          //> Specifies which texture unit to make active (in subsequent calls?).
   me._g.pixelStorei(   me._g.UNPACK_FLIP_Y_WEBGL ,true      );                                          //> Specifies the pixel storame._ge modes: Flips the source data along its vertical axis if true. For some reason WebGL textures are flipped vertically in comparasion to OpenGL
   me._g.bindTexture(   me._g.TEXTURE_2D          ,a_texture );                                          //> Bind to a texturing target (2-D plane), a named texture - an unsigned integer.
-  me._g.texImage2D(    me._g.TEXTURE_2D                                                                 //> Specifies a 2-D texture image:   
+  me._g.texImage2D(    me._g.TEXTURE_2D                                                                 //> Specifies a 2-D texture image:
   ,                0                                                                                    //> level 0 is the base image level of detail (of a set of mipmaps);
   ,                me._g.RGBA                                                                           //> internal format is RGBA components read from the color buffer;
-  ,                me._g.RGBA                                                                           //> texel format is RGBA, 
-  ,                me._g.UNSIGNED_BYTE                                                                  //> 8-bit values; 
+  ,                me._g.RGBA                                                                           //> texel format is RGBA,
+  ,                me._g.UNSIGNED_BYTE                                                                  //> 8-bit values;
   ,                a_ele                                                                                //> DOM element is the source of data.
   );                                                                                                    //>
   me._g.texParameteri( me._g.TEXTURE_2D          ,me._g.TEXTURE_MAG_FILTER ,me._g.LINEAR        );      //> How it should filter upon scaling up. Set texture parameters: target is a two-dimensional texture; texture magnification filter; default.   https://dens.website/tutorials/webgl/textures
@@ -266,7 +262,7 @@ class                                   ShaderRenderer//////////////////////////
   g.enableVertexAttribArray( me._attriblocationPosition                     );                          //> Index of the generic vertex attribute bound to the attribute '_attriblocationPosition'. attributes in a vertex shader are disabled by default. To use one, you have to first enable it with this function.
   g.bindBuffer(              g.ARRAY_BUFFER             ,me._bufferPosition );                          //>
   g.vertexAttribPointer(     me._attriblocationPosition                                                 //> Specify how to interpret data: '_attriblocationPosition' takes
-  ,                          2   ,g.FLOAT                                                               //> 2 floats, 
+  ,                          2   ,g.FLOAT                                                               //> 2 floats,
   ,                          false                                                                      //> not normalized,
   ,                          0 ,0                                                                       //> no offset or stride (single value)?
   );                                                                                                    //>
@@ -459,7 +455,7 @@ function                                Tick(//FilterStream/////////////////////
  ,                         nFlagW/2      ,nFlagH/4                                                      //> Size of the sub-rectangle of the source.
  ,                         0             ,g_nH_px*0.7                                                   //> Coordinate in the destination canvas at which to place the top-left corner of the source.
  ,                         g_nW_px*0.4   ,g_nH_px*0.3                                                   //> Width to draw the image in the destination canvas.
- );                                                                                                     //> 
+ );                                                                                                     //>
                                                                                                         //>
  requestAnimationFrame( Tick );                                                                         //> Run this periodic routine again.
 }//Tick///////////////////////////////////////////////////////////////////////////////////////////////////>
@@ -523,7 +519,7 @@ async function                          Go_ModifyMediaDevices_GetUserMedia(/////
   g_eleVideoIn   = document.createElement('video' );                                                    //>
   g_eleCanvasOut = document.createElement('canvas');  g_context2dOut = g_eleCanvasOut.getContext('2d'); //>
   g_eleVideoIn.srcObject = usermedia;                                                                   //>
-  g_eleVideoIn.autoplay  = true;                                                                        //> TODO Shut down and restart g_shaderrenderer???         
+  g_eleVideoIn.autoplay  = true;                                                                        //> TODO Shut down and restart g_shaderrenderer???
   g_eleVideoIn.addEventListener( 'playing'                                                              //>
   ,function(){                                                                                          //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
     g_eleCanvasOut.width    = g_nW_px;                                                                  //>
@@ -556,7 +552,7 @@ function                                Go_LoadFlags(///////////////////////////
 
 
 function                                Go_Gui(///////////////////////////////////////////////////////////# Create div to be used for user to set options.
-){                                      //////////////////////////////////////////////////////////////////# 
+){                                      //////////////////////////////////////////////////////////////////#
  const                                  eleGui                  = document.createElement('div');        //> Create div that can be used for user to set options.
  eleGui.style.display    = 'inline-block';                                                              //>
  eleGui.position         = 'absolute'    ;                                                              //>
