@@ -354,88 +354,90 @@ class                                   ShaderRenderer//////////////////////////
 
 let                                     g_shaderrenderer        = null;                                 //>
                                                                                                         //>
-let                                     g_eleVideo              = null;                                 //>
-let                                     g_eleCanvasVideo        = null;                                 //>
-let                                     g_context2dVideo        = null;                                 //>
+let                                     g_eleVideoIn            = null;                                 //>
+let                                     g_eleCanvasOut          = null; let g_context2dOut   = null;    //>
+let                                     g_eleCanvasFlags        = null; let g_context2dFlags = null;    //>
+let                                     g_imageFlags            = null;                                 //>
+let                                     g_imagedataFlags        = null;                                 //>
+
 let                                     g_nW_px                 = 640 ;                                 //>
 let                                     g_nH_px                 = 480 ;                                 //>
-let                                     g_eleCanvasFlags        = null;                                 //>
-let                                     g_context2dFlags        = null;                                 //>
-let                                     g_imageFlags            = null;                                 //>
-let                                     g_imageDataFlags        = null;                                 //>
 let                                     g_whenGo_ms             = null;                                 //>
-let                                     g_iFlag                 = 0;                                                              //> Index to current flag image: g_sFLAG_UKRAINE
-//let                                     g_eleSvg                = null;            //> targeting the svg itself
+let                                     g_iFlag                 =   0 ;                                 //> Index to current flag image.
 
 
 function                                Tick(//FilterStream///////////////////////////////////////////////# Periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
  //g_shaderrenderer.render();                                                                           //> Use a WebGL renderer.
- //console.log(g_imageDataFlags);
-
- if( g_context2dVideo ){                                                                                //>
+                                                                                                        //>
+ if( g_context2dOut ){                                                                                  //>
   var                                   eleZoom       = document.getElementById( 'inrangeZoom'       ); //>
   var                                   eleBrightness = document.getElementById( 'inrangeBrightness' ); //>
   var                                   eleContrast   = document.getElementById( 'inrangeContrast'   ); //>
   /*DEV*/ G_ASSERT(   eleZoom         ,"eleZoom       not got."   );                                    //>
   /*DEV*/ G_ASSERT(   eleBrightness   ,"eleBrightness not got."   );                                    //>
   /*DEV*/ G_ASSERT(   eleContrast     ,"eleContrast   not got."   );                                    //>
-
-  var                                   dZoom                   = eleZoom.value;                        //> 0 to 100
-  dZoom     = Math.pow( 3 , parseFloat(dZoom        )*0.01 );                                           //> 1 to 3, log scale
-
-  var                                   dBrightness             = eleBrightness.value;                  //> 0 to 100
-  dBrightness *= 0.02;
-
-  var                                   dContrast               = eleContrast.value;                    //> 0 to 100
-  dContrast = Math.pow( 4 , ( parseFloat(dContrast) )*0.01 ) - 1;                                           //> 1 to 3, log scale
                                                                                                         //>
-  g_context2dVideo.drawImage( g_eleVideo                                                                //>
+  var    dZoom       = eleZoom.value      ; dZoom       = Math.pow( 3 ,parseFloat(dZoom    )*0.01 )  ;  //>    1 to   3
+  var    dBrightness = eleBrightness.value; dBrightness = dBrightness*2.55 - 128                        //> -128 to 128
+  var    dContrast   = eleContrast.value  ; dContrast   = 3*(dContrast - 50);                           //> -150 to 150
+                                                                                                        //>
+  g_context2dOut.globalAlpha = 1.0;                                                                     //> Opaque addition.
+  g_context2dOut.drawImage( g_eleVideoIn                                                                //>
   ,                           (g_nW_px - g_nW_px*dZoom)*0.5                                             //> Keep centered, left-right and
   ,                           (g_nH_px - g_nH_px*dZoom)*0.5                                             //> top-bottom.
   ,                                      g_nW_px*dZoom                                                  //> zoom in by user selected amount
   ,                                      g_nH_px*dZoom                                                  //> .
   );                                                                                                    //> this.height   Copy frame from video to canvas
-  let                                   imagedataVideo          = g_context2dVideo.getImageData( 0,0    //> Intermediate result we need at end of changing pixel data
-                                                                  ,g_nW_px ,g_nH_px                     //>
-                                                                  );                                    //> .
 
+
+
+                                                                                                        //>
+  var                                   adAdjust                = [];                                   //>
+  var                                   dF               = 259*(dContrast + 255)/255/(259 - dContrast); //>
+  for( i = 0; i <= 255; i++ ){   adAdjust[i] = 128 + dF*(i-128) + dBrightness;   }                      //>
+                                                                                                        //>
+  let                                   imagedata0              = g_context2dOut.getImageData(          //> Intermediate result we need at end of changing pixel data
+                                                                   0 ,0   ,g_nW_px ,g_nH_px             //>
+                                                                  );                                    //> .
+  var                                   ad0                     = imagedata0.data;                      //> Pull the pixel color data array from the imageData object
+  var                                   k                       = 0;                                    //>
+  for(  var iRow  = 0; iRow  < g_nH_px; iRow++  ){                                                      //>
+   for( var iCell = 0; iCell < g_nW_px; iCell++ ){                                                      //>
+    var                                 r                       = ad0[ k     ];                         //> the RGBA info for pixel [x,y]
+    var                                 g                       = ad0[ k + 1 ];                         //>
+    var                                 b                       = ad0[ k + 2 ];                         //>
+    if( r < g   &&   b < g ){                                                                           //>
+     r = 255;                                                                                           //>
+     g = 255;                                                                                           //>
+     b =  30;                                                                                           //>
+    }else{                                                                                              //>
+     r = adAdjust[r];                                                                                   //>
+     g = adAdjust[g];                                                                                   //>
+     b = adAdjust[b];                                                                                   //>
+    }//if                                                                                               //>
+                                                                                                        //>
+    ad0[ k     ] = ( r < 0 )?0   :(   ( 255 < r )?255 :Math.floor(r)   );                               //>
+    ad0[ k + 1 ] = ( g < 0 )?0   :(   ( 255 < g )?255 :Math.floor(g)   );                               //>
+    ad0[ k + 2 ] = ( b < 0 )?0   :(   ( 255 < b )?255 :Math.floor(b)   );                               //>
+  //ad0[ k + 3 ] = 255;                                                                                 //>
+    k += 4;                                                                                             //>
+   }//for k                                                                                             //>
+  }//for k                                                                                              //>
+  g_context2dOut.putImageData( imagedata0 ,0 ,0 );                                                      //>
 
 
   let                                   nFlagH                  = g_eleCanvasFlags.height;              //>
   let                                   nFlagW                  = g_eleCanvasFlags.width ;              //>
-  g_context2dVideo.filter = ''
-                         //+' url('+           1                 +')'                                   //> A CSS url(). Takes an IRI pointing to an SVG filter element, which may be embedded in an external XML file.
-                         //+' blur('+          1                 +')'                                   //> A CSS <length>. Applies a Gaussian blur to the drawing. It defines the value of the standard deviation to the Gaussian function, i.e., how many pixels on the screen blend into each other; thus, a larger value will create more blur. A value of 0 leaves the input unchanged.
-                         //+' hue-rotate('+                      +')'                                   //> A CSS <angle>. Applies a hue rotation on the drawing. A value of 0deg leaves the input unchanged.
-                         //+' saturate('+                        +')'                                   //> A CSS <percentage>. Saturates the drawing. A value of 0% means completely un-saturated. A value of 100% leaves the drawing unchanged.
-                           +' brightness('+ dBrightness          +')'                                   //> A CSS <percentage>. Applies a linear multiplier to the drawing, making it appear brighter or darker. A value under 100% darkens the image, while a value over 100% brightens it. A value of 0% will create an image that is completely black, while a value of 100% leaves the input unchanged.
-                           +' contrast('+   dContrast            +')'                                   //> A CSS <percentage>. Adjusts the contrast of the drawing. A value of 0% will create a drawing that is completely black. A value of 100% leaves the drawing unchanged.
-                         //+' drop-shadow('+ '-9px 9px 3px #e81' +')'                                   //>
-                         //+' grayscale('+                       +')'                                   //> A CSS <percentage>. Converts the drawing to grayscale. A value of 100% is completely grayscale. A value of 0% leaves the drawing unchanged.
-                         //+' invert('+                          +')'                                   //> A CSS <percentage>. Inverts the drawing. A value of 100% means complete inversion. A value of 0% leaves the drawing unchanged.
-                         //+' opacity('+                         +')'                                   //> A CSS <percentage>. Applies transparency to the drawing. A value of 0% means completely transparent. A value of 100% leaves the drawing unchanged.
-                         //+' sepia('+                           +')'                                   //> A CSS <percentage>. Converts the drawing to sepia. A value of 100% means completely sepia. A value of 0% leaves the drawing unchanged.
-                         //+' none'                                                                     //> No filter is applied. Initial value.
-                           ;                                                                            //>
-  g_context2dVideo.globalAlpha = 0.4;                                                                   //> Semi-transparent addition.
+  g_context2dOut.globalAlpha = 0.6;                                                                     //> Semi-transparent addition.
   var                                   dXf                   = (           g_iFlag      % 2)*nFlagW/2; //>
   var                                   dYf                   = (Math.floor(g_iFlag*0.5) % 4)*nFlagH/4; //>
-  g_context2dVideo.drawImage( g_eleCanvasFlags                                                          //> Add a flag to the bottom left corner.
+  g_context2dOut.drawImage( g_eleCanvasFlags                                                            //> Add a flag to the bottom left corner.
   ,                           dXf           ,dYf                                                        //> sx,sy - top left corner of the sub-rectangle of the source.
   ,                           nFlagW/2      ,nFlagH/4                                                   //> Size of the sub-rectangle of the source.
   ,                           0             ,g_nH_px*0.7                                                //> Coordinate in the destination canvas at which to place the top-left corner of the source.
   ,                           g_nW_px*0.4   ,g_nH_px*0.3                                                //> Width to draw the image in the destination canvas.
   );                                                                                                    //> 
-//console.log( '** '+ (typeof g_eleSvg) );
-//console.log( '** '+ (typeof g_eleSvg.) );
-//  g_context2dVideo.drawImage( g_eleSvg                                                          //> Add a flag to the bottom left corner.
-//  ,                           0         ,0                                                        //> sx,sy - top left corner of the sub-rectangle of the source.
-//  ,                           200       ,300                                                   //> Size of the sub-rectangle of the source.
-//  ,                           0         ,100                                                //> Coordinate in the destination canvas at which to place the top-left corner of the source.
-//  ,                           20        ,30                                                //> Width to draw the image in the destination canvas.
-//  );                                                                                                    //> 
-
  }//if                                                                                                  //>
                                                                                                         //>
  requestAnimationFrame(   function(){ Tick(); }   );                                                    //> Run this periodic routine again.
@@ -479,27 +481,24 @@ async function                          ModifyMediaFunctions(///////////////////
                                                            ,audio : false                               //> No audio.
                                                           });                                           //>
     if( usermedia ){                                                                                    //> If devices found?, then
-     g_eleVideo       = document.createElement( 'video'  );                                             //>
-     g_eleCanvasVideo = document.createElement( 'canvas' );                                             //>
-     g_eleCanvasFlags = document.createElement( 'canvas' );                                             //>
-     g_context2dVideo = g_eleCanvasVideo.getContext('2d');                                              //>
-     g_context2dFlags = g_eleCanvasFlags.getContext('2d');                                              //>
-                                                                                                        //>
-                                                                                                        //>
-     g_imageFlags        = new Image();                                                                 //> Read image into g_context2dFlags
+     g_eleVideoIn     = document.createElement('video' );                                               //>
+     g_eleCanvasOut   = document.createElement('canvas'); g_context2dOut   = g_eleCanvasOut.getContext(  '2d'); //>
+
+     g_eleCanvasFlags = document.createElement('canvas'); g_context2dFlags = g_eleCanvasFlags.getContext('2d'); //>
+     g_imageFlags        = new Image();                                                                 //> Read image into g_context2dFlags (and g_imagedataFlags)
      g_imageFlags.onload = function(){                                                                  //>
                             g_eleCanvasFlags.width    = g_imageFlags.width ;                            //>
                             g_eleCanvasFlags.height   = g_imageFlags.height;                            //>
                             g_context2dFlags.drawImage( g_imageFlags, 0, 0 );                           //>
-                            g_imageDataFlags          = g_context2dFlags.getImageData(                  //>
-                                                        0 ,0                                            //>
+                            g_imagedataFlags          = g_context2dFlags.getImageData(                  //>
+                                                         0,0                                            //>
                                                         ,g_eleCanvasFlags.width                         //>
                                                         ,g_eleCanvasFlags.height                        //>
                                                         );                                              //>
                            };//function                                                                 //>
      g_imageFlags.src = g_sDATAuRIFLAGS;                                                                //> Kick-start the above, using a data URI text string.
                                                                                                         //>
-     const                              eleGui                  = document.createElement('div');        //> Create div that can be used to set options?
+     const                              eleGui                  = document.createElement('div');        //> Create div that can be used for user to set options.
      eleGui.style.display    = 'inline-block';                                                          //>
      eleGui.position         = 'absolute'    ;                                                          //>
      eleGui.left             = '10px'        ;                                                          //>
@@ -544,51 +543,27 @@ async function                          ModifyMediaFunctions(///////////////////
      ;                                                                                                  //>
      document.body.appendChild(eleGui);                                                                 //>
                                                                                                         //>
-     g_eleVideo.srcObject    = usermedia;                                                               //>
-     g_eleVideo.autoplay     = true;                                                                    //>
+     g_eleVideoIn.srcObject    = usermedia;                                                               //>
+     g_eleVideoIn.autoplay     = true;                                                                    //>
                                                                                                         //>
 // TODO Shut down and restart g_shaderrenderer???                                                       //>
-     g_eleVideo.addEventListener('playing'                                                              //>
-     ,function(){                                                            //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
-//*    g_shaderrenderer.setSize(eleVideo.videoWidth ,eleVideo.videoHeight);  //> Use a WebGL Renderer.
-       g_eleCanvasVideo.width  = g_nW_px;                                    //>
-       g_eleCanvasVideo.height = g_nH_px;                                    //>
-       g_whenGo_ms             = Date.now();                                 //>
-      
-       var                                   elePrevious   = document.getElementById( g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
-       var                                   eleNext       = document.getElementById( g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
-       /*DEV*/ G_ASSERT(   elePrevious     ,"elePrevious   not got."   );                                    //>
-       /*DEV*/ G_ASSERT(   eleNext         ,"eleNext       not got."   );                                    //>
-       elePrevious.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; console.log(g_iFlag); } ); //> Handle clicks on previous and
-       eleNext.addEventListener(     'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; console.log(g_iFlag); } ); //> next flag buttons.
+     g_eleVideoIn.addEventListener('playing'                                                              //>
+     ,function(){                                                                                       //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
+//*    g_shaderrenderer.setSize(eleVideo.videoWidth ,eleVideo.videoHeight);                             //> Use a WebGL Renderer.
+       g_eleCanvasOut.width  = g_nW_px;                                                               //>
+       g_eleCanvasOut.height = g_nH_px;                                                               //>
+       g_whenGo_ms             = Date.now();                                                            //>
+       var                              elePrevious   = document.getElementById( g_sDIVfLAG +'_0'    ); //> get data from a field on a configuration page? Text in input field.
+       var                              eleNext       = document.getElementById( g_sDIVfLAG +'_2'    ); //> get data from a field on a configuration page? Text in input field.
+       /*DEV*/ G_ASSERT(   elePrevious     ,"elePrevious   not got."   );                               //>
+       /*DEV*/ G_ASSERT(   eleNext         ,"eleNext       not got."   );                               //>
+       elePrevious.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );               //> Handle clicks on previous and
+       eleNext.addEventListener(     'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );               //> next flag buttons.
                                                                                                         //>
-
-//.        const                            svgns               = 'http://www.w3.org/2000/svg';             //> variable for the namespace 
-//.        g_eleSvg = document.createElementNS( svgns ,'svg' );                                                        //>
-//. 
-//.        console.log( typeof g_eleSvg             );
-//.        console.log( typeof g_eleSvg.constructor );
-//.        if(        g_eleSvg
-//.         &&        g_eleSvg.getCurrentTime
-//.          && ( 0 < g_eleSvg.getCurrentTime() )
-//.        ){
-//. console.log('ya');
-//.         document.body.appendChild( g_eleSvg );
-//.        }
-//. 
-//. 
-//.        let                              newRect             = document.createElementNS( svgns ,'rect'); //> make a simple rectangle
-//.        newRect.setAttribute("x"         ,'150');                                                        //>
-//.        newRect.setAttribute("y"         ,'150');                                                        //>
-//.        newRect.setAttribute("width"     ,'100');                                                        //>
-//.        newRect.setAttribute("height"    ,'100');                                                        //>
-//.        newRect.setAttribute("fill"      ,'#5CCEEE');                                                    //>
-//.        g_eleSvg.appendChild( newRect );                                                                      //> append the new rectangle to the svg
-
-                                  Tick();                                                               //> Start periodic routine
-     }                           );                                                                     //> .
+       Tick();                                                                                          //> Start periodic routine
+     });                                                                                                //> .
                                                                                                         //>
- return g_eleCanvasVideo.captureStream();                                                               //> Report a real-time video capture of the surface of the canvas.
+ return g_eleCanvasOut.captureStream();                                                               //> Report a real-time video capture of the surface of the canvas.
     }//if                                                                                               //>
     // ??? What happens now, if fullfilledpromiseMediaStream was null?                                  //>
   }}//if virtual//if                                                                                    //>
