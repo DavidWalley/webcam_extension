@@ -373,6 +373,8 @@ let                                     g_dZoom                 =   1 ;
 let                                     g_dBrightness           =   0 ;
 let                                     g_dContrast             =   0 ;
 
+let                                     g_sDivTestWas           = '';
+
 
 function                                Tick(//FilterStream///////////////////////////////////////////////# Periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
@@ -380,35 +382,23 @@ function                                Tick(//FilterStream/////////////////////
                                                                                                         //>
  if( !g_context2dOut ){ requestAnimationFrame( Tick );                                          return;}//> Run this periodic routine again.
                                                                                                         //>
-
-var                                     eleDivTest              = document.getElementById('divRthisskdheww');
-if( eleDivTest ){ console.log( eleDivTest.innerHTML ); }
-
-
- var                                    eleZoom     = document.getElementById( g_sGUIiNrANGEzOOM     ); //>
- var                                    eleBright   = document.getElementById( g_sGUIiNrNAGEbRIGHT   ); //>
- var                                    eleContrast = document.getElementById( g_sGUIiNrANGEcONTRAST ); //>
- /*DEV*/ G_ASSERT( eleZoom     ,"eleZoom     not got." );                                               //>
- /*DEV*/ G_ASSERT( eleBright   ,"eleBright   not got." );                                               //>
- /*DEV*/ G_ASSERT( eleContrast ,"eleContrast not got." );                                               //>
-                                                                                                        //>
- var        dZoom       = eleZoom.value    ;   dZoom       = Math.pow( 3 ,parseFloat(dZoom    )*0.01 ); //>    1 to   3
- var        dBrightness = eleBright.value  ;   dBrightness = dBrightness*2.55 - 128                     //> -128 to 128
- var        dContrast   = eleContrast.value;   dContrast   = 3*(dContrast - 50);                        //> -150 to 150
- if(   g_dZoom       !== dZoom      
-  ||   g_dBrightness !== dBrightness
-   ||  g_dContrast   !== dContrast  
- ){
-  g_dZoom       = dZoom      ;
-  g_dBrightness = dBrightness;
-  g_dContrast   = dContrast  ;
-
-  window.localStorage.setItem('myCat', 'Tom');          //> https://css-tricks.com/a-primer-on-the-different-types-of-browser-storage/
-//.  window['chrome']['storage']['local']['set']( {iExtensionVirtualWebcam_Flag : 3}
-//.  ,                         function() {                                                             //> Save user settings values.
-//.                             console.log( 'Value is set.' );
-//.  }                         );
- }
+ var                                    eleDivTest     = document.getElementById('divDataFromOptions'); //>
+ if( eleDivTest ){
+  var                                   sData                   = eleDivTest.innerHTML;
+  if( sData !== g_sDivTestWas ){
+   console.log( 'changed !!!!!!!!!! '+ sData );
+//> Decode and put in 
+   try{
+    var                                 ob                      = JSON.parse(sData);
+    console.log( ob ); //> {"inrangeGuiZoom":"78","inrangeGuiBright":"50","inrangeGuiContrast":"50"}
+    if( ob['inrangeGuiZoom'    ] ){ g_dZoom       = ob['inrangeGuiZoom'    ]; }
+    if( ob['inrangeGuiBright'  ] ){ g_dBrightness = ob['inrangeGuiBright'  ]; }
+    if( ob['inrangeGuiContrast'] ){ g_dContrast   = ob['inrangeGuiContrast']; }
+console.log('111 '+ g_dZoom +' '+ g_dBrightness +' '+ g_dContrast);
+   }catch(e){ console.log('bad '+ e); }
+   g_sDivTestWas = sData;
+  }//if
+ }//if
                                                                                                         //>
  g_context2dOut.globalAlpha = 1.0;                                                                      //> Restore opaque addition.
  g_context2dOut.drawImage( g_eleVideoIn                                                                 //>
@@ -418,9 +408,9 @@ if( eleDivTest ){ console.log( eleDivTest.innerHTML ); }
  ,                                      g_nH_px*g_dZoom                                                 //> .
  );                                                                                                     //> this.height   Copy frame from video to canvas
                                                                                                         //>
- var                                    adAdjust         = [];                                          //> Construct a table for quick conversions of color levels.
- var                                    dF               = 259*(dContrast + 255)/255/(259 - dContrast); //>
- for( var i = 0; i <= 255; i++ ){   adAdjust[i] = 128 + dF*(i-128) + dBrightness;   }                   //> Pre-compute table for quick conversions of color levels based on user's preferences.
+ var                                    adAdjust     = [];                                              //> Construct a table for quick conversions of color levels.
+ var                                    dF           = 259*(g_dContrast + 255)/255/(259 - g_dContrast); //>
+ for( var i = 0; i <= 255; i++ ){   adAdjust[i] = 128 + dF*(i-128) + g_dBrightness;   }                 //> Pre-compute table for quick conversions of color levels based on user's preferences.
                                                                                                         //>
  let                                    imagedata0              = g_context2dOut.getImageData(          //> Intermediate result we need at end of changing pixel data
                                                                    0 ,0   ,g_nW_px ,g_nH_px             //>

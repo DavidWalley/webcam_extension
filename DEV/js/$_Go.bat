@@ -2,7 +2,7 @@ rem $_Go.bat - tool chain automated steps for Closure Compiling and prettifying 
 rem (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3).
 @echo off
 
-set root=C:\xampp\htdocs\webcam_extension\virtual_cam\js\&                                              rem Root directory of project.
+set root=C:\xampp\htdocs\webcam\DEV\js\&                                                                rem Root directory of project.
 set shared=C:\xampp\htdocs\SHARED\&                                                                     rem Directory containing shared code.
 set FIX=%shared%FIX.php &                                                                               rem PHP for making changes before processing.
 set PHP=C:\xampp\php\php.exe &                                                                          rem Command line PHP executable.

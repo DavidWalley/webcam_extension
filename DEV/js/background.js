@@ -2,7 +2,7 @@ console.log("hello from daves background.JS");
 
 chrome.extension.onRequest.addListener(
   function(request, sender, sendResponse) {
-    switch (request.greeting) {
+    switch (request.data) {
     case "maprender"):
       alert("reached here sendin resp"+request.name);
       Addr_details.place = request.name;

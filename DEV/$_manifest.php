@@ -54,37 +54,40 @@
 //.                           }
 //. }
 
-echo '{"manifest_version"'              .':3'                                                    ."\n"; //> Required.
-/*DEV*/ echo ',"name"'                  .':"'. "DEV Virtual Webcam" .'"'                         ."\n"; //> Required. DEV version.
-//*PRO*/echo ',"name"'                  .':"Virtual Webcam - Slava Ukraini"'                     ."\n"; //> Required. Production version.
-echo ',"version"'                       .':"0.1.1"'                                              ."\n"; //> Required.
-echo ',"description"'                   .':"'. "Virtual Webcam with Flag of Ukraine" .'"'        ."\n"; //> Recommended. A plain text description
-echo ',"background"'                    .':{ "'.'service_worker'.'":"'. 'js/background.js' .'" }'."\n"; // *** background.service_worker 
-echo ',"icons"'                         .':{"'.'16'             .'":"icon-16.png"'               ."\n"; //>
-echo                                      ',"'.'32'             .'":"icon-32.png"'               ."\n"; //>
-echo                                      ',"'.'48'             .'":"icon-48.png"'               ."\n"; //>
-echo                                      ',"'.'128'            .'":"icon-128.png"'              ."\n"; //>
-echo                                      '}'                                                    ."\n"; //>
-echo ',"minimum_chrome_version"'        .':"10.0"'                                               ."\n"; //>
-                                                                                                        //>
-//echo ',"options_page"'                .':"options.html"'                                       ."\n"; //> deprecated
-echo ',"options_ui"'                    .':{"'.'open_in_tab'    .'":' .'true'                    ."\n"  //>
-/*DEV*/  .                                ',"'.'page'           .'":"'.'js/options.html'   .'"'  ."\n"  //>
-//*PRO*/ .                                ',"'.'page'           .'":"'.'js/options.html'   .'"'  ."\n"  //>
-.                                         '}'                                                    ."\n"; //>
-                                                                                                        //>
-echo ',"content_scripts"'               .':[{"'.'matches'       .'":' .'["<all_urls>"]'          ."\n"; //> All URLs loaded in Chrome should have access to the virtual camera? All auto-run content scripts must specify match patterns.
-/*DEV*/ echo                               ',"'.'js'            .'":' .'["js/$_inject.js_php"]'  ."\n"; //> Code executed with each page loaded. Performs script addition into page's DOM (and run when ready).
-//*PRO*/echo                               ',"'.'js'            .'":' .'["js/inject.js"]'        ."\n"; //>
-echo                                       ',"'.'run_at'        .'":"'.'document_start"'         ."\n"; //> Scripts are injected after any files from CSS, but before any other DOM is constructed or any other script is run.   https:/ /developer.chrome.com/docs/extensions/mv3/content_scripts/
-echo                                       ',"'.'all_frames'    .'":' .'true'                    ."\n"; //> Allows the extension to specify if files should be injected into all frames matching the specified URL requirements (OR only into the topmost frame in a tab).
-echo                                      '}]'                                                   ."\n"; //>
-                                                                                                        //>
-echo ',"permissions"'                   .':["tabs","storage"]'                                   ."\n"; //> Gives your extension access to privileged fields of the Tab objects, an API to interact with the browser's tab system - need to keep track of what the user is doing.
-echo ',"web_accessible_resources"'      .':[{"resources"'       .':['.'"js/*"'          .']'     ."\n"; //> Explicit permissions: Files inside an extension that can be accessed by web pages or other extensions. Extensions typically use this feature to expose images or other assets that need to be loaded in web pages, but any asset included in an extension's bundle can be made web accessible.
-echo                                    '   ,"matches"'         .':['.'"<all_urls>"'    .']'     ."\n"; //> Any URL
-echo                                      '}]'                                                   ."\n"; //>
+function                                o($a){ echo $a ."\n"; }
 
-echo '}';                                                                                               //>
+
+o('{"manifest_version"'                 .':3'                                                        ); //> Required.
+/*DEV*/ o(',"name"'                     .':"'. "DEV Virtual Webcam" .'"'                             ); //> Required. DEV version.
+//*PRO*/o(',"name"'                     .':"Virtual Webcam - Slava Ukraini"'                         ); //> Required. Production version.
+o(',"version"'                          .':"0.1.1"'                                                  ); //> Required.
+o(',"description"'                      .':"'. "Virtual Webcam with Flag of Ukraine" .'"'            ); //> Recommended. A plain text description
+//o(',"background"'                     .':{ "'.'service_worker'.'":"'. 'js/background.js' .'" }'    ); //> *** background.service_worker 
+o(',"icons"'                            .':{"'.'16'             .'":"icon-16.png"'                   ); //>
+o(                                        ',"'.'32'             .'":"icon-32.png"'                   ); //>
+o(                                        ',"'.'48'             .'":"icon-48.png"'                   ); //>
+o(                                        ',"'.'128'            .'":"icon-128.png"'                  ); //>
+o(                                        '}'                                                        ); //>
+o(',"minimum_chrome_version"'           .':"10.0"'                                                   ); //>
+                                                                                                        //>
+//o(',"options_page"'                   .':"options.html"'                                           ); //> deprecated
+o(',"options_ui"'                       .':{"'.'open_in_tab'    .'":' .'true'                        ); //>
+/*DEV*/ o(                                ',"'.'page'           .'":"'.'js/options.html'   .'"'      ); //>
+//*PRO*/o(                                ',"'.'page'           .'":"'.'js/options.html'   .'"'      ); //>
+o(                                        '}'                                                        ); //>
+                                                                                                        //>
+o(',"content_scripts"'                  .':[{"'.'matches'       .'":' .'["<all_urls>"]'              ); //> All URLs loaded in Chrome should have access to the virtual camera? All auto-run content scripts must specify match patterns.
+/*DEV*/ o(                                 ',"'.'js'            .'":' .'["js/$_inject.js_php"]'      ); //> Code executed with each page loaded. Performs script addition into page's DOM (and run when ready).
+//*PRO*/o(                                 ',"'.'js'            .'":' .'["js/inject.js"]'            ); //>
+o(                                         ',"'.'run_at'        .'":"'.'document_start"'             ); //> Scripts are injected after any files from CSS, but before any other DOM is constructed or any other script is run.   https:/ /developer.chrome.com/docs/extensions/mv3/content_scripts/
+o(                                         ',"'.'all_frames'    .'":' .'true'                        ); //> Allows the extension to specify if files should be injected into all frames matching the specified URL requirements (OR only into the topmost frame in a tab).
+o(                                        '}]'                                                       ); //>
+                                                                                                        //>
+o(',"permissions"'                      .':["tabs","storage"]'                                       ); //> Gives your extension access to privileged fields of the Tab objects, an API to interact with the browser's tab system - need to keep track of what the user is doing.
+o(',"web_accessible_resources"'         .':[{"resources"'       .':['.'"js/*"'          .']'         ); //> Explicit permissions: Files inside an extension that can be accessed by web pages or other extensions. Extensions typically use this feature to expose images or other assets that need to be loaded in web pages, but any asset included in an extension's bundle can be made web accessible.
+o(                                      '   ,"matches"'         .':['.'"<all_urls>"'    .']'         ); //> Any URL
+o(                                        '}]'                                                       ); //>
+                                                                                                        //>
+o('}'                                                                                                ); //>
 
 //End of file.
