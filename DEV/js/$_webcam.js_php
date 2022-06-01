@@ -391,9 +391,9 @@ function                                Tick(//FilterStream/////////////////////
    try{
     var                                 ob                      = JSON.parse(sData);
     console.log( ob ); //> {"inrangeGuiZoom":"78","inrangeGuiBright":"50","inrangeGuiContrast":"50"}
-    if( ob['inrangeGuiZoom'    ] ){ g_dZoom       = ob['inrangeGuiZoom'    ]; }
-    if( ob['inrangeGuiBright'  ] ){ g_dBrightness = ob['inrangeGuiBright'  ]; }
-    if( ob['inrangeGuiContrast'] ){ g_dContrast   = ob['inrangeGuiContrast']; }
+    if( ob['inrangeGuiZoom'    ] ){ g_dZoom       = ob['inrangeGuiZoom'    ]; g_dZoom       = Math.pow( 3 ,parseFloat(g_dZoom      )*0.01     ); }//>    1 to   3
+    if( ob['inrangeGuiBright'  ] ){ g_dBrightness = ob['inrangeGuiBright'  ]; g_dBrightness =              parseFloat(g_dBrightness)*2.55 - 128; }//> -128 to 128
+    if( ob['inrangeGuiContrast'] ){ g_dContrast   = ob['inrangeGuiContrast']; g_dContrast   = 3*(          parseFloat(g_dContrast  ) - 50     ); }//> -150 to 150
 console.log('111 '+ g_dZoom +' '+ g_dBrightness +' '+ g_dContrast);
    }catch(e){ console.log('bad '+ e); }
    g_sDivTestWas = sData;
