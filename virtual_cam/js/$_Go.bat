@@ -37,6 +37,20 @@ mkdir                                                                   ..\..\PR
 set /P VERSION=<ZZZ_TIMESTAMP.txt                                                                       & rem "
 echo %VERSION%                                                                                          & rem ".
 
+%PHP%                                  ..\js\$_options.js_php         >        ..\js\options.js         & rem Run PHP to rewrite options page HTML for further development.
+
+%PHP%                                  ..\js\$_options.php            >        ..\js\options.html       & rem Run PHP to rewrite options page HTML for further development.
+%PHP%                                  ..\js\$_options.php            >    ..\js\ZZZ_options1.php       & rem Comment out DEV lines.
+%PHP% %FIX% "/*DEV*/"     "//*DEV*/" ..\js\ZZZ_options1.php           >    ..\js\ZZZ_options2.php       & rem Use PROduction version of code.
+%PHP% %FIX% "//*PRO*/"    "/*PRO*/"  ..\js\ZZZ_options2.php           > ..\..\PRO\js\options.html       & rem Run PHP to create final production version.
+
+%PHP%                                  ..\$_manifest.php              >        ..\manifest.json         & rem Run PHP macros to rewrite DEV version for further localhost development.
+%PHP% %FIX% "/*DEV*/"     "//*DEV*/"   ..\$_manifest.php              >    ..\ZZZ_manifest1.php         & rem Comment out DEV lines.
+%PHP% %FIX% "//*PRO*/"    "/*PRO*/"  ..\ZZZ_manifest1.php             >    ..\ZZZ_manifest2.php         & rem Use PROduction version of code.
+%PHP%                                ..\ZZZ_manifest2.php             > ..\..\PRO\manifest.json         & rem Run PHP to create final production version.
+
+GOTO :End
+
 echo ----- Preprocess inject.js
 %PHP%                                  .\$_inject.js_php              >        .\ZZZ_inject0.js         & rem Run PHP macros in money code.
 %PHP% %FIX% "/*DEV*/"     "//*DEV*/" .\ZZZ_inject0.js                 >        .\ZZZ_inject1.js         & rem Comment out DEV lines.
@@ -50,25 +64,20 @@ call prettier --write .\inject.js                                               
 echo ----- inject.js DONE.
 
 echo ----- Preprocess webcam.js
-%PHP%                                  .\$_webcam.js_php            >        .\ZZZ_webcam0.js       & rem Run PHP macros in money code.
-%PHP% %FIX% "/*DEV*/"     "//*DEV*/" .\ZZZ_webcam0.js               >        .\ZZZ_webcam1.js       & rem Comment out DEV lines.
-%PHP% %FIX% "//*PRO*/"    "/*PRO*/"  .\ZZZ_webcam1.js               >        .\ZZZ_webcam2.js       & rem
-%PHP% %FIX% "/*VERSION*/" %VERSION%  .\ZZZ_webcam2.js               >        .\ZZZ_webcam3.js       & rem Insert version based on date/time into the code.
-%PHP% %FIX% "NOTES"                  .\ZZZ_webcam3.js               >            .\webcam.js        & rem Make changes so prettier can handle blank lines and comments correctly.
-call prettier --write .\webcam.js                                                                          & rem Overwrite file to create a prettifed version of the code as standard source code.
-%compile%                                .\webcam.js --js_output_file ..\..\PRO\js\webcam.js        & rem
+%PHP%                                  .\$_webcam.js_php            >        .\ZZZ_webcam0.js           & rem Run PHP macros in money code.
+%PHP% %FIX% "/*DEV*/"     "//*DEV*/" .\ZZZ_webcam0.js               >        .\ZZZ_webcam1.js           & rem Comment out DEV lines.
+%PHP% %FIX% "//*PRO*/"    "/*PRO*/"  .\ZZZ_webcam1.js               >        .\ZZZ_webcam2.js           & rem
+%PHP% %FIX% "/*VERSION*/" %VERSION%  .\ZZZ_webcam2.js               >        .\ZZZ_webcam3.js           & rem Insert version based on date/time into the code.
+%PHP% %FIX% "NOTES"                  .\ZZZ_webcam3.js               >            .\webcam.js            & rem Make changes so prettier can handle blank lines and comments correctly.
+call prettier --write .\webcam.js                                                                              & rem Overwrite file to create a prettifed version of the code as standard source code.
+%compile%                                .\webcam.js --js_output_file ..\..\PRO\js\webcam.js            & rem
 echo --- webcam.js DONE.
 
 xcopy ..\icon-16.png                                                    ..\..\PRO\ /Y                   & rem
 xcopy ..\icon-48.png                                                    ..\..\PRO\ /Y                   & rem
 xcopy ..\icon-128.png                                                   ..\..\PRO\ /Y                   & rem
 
-%PHP% %FIX% "/*DEV*/"     "//*DEV*/"   ..\$_manifest.php              >    ..\ZZZ_manifest1.php         & rem Comment out DEV lines.
-%PHP% %FIX% "//*PRO*/"    "/*PRO*/"  ..\ZZZ_manifest1.php             >    ..\ZZZ_manifest2.php         & rem Use PROduction version of code.
-%PHP%                                ..\ZZZ_manifest2.php             > ..\..\PRO\manifest.json         & rem Run PHP macros in money code.
-%PHP%                                ..\ZZZ_manifest2.php             >        ..\manifest.json         & rem Run PHP macros to rewrite DEV version for further localhost development.
-
-rem del                                                                         .\ZZZ_*.*                   & rem
-rem del                                                                        ..\ZZZ_*.*                   & rem
+del                                                                         .\ZZZ_*.*                   & rem
+del                                                                        ..\ZZZ_*.*                   & rem
 
 :End

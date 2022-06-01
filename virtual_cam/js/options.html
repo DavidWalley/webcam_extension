@@ -1,24 +1,20 @@
 <!DOCTYPE html>
-<html>
-<head><title>My Test Extension Options</title></head>
+<html lang="en">
+<head><title>Virtual Webcam Options</title></head>
 <body>
-
-Favorite color:
-<select id="color">
- <option value="red">red</option>
- <option value="green">green</option>
- <option value="blue">blue</option>
- <option value="yellow">yellow</option>
-</select>
-
-<label>
-  <input type="checkbox" id="like">
-  I like colors.
-</label>
-
-<div id="status"></div>
-<button id="save">Save</button>
-
-<script src="options.js"></script>
+Virtual Webcam Options
+<span id="divWebcam_Extension_FlagBefore" style="cursor:pointer;width:4rem;font-size:2em;font-weight:bold"> < </span>
+<span id="divWebcam_Extension_FlagNext" style="cursor:pointer;width:4rem;font-size:2em;font-weight:bold"> > </span>
+<br>
+<div>
+<input type="range" id="inrangeGuiZoom" name="inrangeGuiZoom" min="0" max="100"><label for="inrangeGuiZoom">Zoom</label>
+<br>
+<input type="range" id="inrangeGuiBright" name="inrangeGuiBright" min="0" max="100"><label for="inrangeGuiBright">Brightness</label>
+<br>
+<input type="range" id="inrangeGuiContrast"
+ name="inrangeGuiContrast"
+ min="0" max="100"><label for="inrangeGuiContrast">Contrast</label>
+</div>
+<script src="options.js" type="application/javascript"></script>
 </body>
 </html>

@@ -591,7 +591,7 @@ function                                Go_Gui(/////////////////////////////////
  eleGui.style.width      = '400px'       ;                                                              //>
  eleGui.style.height     = '100px'       ;                                                              //>
  eleGui.style.background = '#FFFFCC'     ;                                                              //> Pale yellow
- eleGui.innerHTML        =                                                                              //> HTML for a simple pop-up control panel:
+var sDummy =
    '<span id="'+ g_sGUIdIVfLAG_BEFORE +'" style="'                                                      //> Select previous flag.
   +                                      'cursor'               +':pointer'                             //>
   +                                     ';width'                +':4rem'                                //>
@@ -626,6 +626,9 @@ function                                Go_Gui(/////////////////////////////////
 // +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_F" value="F">'     +'<label for="'+g_sINoPTIONfLIP+'_F">'+"Flip"  +'</label>'
 // +' &nbsp; &nbsp; &nbsp; '                                                                            //>
  ;                                                                                                      //>
+
+ //console.log(sDummy);
+ eleGui.innerHTML        = sDummy;                                                                      //> HTML for a simple pop-up control panel:
  document.body.appendChild(eleGui);                                                                     //>
 }//Go_Gui/////////////////////////////////////////////////////////////////////////////////////////////////>
 

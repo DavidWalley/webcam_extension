@@ -17,7 +17,7 @@ head.insertBefore( scriptWebcam ,head.lastChild );                              
                                                                                                         //>
 window['chrome']['runtime']['onMessage']['addListener'](   function(a){ console.log(a); }   );          //> ???DEBUG?
                                                                                                         //>
-window['chrome']['runtime']['openOptionsPage']();                                                       //>
+//window['chrome']['runtime']['openOptionsPage']();                                                       //>
 
 
 //End of file.

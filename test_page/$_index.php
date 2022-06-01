@@ -22,5 +22,5 @@ echo   '<br><video  id="videoExample" autoplay playsinline>'                    
                                                                                                         //>
 echo  '</body>';                                                                                        //>
 echo '</html>';                                                                                         //>
-                                                                                                        //>
+
 //End of file.
