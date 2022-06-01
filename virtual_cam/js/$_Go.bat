@@ -1,6 +1,6 @@
 rem $_Go.bat - tool chain automated steps for Closure Compiling and prettifying the Virtual WebCam Chrome Extension file.
 rem (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3).
-rem @echo off
+@echo off
 
 set root=C:\xampp\htdocs\webcam_extension\virtual_cam\js\&                                              rem Root directory of project.
 set shared=C:\xampp\htdocs\SHARED\&                                                                     rem Directory containing shared code.
@@ -31,7 +31,7 @@ rem ------------------------------------
 cd %root%                                                                                               & rem Start in project root directory.
 
 del %root%inject*.*                                                                                     & rem Clean up old results. Ignore warning message "Could not find."
-del %root%webcam*.*                                                                                   & rem Clean up old results. Ignore warning message "Could not find."
+del %root%webcam*.*                                                                                     & rem Clean up old results. Ignore warning message "Could not find."
 mkdir                                                                   ..\..\PRO\js                    & rem Create directory for production version of JavaScript files.
 %PHP% %FIX% "TIMESTAMP" > .\ZZZ_TIMESTAMP.txt                                                           & rem Create a unique ID based on current date/time (save in a file for to make this work)
 set /P VERSION=<ZZZ_TIMESTAMP.txt                                                                       & rem "

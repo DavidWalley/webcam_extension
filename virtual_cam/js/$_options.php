@@ -8,14 +8,6 @@ o('<html lang="en">'                                                            
 o( '<head><title>'. "Virtual Webcam Options" .'</title></head>'                                 );      //>
 o( '<body>'                                                                                     );      //>
 o(  "Virtual Webcam Options"                                                                    );      //>
-//. o(  '<br><button id="'. 'buttonGoList' .'">'.            "1) Initialize List"      .'</button>' );      //>
-//. o(  '<br><label for="'. 'selectSource' .'">'.            "2) Choose video source:" .'</label>'  );      //>
-//. o(      '<select id="'. 'selectSource' .'"'                                                             //>
-//. .            ' name="'. 'selectSource' .'">'                                                            //>
-//. .       '</select>'                                                                             );      //>
-//. o(  '<br><button id="'. 'buttonCamera' .'">'.            "3) Start Camera"         .'</button>' );      //>
-//. o(  '<br><video  id="'. 'videoExample' .'" autoplay playsinline>'                  .'</video>'  );      //> Example of video element that might be found on someone's website.
-
 o(  '<span id="'. 'divWebcam_Extension_FlagBefore'      .'"'                                            //>
 .   ' style="'                          .'cursor'               .':pointer'                             //>
 .                                       ';width'                .':4rem'                                //>

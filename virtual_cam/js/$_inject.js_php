@@ -1,4 +1,4 @@
-// $_inject.js_php - Inject a script into all pages running in Chrome after Daves Virtual Webcam extension is installed (as mentioned in manifest.json extension file).
+// $_inject.js_php - A content script - Inject a script into all pages running in Chrome after Daves Virtual Webcam extension is installed (as mentioned in manifest.json extension file).
 // (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
 // Can use chrome.runtime
@@ -19,5 +19,18 @@ window['chrome']['runtime']['onMessage']['addListener'](   function(a){ console.
                                                                                                         //>
 //window['chrome']['runtime']['openOptionsPage']();                                                       //>
 
+
+//chrome.runtime.onMessage.addListener(                           //> ###
+
+console.log();'Hoot from $_inject.js_php'
+
+chrome.runtime.onMessage.addListener(                           //> ###
+ function(message ,sender ,sendResponse){
+  console.log("Hark for background.");
+  console.log( message );                                       //> Got this far.
+  //sendResponse( "Hark to you too" );
+ //return Promise.resolve( {response : "Howdy from content script inject.js"} );   // this failed to make an impression with options.js.
+ }
+);
 
 //End of file.

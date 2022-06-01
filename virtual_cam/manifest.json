@@ -2,6 +2,7 @@
 ,"name":"DEV Virtual Webcam"
 ,"version":"0.1.1"
 ,"description":"Virtual Webcam with Flag of Ukraine"
+,"background":{ "service_worker":"js/background.js" }
 ,"icons":{"16":"icon-16.png"
 ,"32":"icon-32.png"
 ,"48":"icon-48.png"
