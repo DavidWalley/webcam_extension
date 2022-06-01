@@ -28,9 +28,9 @@
 //                - The global window object of a Content script is distinct from the page/extension's global namespace.
 // 
 // Injected scripts (via this method in a Content script) 
-//                - Full access to all properties??? in the page. No access to any of the chrome.* APIs.
+//                - Full access to all of the DOM??? properties??? in the page they are injected into. No access to any of the chrome.* APIs.
 //                - Injected scripts behave as if they were included by the page itself, and are not connected to the extension in any way. 
-//                  See this post to learn more information on the various injection methods.
+
 
 //. {"name"                 : "First Plugin Testing"
 //. ,"version"              : "1.0"

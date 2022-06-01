@@ -27,22 +27,22 @@ o(  '<span id="'. 'divWebcam_Extension_FlagNext'        .'"'                    
 o(  '<br>'                                                                                      );      //>
 o(  '<div>'                                                                                     );      //>
 o(   '<input type="range"'                                                                              //>
-.    ' id="'.        'inrangeGuiZoom'           .'"'                                                    //>
-.    ' name="'.      'inrangeGuiZoom'           .'"'                                                    //>
+.    ' id="'.        'inrangeZoom'           .'"'                                                       //>
+.    ' name="'.      'inrangeZoom'           .'"'                                                       //>
 .    ' min="0" max="100"'                                                                               //>
-.    '><label for="'.'inrangeGuiZoom'           .'">'   ."Zoom"         .'</label>'             );      //>
+.    '><label for="'.'inrangeZoom'           .'">'   ."Zoom"         .'</label>'                );      //>
 o(   '<br>'                                                                                     );      //>
 o(   '<input type="range"'                                                                              //>
-.    ' id="'.        'inrangeGuiBright'         .'"'                                                    //>
-.    ' name="'.      'inrangeGuiBright'         .'"'                                                    //>
+.    ' id="'.        'inrangeBright'         .'"'                                                       //>
+.    ' name="'.      'inrangeBright'         .'"'                                                       //>
 .    ' min="0" max="100"'                                                                               //>
-.    '><label for="'.'inrangeGuiBright'         .'">'   ."Brightness"   .'</label>'             );      //>
+.    '><label for="'.'inrangeBright'         .'">'   ."Brightness"   .'</label>'                );      //>
 o(   '<br>'                                                                                     );      //>
 o(   '<input type="range"'                                                                              //>
-.    ' id="'.        'inrangeGuiContrast'       .'"'                                            );      //>
-o(   ' name="'.      'inrangeGuiContrast'       .'"'                                            );      //>
+.    ' id="'.        'inrangeContrast'       .'"'                                               );      //>
+o(   ' name="'.      'inrangeContrast'       .'"'                                               );      //>
 o(   ' min="0" max="100"'                                                                               //>
-.    '><label for="'.'inrangeGuiContrast'       .'">'   ."Contrast"     .'</label>'             );      //>
+.    '><label for="'.'inrangeContrast'       .'">'   ."Contrast"     .'</label>'                );      //>
 o(  '</div>'                                                                                    );      //>
 o(  '<script src="options.js" type="application/javascript"></script>'                          );      //> Main application source money code.
 o( '</body>'                                                                                    );      //>

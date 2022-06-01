@@ -155,13 +155,13 @@ const                                   g_sCodeFragmentShader   =               
 +'}'+N//main// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
 ;                                                                                                       //> /*DEV*/console.log( g_sCodeFragmentShader );
 
-const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side'  ;     //>
-const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip'  ;     //>
-const                                   g_sGUIdIVfLAG_BEFORE    = 'divWebcam_Extension_FlagBefore';     //>
-const                                   g_sGUIdIVfLAG_NEXT      = 'divWebcam_Extension_FlagNext'  ;     //>
-const                                   g_sGUIiNrANGEzOOM       = 'inrangeGuiZoom'                ;     //>
-const                                   g_sGUIiNrNAGEbRIGHT     = 'inrangeGuiBright'              ;     //>
-const                                   g_sGUIiNrANGEcONTRAST   = 'inrangeGuiContrast'            ;     //>
+//. const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side'  ;     //>
+//. const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip'  ;     //>
+//. const                                   g_sGUIdIVfLAG_BEFORE    = 'divWebcam_Extension_FlagBefore';     //>
+//. const                                   g_sGUIdIVfLAG_NEXT      = 'divWebcam_Extension_FlagNext'  ;     //>
+//. const                                   g_sGUIiNrANGEzOOM       = 'inrangeGuiZoom'                ;     //>
+//. const                                   g_sGUIiNrNAGEbRIGHT     = 'inrangeGuiBright'              ;     //>
+//. const                                   g_sGUIiNrANGEcONTRAST   = 'inrangeGuiContrast'            ;     //>
 
 
 class                                   ShaderRenderer////////////////////////////////////////////////////#
@@ -242,11 +242,11 @@ class                                   ShaderRenderer//////////////////////////
                                                                                                         //>
 //  var                                eleSides    = document.getElementsByName(g_sINoPTIONsIDE      ); //> get data from a field on a configuration page? Text in input field.
 //  var                                eleFlips    = document.getElementsByName(g_sINoPTIONfLIP      ); //> get data from a field on a configuration page? Text in input field.
-  var                                eleBefore   = document.getElementById(   g_sGUIdIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
-  var                                eleNext     = document.getElementById(   g_sGUIdIVfLAG_NEXT   ); //> get data from a field on a configuration page? Text in input field.
-  var                                eleZoom     = document.getElementById(   g_sGUIiNrANGEzOOM    ); //>
-  var                                eleBright   = document.getElementById(   g_sGUIiNrNAGEbRIGHT  ); //>
-  var                                eleContrast = document.getElementById(   g_sGUIiNrANGEcONTRAST); //>
+//$  var                                eleBefore   = document.getElementById(   g_sGUIdIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
+//$  var                                eleNext     = document.getElementById(   g_sGUIdIVfLAG_NEXT   ); //> get data from a field on a configuration page? Text in input field.
+//$  var                                eleZoom     = document.getElementById(   g_sGUIiNrANGEzOOM    ); //>
+//$  var                                eleBright   = document.getElementById(   g_sGUIiNrNAGEbRIGHT  ); //>
+//$  var                                eleContrast = document.getElementById(   g_sGUIiNrANGEcONTRAST); //>
 //  /*DEV*/ G_ASSERT( eleSides    ,"eleSides    not got." );                                            //>
 //  /*DEV*/ G_ASSERT( eleFlips    ,"eleFlips    not got." );                                            //>
   /*DEV*/ G_ASSERT( eleBefore   ,"eleBefore   not got." );                                            //>
@@ -387,18 +387,15 @@ function                                Tick(//FilterStream/////////////////////
   var                                   sData                   = eleDivTest.innerHTML;
   if( sData !== g_sDivTestWas ){
    console.log( 'changed !!!!!!!!!! '+ sData );
-//> Decode and put in 
    try{
     var                                 ob                      = JSON.parse(sData);
-    console.log( ob ); //> {"inrangeGuiZoom":"78","inrangeGuiBright":"50","inrangeGuiContrast":"50"}
-    if( ob['inrangeGuiZoom'    ] ){ g_dZoom       = ob['inrangeGuiZoom'    ]; g_dZoom       = Math.pow( 3 ,parseFloat(g_dZoom      )*0.01     ); }//>    1 to   3
-    if( ob['inrangeGuiBright'  ] ){ g_dBrightness = ob['inrangeGuiBright'  ]; g_dBrightness =              parseFloat(g_dBrightness)*2.55 - 128; }//> -128 to 128
-    if( ob['inrangeGuiContrast'] ){ g_dContrast   = ob['inrangeGuiContrast']; g_dContrast   = 3*(          parseFloat(g_dContrast  ) - 50     ); }//> -150 to 150
-console.log('111 '+ g_dZoom +' '+ g_dBrightness +' '+ g_dContrast);
+    console.log( ob );
+    if( ob['inrangeZoom'    ] ){ g_dZoom       = Math.pow( 3 ,parseFloat( ob['inrangeZoom'    ] )*0.01     ); }//>    1 to   3
+    if( ob['inrangeBright'  ] ){ g_dBrightness =              parseFloat( ob['inrangeBright'  ] )*2.55 - 128; }//> -128 to 128
+    if( ob['inrangeContrast'] ){ g_dContrast   = 3*(          parseFloat( ob['inrangeContrast'] ) - 50     ); }//> -150 to 150
    }catch(e){ console.log('bad '+ e); }
    g_sDivTestWas = sData;
-  }//if
- }//if
+ }}//if//if
                                                                                                         //>
  g_context2dOut.globalAlpha = 1.0;                                                                      //> Restore opaque addition.
  g_context2dOut.drawImage( g_eleVideoIn                                                                 //>
@@ -481,19 +478,18 @@ console.log('111 '+ g_dZoom +' '+ g_dBrightness +' '+ g_dContrast);
 
 function                                Go_Tick(//////////////////////////////////////////////////////////# Start of stream modification - start periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
- Go_Gui();                                                                                              //>
-
+// Go_Gui();                                                                                              //>
  g_eleCanvasOut.width    = g_nW_px;                                                                     //>
  g_eleCanvasOut.height   = g_nH_px;                                                                     //>
  g_imagedataWas          = g_context2dOut.createImageData(g_nW_px+2 ,g_nH_px+2);                        //>
                                                                                                         //>
  g_whenGo_ms = Date.now();                                                                              //>
- var                                    eleBefore    = document.getElementById( g_sGUIdIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
- var                                    eleNext      = document.getElementById( g_sGUIdIVfLAG_NEXT   ); //> get data from a field on a configuration page? Text in input field.
- /*DEV*/ G_ASSERT( eleBefore ,"eleBefore not got." );                                                   //>
- /*DEV*/ G_ASSERT( eleNext   ,"eleNext   not got." );                                                   //>
- eleBefore.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                       //> Handle clicks on previous and
- eleNext.addEventListener(   'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );                       //> next flag buttons.
+//$ var                                    eleBefore    = document.getElementById( g_sGUIdIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
+//$ var                                    eleNext      = document.getElementById( g_sGUIdIVfLAG_NEXT   ); //> get data from a field on a configuration page? Text in input field.
+//$ /*DEV*/ G_ASSERT( eleBefore ,"eleBefore not got." );                                                   //>
+//$ /*DEV*/ G_ASSERT( eleNext   ,"eleNext   not got." );                                                   //>
+//$ eleBefore.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                       //> Handle clicks on previous and
+//$ eleNext.addEventListener(   'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );                       //> next flag buttons.
                                                                                                         //>
  Tick();                                                                                                //> Start periodic routine
 }//Go_Tick////////////////////////////////////////////////////////////////////////////////////////////////>
@@ -546,6 +542,7 @@ async function                          Go_ModifyMediaDevices_GetUserMedia(/////
   g_eleVideoIn.autoplay  = true;                                                                        //> TODO Shut down and restart g_shaderrenderer???
   g_eleVideoIn.addEventListener( 'playing'                                                              //>
   ,function(){                                                                                          //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
+//??? Load more script?
     Go_Tick();                                                                                          //>
   });                                                                                                   //> .
                                                                                                         //>
@@ -574,64 +571,64 @@ function                                Go_LoadFlags(///////////////////////////
 }//Go_LoadFlags///////////////////////////////////////////////////////////////////////////////////////////>
 
 
-function                                Go_Gui(///////////////////////////////////////////////////////////# Create div to be used for user to set options.
-){                                      //////////////////////////////////////////////////////////////////#
-//. //window['chrome']['storage']['local']['get']
- const cat = window.localStorage.getItem('myCat');
-// chrome.storage.local.get(             //    variable chrome is undeclared
-//  ['iExtensionVirtualWebcam_Flag']                                                                      //> Get user settings default values.
-// ,function(result){   console.log('Value currently is ' + result.iExtensionVirtualWebcam_Flag);   }
-// );       
-
-
- const                                  eleGui                  = document.createElement('div');        //> Create div that can be used for user to set options.
- eleGui.style.display    = 'block';                                                              //>
- eleGui.position         = 'absolute'    ;                                                              //>
- eleGui.left             = '10px'        ;                                                              //>
- eleGui.top              = '20px'        ;                                                              //>
- eleGui.style.width      = '400px'       ;                                                              //>
- eleGui.style.height     = '100px'       ;                                                              //>
- eleGui.style.background = '#FFFFCC'     ;                                                              //> Pale yellow
-var sDummy =
-   '<span id="'+ g_sGUIdIVfLAG_BEFORE +'" style="'                                                      //> Select previous flag.
-  +                                      'cursor'               +':pointer'                             //>
-  +                                     ';width'                +':4rem'                                //>
-  +                                     ';font-size'            +':2em'                                 //>
-  +                                     ';font-weight'          +':bold'                                //>
-  +'">'+ " < " +'</span>'                                                                               //>
-  +'<span id="'+ g_sGUIdIVfLAG_NEXT +'" style="'                                                        //> Select next flag.
-  +                                      'cursor'               +':pointer'                             //>
-  +                                     ';width'                +':4rem'                                //>
-  +                                     ';font-size'            +':2em'                                 //>
-  +                                     ';font-weight'          +':bold'                                //>
-  +'">'+ " > " +'</span>'                                                                               //>
-                                                                                                        //>
-  +'<br>'                                                                                               //>
-  +'<div>'                                                                                              //>
-  + '<input type="range" id="'+ g_sGUIiNrANGEzOOM                                                       //>
-  +                 '" name="'+ g_sGUIiNrANGEzOOM     +'" min="0" max="100">'                           //> Arbitrary scale of 100.
-  + '<label for="'+             g_sGUIiNrANGEzOOM     +'">'+ "Zoom"       +'</label>'                   //>
-  + '<br>'                                                                                              //>
-  + '<input type="range" id="'+ g_sGUIiNrNAGEbRIGHT                                                     //>
-  +                 '" name="'+ g_sGUIiNrNAGEbRIGHT   +'" min="0" max="100">'                           //> Arbitrary scale of 100.
-  + '<label for="'+             g_sGUIiNrNAGEbRIGHT   +'">'+ "Brightness" +'</label>'                   //>
-  + '<br>'                                                                                              //>
-  + '<input type="range" id="'+ g_sGUIiNrANGEcONTRAST                                                   //>
-  +                 '" name="'+ g_sGUIiNrANGEcONTRAST +'" min="0" max="100">'                           //> Arbitrary scale of 100.
-  + '<label for="'+             g_sGUIiNrANGEcONTRAST +'">'+ "Contrast"   +'</label>'                   //>
-  +'</div>'                                                                                             //>
-//  '<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_L" value="L" checked><label for="'+g_sINoPTIONsIDE+'_L">'+"L"     +'</label>'
-// +'<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_R" value="R">'     +'<label for="'+g_sINoPTIONsIDE+'_R">'+"R"     +'</label>'
-// +' &nbsp; &nbsp; &nbsp; '
-// +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_N" value="N" checked><label for="'+g_sINoPTIONfLIP+'_N">'+"Normal"+'</label>'
-// +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_F" value="F">'     +'<label for="'+g_sINoPTIONfLIP+'_F">'+"Flip"  +'</label>'
-// +' &nbsp; &nbsp; &nbsp; '                                                                            //>
- ;                                                                                                      //>
-
- //console.log(sDummy);
- eleGui.innerHTML        = sDummy;                                                                      //> HTML for a simple pop-up control panel:
- document.body.appendChild(eleGui);                                                                     //>
-}//Go_Gui/////////////////////////////////////////////////////////////////////////////////////////////////>
+//. function                                Go_Gui(///////////////////////////////////////////////////////////# Create div to be used for user to set options.
+//. ){                                      //////////////////////////////////////////////////////////////////#
+//. //. //window['chrome']['storage']['local']['get']
+//.  const cat = window.localStorage.getItem('myCat');
+//. // chrome.storage.local.get(             //    variable chrome is undeclared
+//. //  ['iExtensionVirtualWebcam_Flag']                                                                      //> Get user settings default values.
+//. // ,function(result){   console.log('Value currently is ' + result.iExtensionVirtualWebcam_Flag);   }
+//. // );       
+//. 
+//. 
+//.  const                                  eleGui                  = document.createElement('div');        //> Create div that can be used for user to set options.
+//.  eleGui.style.display    = 'block';                                                              //>
+//.  eleGui.position         = 'absolute'    ;                                                              //>
+//.  eleGui.left             = '10px'        ;                                                              //>
+//.  eleGui.top              = '20px'        ;                                                              //>
+//.  eleGui.style.width      = '400px'       ;                                                              //>
+//.  eleGui.style.height     = '100px'       ;                                                              //>
+//.  eleGui.style.background = '#FFFFCC'     ;                                                              //> Pale yellow
+//. var sDummy =
+//.    '<span id="'+ g_sGUIdIVfLAG_BEFORE +'" style="'                                                      //> Select previous flag.
+//.   +                                      'cursor'               +':pointer'                             //>
+//.   +                                     ';width'                +':4rem'                                //>
+//.   +                                     ';font-size'            +':2em'                                 //>
+//.   +                                     ';font-weight'          +':bold'                                //>
+//.   +'">'+ " < " +'</span>'                                                                               //>
+//.   +'<span id="'+ g_sGUIdIVfLAG_NEXT +'" style="'                                                        //> Select next flag.
+//.   +                                      'cursor'               +':pointer'                             //>
+//.   +                                     ';width'                +':4rem'                                //>
+//.   +                                     ';font-size'            +':2em'                                 //>
+//.   +                                     ';font-weight'          +':bold'                                //>
+//.   +'">'+ " > " +'</span>'                                                                               //>
+//.                                                                                                         //>
+//.   +'<br>'                                                                                               //>
+//.   +'<div>'                                                                                              //>
+//.   + '<input type="range" id="'+ g_sGUIiNrANGEzOOM                                                       //>
+//.   +                 '" name="'+ g_sGUIiNrANGEzOOM     +'" min="0" max="100">'                           //> Arbitrary scale of 100.
+//.   + '<label for="'+             g_sGUIiNrANGEzOOM     +'">'+ "Zoom"       +'</label>'                   //>
+//.   + '<br>'                                                                                              //>
+//.   + '<input type="range" id="'+ g_sGUIiNrNAGEbRIGHT                                                     //>
+//.   +                 '" name="'+ g_sGUIiNrNAGEbRIGHT   +'" min="0" max="100">'                           //> Arbitrary scale of 100.
+//.   + '<label for="'+             g_sGUIiNrNAGEbRIGHT   +'">'+ "Brightness" +'</label>'                   //>
+//.   + '<br>'                                                                                              //>
+//.   + '<input type="range" id="'+ g_sGUIiNrANGEcONTRAST                                                   //>
+//.   +                 '" name="'+ g_sGUIiNrANGEcONTRAST +'" min="0" max="100">'                           //> Arbitrary scale of 100.
+//.   + '<label for="'+             g_sGUIiNrANGEcONTRAST +'">'+ "Contrast"   +'</label>'                   //>
+//.   +'</div>'                                                                                             //>
+//. //  '<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_L" value="L" checked><label for="'+g_sINoPTIONsIDE+'_L">'+"L"     +'</label>'
+//. // +'<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_R" value="R">'     +'<label for="'+g_sINoPTIONsIDE+'_R">'+"R"     +'</label>'
+//. // +' &nbsp; &nbsp; &nbsp; '
+//. // +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_N" value="N" checked><label for="'+g_sINoPTIONfLIP+'_N">'+"Normal"+'</label>'
+//. // +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_F" value="F">'     +'<label for="'+g_sINoPTIONfLIP+'_F">'+"Flip"  +'</label>'
+//. // +' &nbsp; &nbsp; &nbsp; '                                                                            //>
+//.  ;                                                                                                      //>
+//. 
+//.  //console.log(sDummy);
+//.  eleGui.innerHTML        = sDummy;                                                                      //> HTML for a simple pop-up control panel:
+//.  document.body.appendChild(eleGui);                                                                     //>
+//. }//Go_Gui/////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
 async function                          Go(///////////////////////////////////////////////////////////////# Main execution starts here.

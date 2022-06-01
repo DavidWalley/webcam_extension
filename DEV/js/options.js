@@ -3,9 +3,9 @@
 
 function                                restore_options(//////////////////////////////////////////////////> Restores select box and checkbox state using the preferences stored in chrome.storage.
 ){                                      //////////////////////////////////////////////////////////////////>
- chrome.storage.local.get( 'dZoom'    ,function(a){ document.getElementById('inrangeGuiZoom'    ).value = a.dZoom    ; } ); //>
- chrome.storage.local.get( 'dBright'  ,function(a){ document.getElementById('inrangeGuiBright'  ).value = a.dBright  ; } ); //>
- chrome.storage.local.get( 'dContrast',function(a){ document.getElementById('inrangeGuiContrast').value = a.dContrast; } ); //>
+ chrome.storage.local.get( 'dZoom'    ,function(a){ document.getElementById('inrangeZoom'    ).value = a.dZoom    ; } ); //>
+ chrome.storage.local.get( 'dBright'  ,function(a){ document.getElementById('inrangeBright'  ).value = a.dBright  ; } ); //>
+ chrome.storage.local.get( 'dContrast',function(a){ document.getElementById('inrangeContrast').value = a.dContrast; } ); //>
 }//restore_options////////////////////////////////////////////////////////////////////////////////////////>
 
 
@@ -34,9 +34,9 @@ function                                Send(///////////////////////////////////
  ).then(  function(a_tab){// // // // // // // // // // // // // // // // // // // // // // // // // // //>
            Send_ToTabs( a_tab                                                                           //>
            ,JSON.stringify(                                                                             //>
-             {'inrangeGuiZoom'     : document.getElementById('inrangeGuiZoom'    ).value                //>
-             ,'inrangeGuiBright'   : document.getElementById('inrangeGuiBright'  ).value                //>
-             ,'inrangeGuiContrast' : document.getElementById('inrangeGuiContrast').value                //>
+             {'inrangeZoom'     : document.getElementById('inrangeZoom'    ).value                //>
+             ,'inrangeBright'   : document.getElementById('inrangeBright'  ).value                //>
+             ,'inrangeContrast' : document.getElementById('inrangeContrast').value                //>
              }                                                                                          //>
             )                                                                                           //>
            );                                                                                           //>
@@ -47,8 +47,8 @@ function                                Send(///////////////////////////////////
 
 
 document.addEventListener('DOMContentLoaded' ,restore_options);                                         //>
-document.getElementById('inrangeGuiZoom'    ).oninput = function(){ Send(); chrome.storage.local.set( {dZoom     : this.value} ,restore_options ); } //>
-document.getElementById('inrangeGuiBright'  ).oninput = function(){ Send(); chrome.storage.local.set( {dBright   : this.value} ,restore_options ); } //>
-document.getElementById('inrangeGuiContrast').oninput = function(){ Send(); chrome.storage.local.set( {dContrast : this.value} ,restore_options ); } //>
+document.getElementById('inrangeZoom'    ).oninput = function(){ Send(); chrome.storage.local.set( {dZoom     : this.value} ,restore_options ); } //>
+document.getElementById('inrangeBright'  ).oninput = function(){ Send(); chrome.storage.local.set( {dBright   : this.value} ,restore_options ); } //>
+document.getElementById('inrangeContrast').oninput = function(){ Send(); chrome.storage.local.set( {dContrast : this.value} ,restore_options ); } //>
 
 //End of file.
