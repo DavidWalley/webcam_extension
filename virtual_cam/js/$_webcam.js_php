@@ -8,6 +8,7 @@
 // Fragment Shader = 2nd part of GPU program - In 3-D rendering program, this code is run more-or-less on a per-output pixel order. Do as much work as you can in the vertex shader, rather than in the fragment shader.
 // u               = uniform
 
+
 const                                   N                       = "\n";                                 //> Newline. Used within GPU code text, to make reports from the GPU easier to understand, i.e, gives line with the error.
 
 /*DEV*/ function                        G_ASSERT(/////////////////////////////////////////////////////////# Power comments during development.

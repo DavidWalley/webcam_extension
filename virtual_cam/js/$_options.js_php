@@ -13,7 +13,7 @@ function                                Send_ToTabs(////////////////////////////
                                         a_tabs                                                          //>
 ,                                       a_s
 ){                                      //////////////////////////////////////////////////////////////////>
-console.log(a_tabs);                                                                                    //>
+ console.log(a_tabs);                                                                                    //>
  for( let tab of a_tabs) {                                                                              //>
   chrome.tabs.sendMessage(                                                                              //> ###
    tab.id                                                                                               //>
