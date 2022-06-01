@@ -127,9 +127,9 @@ const g_sCodeFragmentShader =
   N +
   "v1 = ( v0 - 0.85 )*15.0;" +
   N +
-  "if( u1 < 0.0        ||   v1 < 0.0              ){ gl_FragColor = vec4(1.0,0.0,0.1 ,1.0);    return;}" +
+  "if( u1 < 0.0        ||   v1 < 0.0          ){ gl_FragColor = vec4(1.0,0.0,0.1 ,1.0);    return;}" +
   N +
-  "if(      1.0 < u1   ||        1.0 < v1         ){ gl_FragColor = vec4(0.0,1.0,0.0 ,1.0);    return;}" +
+  "if(      1.0 < u1   ||        1.0 < v1     ){ gl_FragColor = vec4(0.0,1.0,0.0 ,1.0);    return;}" +
   N +
   "r1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).r;" +
   N +
@@ -137,7 +137,7 @@ const g_sCodeFragmentShader =
   N +
   "b1 = texture2D( usampler2d2_Dave ,vec2(u1 ,v1) ).b;" +
   N +
-  "if( r1 < 0.01   &&   g1 < 0.01   &&   b1 < 0.01 ){ gl_FragColor = vec4(r0,g0,b0,1.0);  return;}" +
+  "if( r1<0.01   &&   g1<0.01   &&   b1<0.01  ){ gl_FragColor = vec4(r0 ,g0 ,b0  ,1.0);    return;}" +
   N +
   "gl_FragColor = vec4(r1*0.2 + r0*0.8" +
   ",g1*0.2 + g0*0.8" +
@@ -205,8 +205,7 @@ const g_sCodeFragmentShader =
   N +
   "return;" +
   N +
-  "}" +
-  "}" +
+  "}}" +
   "}else{" +
   "dFlutter = (0.06 *sin( 11.0*(u0 + 0.4*ufNow_ms) )" +
   "+0.037*sin( 15.3*(u0 + 0.9*ufNow_ms) )" +
@@ -274,7 +273,11 @@ const g_sCodeFragmentShader =
   N;
 const g_sINoPTIONsIDE = "inradioWebcam_Extension_Side";
 const g_sINoPTIONfLIP = "inradioWebcam_Extension_Flip";
-const g_sDIVfLAG = "divWebcam_Extension_Flag";
+const g_sGUIdIVfLAG_BEFORE = "divWebcam_Extension_FlagBefore";
+const g_sGUIdIVfLAG_NEXT = "divWebcam_Extension_FlagNext";
+const g_sGUIiNrANGEzOOM = "inrangeGuiZoom";
+const g_sGUIiNrNAGEbRIGHT = "inrangeGuiBright";
+const g_sGUIiNrANGEcONTRAST = "inrangeGuiContrast";
 class ShaderRenderer {
   //
   constructor( // Create instance of ShaderRenderer - the connection to the GPU.
@@ -289,7 +292,6 @@ class ShaderRenderer {
     this._eleVideoIn = a_eleVideoIn;
     this._eleFlagIn = new Image();
     me._eleFlagIn.src = a_sFlagIn;
-    this._iFlag = 0;
     this._eleDaveIn = new Image();
     me._eleDaveIn.src = a_sDaveIn;
     this._g = me._eleCanvasOut.getContext("webgl");
@@ -378,31 +380,16 @@ class ShaderRenderer {
     //
     const me = this;
     const g = me._g;
-    var eleSides = document.getElementsByName(g_sINoPTIONsIDE);
-    var eleFlips = document.getElementsByName(g_sINoPTIONfLIP);
-    var elePrevious = document.getElementById(g_sDIVfLAG + "_0");
-    var eleNext = document.getElementById(g_sDIVfLAG + "_2");
-    var eleZoom = document.getElementById("inrangeZoom");
-    if (!eleSides) {
-      return;
-    }
-    if (!eleFlips) {
-      return;
-    }
-    if (!elePrevious) {
+    var eleBefore = document.getElementById(g_sGUIdIVfLAG_BEFORE);
+    var eleNext = document.getElementById(g_sGUIdIVfLAG_NEXT);
+    var eleZoom = document.getElementById(g_sGUIiNrANGEzOOM);
+    var eleBright = document.getElementById(g_sGUIiNrNAGEbRIGHT);
+    var eleContrast = document.getElementById(g_sGUIiNrANGEcONTRAST);
+    if (!eleBefore) {
       return;
     }
     if (!eleNext) {
       return;
-    }
-    if (!me._bEventHandlersGo) {
-      elePrevious.addEventListener("click", function () {
-        me._iFlag = (me._iFlag + 7) % 8;
-      });
-      eleNext.addEventListener("click", function () {
-        me._iFlag = (me._iFlag + 1) % 8;
-      });
-      me._bEventHandlersGo = true;
     }
     g.enableVertexAttribArray(me._attriblocationPosition);
     g.bindBuffer(g.ARRAY_BUFFER, me._bufferPosition);
@@ -415,25 +402,8 @@ class ShaderRenderer {
     g.uniform1i(me._usampler2d1_Flag, 1);
     g.uniform1i(me._usampler2d2_Dave, 2);
     g.uniform1f(me._location_ufNow_ms, (Date.now() % 100000) * 0.0001);
-    var sSide = "";
-    var sFlip = "";
-    var i = 0;
-    for (i = 0; i < eleSides.length; i++) {
-      if (eleSides[i].checked) {
-        sSide = eleSides[i].value;
-        break;
-      }
-    }
-    for (i = 0; i < eleFlips.length; i++) {
-      if (eleFlips[i].checked) {
-        sFlip = eleFlips[i].value;
-        break;
-      }
-    }
     var dZoom = eleZoom.value;
     dZoom = Math.pow(2, parseFloat(100 - dZoom) * 0.02) * 0.5;
-    g.uniform1f(me._location_ufSide, "R" === sSide ? 1 : -1);
-    g.uniform1f(me._location_ufFlip, "N" === sFlip ? 1 : -1);
     g.uniform1f(me._location_ufZoom, dZoom);
     g.uniform2f(me._location_vec2Size, g.canvas.width, g.canvas.height);
     g.drawArrays(g.TRIANGLES, 0, 6);
@@ -485,87 +455,142 @@ class ShaderRenderer {
   }
 }
 let g_shaderrenderer = null;
-let g_eleVideo = null;
-let g_eleCanvasVideo = null;
-let g_context2dVideo = null;
-let g_nW_px = 640;
-let g_nH_px = 480;
+let g_eleVideoIn = null;
+let g_eleCanvasOut = null;
+let g_context2dOut = null;
+let g_imagedataWas = null;
 let g_eleCanvasFlags = null;
 let g_context2dFlags = null;
 let g_imageFlags = null;
-let g_imageDataFlags = null;
+let g_imagedataFlags = null;
+let g_nW_px = 640;
+let g_nH_px = 480;
 let g_whenGo_ms = null;
+let g_iFlag = 0;
+let g_dZoom = 1;
+let g_dBrightness = 0;
+let g_dContrast = 0;
 
 function Tick() { // Periodic routine.
   //
-  if (g_context2dVideo) {
-    var eleZoom = document.getElementById("inrangeZoom");
-    var dZoom = eleZoom.value;
-    dZoom = Math.pow(3, parseFloat(dZoom) * 0.01);
-    g_context2dVideo.drawImage(
-      g_eleVideo,
-      (g_nW_px - g_nW_px * dZoom) * 0.5,
-      (g_nH_px - g_nH_px * dZoom) * 0.5,
-      g_nW_px * dZoom,
-      g_nH_px * dZoom
-    );
-    let imagedataVideo = g_context2dVideo.getImageData(0, 0, g_nW_px, g_nH_px);
-    let adVideo = imagedataVideo.data;
-    let l = adVideo.length;
-    var i = 0;
-    let nFlagH = g_eleCanvasFlags.height;
-    let nFlagW = g_eleCanvasFlags.width;
-    let tookNow_s = (Date.now() - g_whenGo_ms) * 0.001;
-    for (let iCell = 0; iCell < g_nW_px; iCell++) {
-      var u = iCell / g_nW_px;
-      i = iCell * 4;
-      var dFlutter =
-        0.04 * Math.cos(iCell * 0.022 - tookNow_s * 1.6) +
-        0.027 * Math.sin(iCell * 0.031 - tookNow_s * 0.9) +
-        0.019 * Math.sin(iCell * 0.045 - tookNow_s * 2.6);
-      for (let iRow = 0; iRow < g_nH_px; iRow++) {
-        var v = iRow / g_nH_px;
-        let r = adVideo[i];
-        let g = adVideo[i + 1];
-        let b = adVideo[i + 2];
-        let iFlagX = 0.5;
-        let iFlagY = 0;
-        if (g_imageDataFlags) {
-          if (0 <= u && u < 0.4) {
-            let uFlag = Math.floor(((u + iFlagX) * nFlagW) / 2 / 0.4);
-            if (0.7 + u * dFlutter <= v && v < 1 + u * dFlutter) {
-              let vFlag = Math.floor(
-                ((v - u * dFlutter - 0.7 + iFlagY) * nFlagH) / 4 / 0.3
-              );
-              let iFlag = (vFlag * nFlagW + uFlag) * 4;
-              r = 500 * dFlutter + r * 0.5 + g_imageDataFlags.data[iFlag] * 0.5;
-              g =
-                500 * dFlutter +
-                g * 0.5 +
-                g_imageDataFlags.data[iFlag + 1] * 0.5;
-              b =
-                500 * dFlutter +
-                b * 0.5 +
-                g_imageDataFlags.data[iFlag + 2] * 0.5;
-            }
-          }
-        }
-        adVideo[i] = r < 0 ? 0 : 255 < r ? 255 : Math.floor(r);
-        adVideo[i + 1] = g < 0 ? 0 : 255 < g ? 255 : Math.floor(g);
-        adVideo[i + 2] = b < 0 ? 0 : 255 < b ? 255 : Math.floor(b);
-        adVideo[i + 3] = 255;
-        i += g_nW_px * 4;
-      }
-    }
-    g_context2dVideo.putImageData(imagedataVideo, 0, 0);
+  if (!g_context2dOut) {
+    requestAnimationFrame(Tick);
+    return;
   }
-  requestAnimationFrame(function () {
-    Tick();
-  });
+  var eleZoom = document.getElementById(g_sGUIiNrANGEzOOM);
+  var eleBright = document.getElementById(g_sGUIiNrNAGEbRIGHT);
+  var eleContrast = document.getElementById(g_sGUIiNrANGEcONTRAST);
+  var dZoom = eleZoom.value;
+  dZoom = Math.pow(3, parseFloat(dZoom) * 0.01);
+  var dBrightness = eleBright.value;
+  dBrightness = dBrightness * 2.55 - 128;
+  var dContrast = eleContrast.value;
+  dContrast = 3 * (dContrast - 50);
+  if (
+    g_dZoom !== dZoom ||
+    g_dBrightness !== dBrightness ||
+    g_dContrast !== dContrast
+  ) {
+    g_dZoom = dZoom;
+    g_dBrightness = dBrightness;
+    g_dContrast = dContrast;
+    window.localStorage.setItem("myCat", "Tom");
+  }
+  g_context2dOut.globalAlpha = 1.0;
+  g_context2dOut.drawImage(
+    g_eleVideoIn,
+    (g_nW_px - g_nW_px * g_dZoom) * 0.5,
+    (g_nH_px - g_nH_px * g_dZoom) * 0.5,
+    g_nW_px * g_dZoom,
+    g_nH_px * g_dZoom
+  );
+  var adAdjust = [];
+  var dF = (259 * (dContrast + 255)) / 255 / (259 - dContrast);
+  for (var i = 0; i <= 255; i++) {
+    adAdjust[i] = 128 + dF * (i - 128) + dBrightness;
+  }
+  let imagedata0 = g_context2dOut.getImageData(0, 0, g_nW_px, g_nH_px);
+  var adWas = g_imagedataWas.data;
+  var ad0 = imagedata0.data;
+  var k = 0;
+  var jL = k + g_nW_px;
+  var jT = k + 4;
+  var j0 = k + g_nW_px + 4;
+  var jB = k + 2 * g_nW_px + 4;
+  var jR = k + g_nW_px + 8;
+  for (var iRow = 0; iRow < g_nH_px; iRow++) {
+    for (var iCell = 0; iCell < g_nW_px; iCell++) {
+      var r = ad0[k];
+      var g = ad0[k + 1];
+      var b = ad0[k + 2];
+      adWas[j0] = adWas[j0] >> 1;
+      if (r + b < g * 1.8) {
+        adWas[j0] |= 0x80;
+        if (0x40 < adWas[j0]) {
+          r = (adAdjust[r] + 255) * 0.5;
+          g = (adAdjust[g] + 255) * 0.5;
+          b = (adAdjust[b] + 255) * 0.5;
+        } else {
+          r = adAdjust[r];
+          g = adAdjust[g];
+          b = adAdjust[b];
+        }
+      } else {
+        r = adAdjust[r];
+        g = adAdjust[g];
+        b = adAdjust[b];
+      }
+      ad0[k] = r < 0 ? 0 : 255 < r ? 255 : Math.floor(r);
+      ad0[k + 1] = g < 0 ? 0 : 255 < g ? 255 : Math.floor(g);
+      ad0[k + 2] = b < 0 ? 0 : 255 < b ? 255 : Math.floor(b);
+      k += 4;
+      jL += 4;
+      jT += 4;
+      j0 += 4;
+      jB += 4;
+      jR += 4;
+    }
+  }
+  g_context2dOut.putImageData(imagedata0, 0, 0);
+  let nFlagH = g_eleCanvasFlags.height;
+  let nFlagW = g_eleCanvasFlags.width;
+  g_context2dOut.globalAlpha = 0.6;
+  var dXf = ((g_iFlag % 2) * nFlagW) / 2;
+  var dYf = ((Math.floor(g_iFlag * 0.5) % 4) * nFlagH) / 4;
+  g_context2dOut.drawImage(
+    g_eleCanvasFlags,
+    dXf,
+    dYf,
+    nFlagW / 2,
+    nFlagH / 4,
+    0,
+    g_nH_px * 0.7,
+    g_nW_px * 0.4,
+    g_nH_px * 0.3
+  );
+  requestAnimationFrame(Tick);
 }
 
-async function ModifyMediaFunctions() { //
+function Go_Tick() { // Start of stream modification - start periodic routine.
   //
+  Go_Gui();
+  g_eleCanvasOut.width = g_nW_px;
+  g_eleCanvasOut.height = g_nH_px;
+  g_imagedataWas = g_context2dOut.createImageData(g_nW_px + 2, g_nH_px + 2);
+  g_whenGo_ms = Date.now();
+  var eleBefore = document.getElementById(g_sGUIdIVfLAG_BEFORE);
+  var eleNext = document.getElementById(g_sGUIdIVfLAG_NEXT);
+  eleBefore.addEventListener("click", function () {
+    g_iFlag = (g_iFlag + 7) % 8;
+  });
+  eleNext.addEventListener("click", function () {
+    g_iFlag = (g_iFlag + 1) % 8;
+  });
+  Tick();
+}
+
+async function Go_ModifyMediaDevices_EnumerateDevices() { // Locally redefine system function to get list of media devices (cameras and microphones).
+  // Change system function locally.
   const enumerateDevicesWas = MediaDevices.prototype.enumerateDevices;
   MediaDevices["prototype"][
     "enumerateDevices"
@@ -582,6 +607,10 @@ async function ModifyMediaFunctions() { //
     result.push(/** @type {!MediaDeviceInfo|!undefined} */ (x));
     return result;
   };
+}
+
+async function Go_ModifyMediaDevices_GetUserMedia() { // Locally redefine system function to get list of cameras, to include the virtual camera.
+  // Change system function locally.
   const getUserMediaWas = MediaDevices.prototype.getUserMedia;
   MediaDevices["prototype"][
     "getUserMedia"
@@ -589,150 +618,142 @@ async function ModifyMediaFunctions() { //
   {
     //
     const args = arguments;
-    if (args.length && args[0].video && args[0].video.deviceId) {
-      if (
-        "virtual" === args[0].video.deviceId ||
-        "virtual" === args[0].video.deviceId.exact
-      ) {
-        const usermedia = await getUserMediaWas.call(navigator.mediaDevices, {
-          video: {
-            facingMode: args[0].facingMode,
-            advanced: args[0].video.advanced,
-            width: g_nW_px,
-            height: g_nH_px,
-          },
-          audio: false,
-        });
-        if (usermedia) {
-          g_eleVideo = document.createElement("video");
-          g_eleCanvasVideo = document.createElement("canvas");
-          g_eleCanvasFlags = document.createElement("canvas");
-          g_context2dVideo = g_eleCanvasVideo.getContext("2d");
-          g_context2dFlags = g_eleCanvasFlags.getContext("2d");
-          g_imageFlags = new Image();
-          g_imageFlags.onload = function () {
-            g_eleCanvasFlags.width = g_imageFlags.width;
-            g_eleCanvasFlags.height = g_imageFlags.height;
-            g_context2dFlags.drawImage(g_imageFlags, 0, 0);
-            g_imageDataFlags = g_context2dFlags.getImageData(
-              0,
-              0,
-              g_eleCanvasFlags.width,
-              g_eleCanvasFlags.height
-            );
-          };
-          g_imageFlags.src = g_sDATAuRIFLAGS;
-          const eleGui = document.createElement("div");
-          eleGui.style.display = "inline-block";
-          eleGui.position = "absolute";
-          eleGui.left = "10px";
-          eleGui.top = "20px";
-          eleGui.style.width = "400px";
-          eleGui.style.height = "100px";
-          eleGui.style.background = "#FFFFCC";
-          eleGui.innerHTML =
-            '<input type="radio" name="' +
-            g_sINoPTIONsIDE +
-            '" id="' +
-            g_sINoPTIONsIDE +
-            '_L" value="L" checked><label for="' +
-            g_sINoPTIONsIDE +
-            '_L">' +
-            "L" +
-            "</label>" +
-            '<input type="radio" name="' +
-            g_sINoPTIONsIDE +
-            '" id="' +
-            g_sINoPTIONsIDE +
-            '_R" value="R">' +
-            '<label for="' +
-            g_sINoPTIONsIDE +
-            '_R">' +
-            "R" +
-            "</label>" +
-            " &nbsp; &nbsp; &nbsp; " +
-            '<input type="radio" name="' +
-            g_sINoPTIONfLIP +
-            '" id="' +
-            g_sINoPTIONfLIP +
-            '_N" value="N" checked><label for="' +
-            g_sINoPTIONfLIP +
-            '_N">' +
-            "Normal" +
-            "</label>" +
-            '<input type="radio" name="' +
-            g_sINoPTIONfLIP +
-            '" id="' +
-            g_sINoPTIONfLIP +
-            '_F" value="F">' +
-            '<label for="' +
-            g_sINoPTIONfLIP +
-            '_F">' +
-            "Flip" +
-            "</label>" +
-            " &nbsp; &nbsp; &nbsp; " +
-            '<span id="' +
-            g_sDIVfLAG +
-            '_0" style="' +
-            "cursor" +
-            ":pointer" +
-            ";width" +
-            ":4rem" +
-            ";font-size" +
-            ":2em" +
-            ";font-weight" +
-            ":bold" +
-            '">' +
-            " < " +
-            "</span>" +
-            '<span id="' +
-            g_sDIVfLAG +
-            '_2" style="' +
-            "cursor" +
-            ":pointer" +
-            ";width" +
-            ":4rem" +
-            ";font-size" +
-            ":2em" +
-            ";font-weight" +
-            ":bold" +
-            '">' +
-            " > " +
-            "</span>" +
-            "<br>" +
-            "<div>" +
-            '<input type="range" id="' +
-            "inrangeZoom" +
-            '" name="' +
-            "inrangeZoom" +
-            '" min="0" max="100">' +
-            '<label for="' +
-            "inrangeZoom" +
-            '">' +
-            "Zoom" +
-            "</label>" +
-            "</div>";
-          document.body.appendChild(eleGui);
-          g_eleVideo.srcObject = usermedia;
-          g_eleVideo.autoplay = true;
-          g_eleVideo.addEventListener("playing", function () {
-            g_eleCanvasVideo.width = g_nW_px;
-            g_eleCanvasVideo.height = g_nH_px;
-            g_whenGo_ms = Date.now();
-            Tick();
-          });
-          return g_eleCanvasVideo.captureStream();
-        }
-      }
+    if (
+      !args.length ||
+      !args[0].video ||
+      !args[0].video.deviceId ||
+      ("virtual" !== args[0].video.deviceId &&
+        "virtual" !== args[0].video.deviceId.exact)
+    ) {
+      return await getUserMediaWas.call(navigator.mediaDevices, ...arguments);
     }
-    const fullfilledpromiseMediaStream = await getUserMediaWas.call(
-      navigator.mediaDevices,
-      ...arguments
-    );
-    return fullfilledpromiseMediaStream;
+    const usermedia = await getUserMediaWas.call(navigator.mediaDevices, {
+      video: {
+        facingMode: args[0].facingMode,
+        advanced: args[0].video.advanced,
+        width: g_nW_px,
+        height: g_nH_px,
+      },
+      audio: false,
+    });
+    if (!usermedia) {
+      return await getUserMediaWas.call(navigator.mediaDevices, ...arguments);
+    }
+    g_eleVideoIn = document.createElement("video");
+    g_eleCanvasOut = document.createElement("canvas");
+    g_context2dOut = g_eleCanvasOut.getContext("2d");
+    g_eleVideoIn.srcObject = usermedia;
+    g_eleVideoIn.autoplay = true;
+    g_eleVideoIn.addEventListener("playing", function () {
+      Go_Tick();
+    });
+    return g_eleCanvasOut.captureStream();
   };
 }
-ModifyMediaFunctions();
+
+function Go_LoadFlags() { // Load image with all predefined flags.
+  // Report nothing. Initialize global variables.
+  g_eleCanvasFlags = document.createElement("canvas");
+  g_context2dFlags = g_eleCanvasFlags.getContext("2d");
+  g_imageFlags = new Image();
+  g_imageFlags.onload = function () {
+    g_eleCanvasFlags.width = g_imageFlags.width;
+    g_eleCanvasFlags.height = g_imageFlags.height;
+    g_context2dFlags.drawImage(g_imageFlags, 0, 0);
+    g_imagedataFlags = g_context2dFlags.getImageData(
+      0,
+      0,
+      g_eleCanvasFlags.width,
+      g_eleCanvasFlags.height
+    );
+  };
+  g_imageFlags.src = g_sDATAuRIFLAGS;
+}
+
+function Go_Gui() { // Create div to be used for user to set options.
+  //
+  const cat = window.localStorage.getItem("myCat");
+  const eleGui = document.createElement("div");
+  eleGui.style.display = "block";
+  eleGui.position = "absolute";
+  eleGui.left = "10px";
+  eleGui.top = "20px";
+  eleGui.style.width = "400px";
+  eleGui.style.height = "100px";
+  eleGui.style.background = "#FFFFCC";
+  eleGui.innerHTML =
+    '<span id="' +
+    g_sGUIdIVfLAG_BEFORE +
+    '" style="' +
+    "cursor" +
+    ":pointer" +
+    ";width" +
+    ":4rem" +
+    ";font-size" +
+    ":2em" +
+    ";font-weight" +
+    ":bold" +
+    '">' +
+    " < " +
+    "</span>" +
+    '<span id="' +
+    g_sGUIdIVfLAG_NEXT +
+    '" style="' +
+    "cursor" +
+    ":pointer" +
+    ";width" +
+    ":4rem" +
+    ";font-size" +
+    ":2em" +
+    ";font-weight" +
+    ":bold" +
+    '">' +
+    " > " +
+    "</span>" +
+    "<br>" +
+    "<div>" +
+    '<input type="range" id="' +
+    g_sGUIiNrANGEzOOM +
+    '" name="' +
+    g_sGUIiNrANGEzOOM +
+    '" min="0" max="100">' +
+    '<label for="' +
+    g_sGUIiNrANGEzOOM +
+    '">' +
+    "Zoom" +
+    "</label>" +
+    "<br>" +
+    '<input type="range" id="' +
+    g_sGUIiNrNAGEbRIGHT +
+    '" name="' +
+    g_sGUIiNrNAGEbRIGHT +
+    '" min="0" max="100">' +
+    '<label for="' +
+    g_sGUIiNrNAGEbRIGHT +
+    '">' +
+    "Brightness" +
+    "</label>" +
+    "<br>" +
+    '<input type="range" id="' +
+    g_sGUIiNrANGEcONTRAST +
+    '" name="' +
+    g_sGUIiNrANGEcONTRAST +
+    '" min="0" max="100">' +
+    '<label for="' +
+    g_sGUIiNrANGEcONTRAST +
+    '">' +
+    "Contrast" +
+    "</label>" +
+    "</div>";
+  document.body.appendChild(eleGui);
+}
+
+async function Go() { // Main execution starts here.
+  // Report nothing.
+  Go_ModifyMediaDevices_EnumerateDevices();
+  Go_ModifyMediaDevices_GetUserMedia();
+  Go_LoadFlags();
+}
 const g_sDATAuRIFLAGS =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABkAAAAZACAYAAAAhDI6nAAAACXBIWXMAAB8/AAAfPwHBe4GKAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAIABJREFUeJzs3Xm4nGV9P/732XKy7wRIgECCEDZZBRQRRdRavy5t1Vq72vpttdRqbdVWay9caivu1IobqyBQRa1arUuhgmxuICCyo6xC" +
   "IGRPTnLOzO+P+5dvEBJyzsnMPDNzXq/rmisnyczzvDNnzsD1vOe+Pz35k3o9AAAALVA/u6fqCNC26rffnp6lS6uOAUAnufba5Igjqk4Bbau36gAAAABA4tOJAACNpQABAAAAAAC6jgIEAAAAAADoOgoQAAAAAACg6yhAAAAAAACArqMAAQAAAAAAuo4CBAAAAAAA6DoKEAAAAAAAoOsoQAAAAAAAgK6jAAEAAAAAALqOAgQAAAAAAOg6" +
@@ -1748,3 +1769,4 @@ const g_sDATAuRIFLAGS =
   "lDoGIJIkSZIkSZIkKXUMQCRJkiRJkiRJUuoYgEiSJEmSJEmSpNQxAJEkSZIkSZIkSaljACJJkiRJkiRJklLHAESSJEmSJEmSJKWOAYgkSZIkSZIkSUodAxBJkiRJkiRJkpQ6BiCSJEmSJEmSJCl1DEAkSZIkSZIkSVLqGIBIkiRJkiRJkqTUMQCRJEmSJEmSJEmpYwAiSZIkSZIkSZJSxwBEkiRJkiRJkiSljgGIJEmSJEmSJElKHQMQ" +
   "SZIkSZIkSZKUOgYgkiRJkiRJkiQpdQxAJEmSJEmSJElS6hiASJIkSZIkSZKk1DEAkSRJkiRJkiRJqWMAIkmSJEmSJEmSUscARJIkSZIkSZIkpY4BiCRJkiRJkiRJSh0DEEmSJEmSJEmSlDoGIJIkSZIkSZIkKXUMQCRJkiRJkiRJUuoYgEiSJEmSJEmSpNQxAJEkSZIkSZIkSaljACJJkiRJkiRJklLHAESSJEmSJEmSJKWOAYgkSZIk" +
   "SZIkSUqd/w+NKpCw7v0oZgAAAABJRU5ErkJggg==";
+Go();

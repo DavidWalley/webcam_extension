@@ -1,19 +1,23 @@
 // $_inject.js_php - Inject a script into all pages running in Chrome after Daves Virtual Webcam extension is installed (as mentioned in manifest.json extension file).
 // (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
+// Can use chrome.runtime
+
 'use strict';                                                                                           //>
                                                                                                         //>
-const                                   script1                 = document.createElement('script');     //>
-script1.setAttribute( 'type' ,'text/javascript'                                                    );   //>
-/*DEV*/ script1.setAttribute( 'src' ,window['chrome']['runtime']['getURL']('js/$_injected.js_php') );   //> Form a URL to get to this file. For development.
-//*PRO*/script1.setAttribute( 'src' ,window['chrome']['runtime']['getURL'](  'js/injected.js'    ) );   //> For production with Closure Compiled code.
+const                                   scriptWebcam            = document.createElement('script');     //> Document is the host page DOM that this code is running in. We are going to inject a script into it.
+scriptWebcam.setAttribute(        'type','text/javascript'                                           ); //> The script is in JavaScript.
+/*DEV*/ scriptWebcam.setAttribute( 'src',window['chrome']['runtime']['getURL']('js/$_webcam.js_php') ); //> Form a URL to get to the main code file. For development.
+//*PRO*/scriptWebcam.setAttribute( 'src',window['chrome']['runtime']['getURL'](  'js/webcam.js'    ) ); //> Form a URL to get to the main code file. For production with Closure Compiled code.
                                                                                                         //>
-const                                   head              =    document.head                            //>
-                                                           ||  document.getElementsByTagName('head')[0] //>
-                                                            || document.documentElement;                //>
-head.insertBefore( script1 ,head.lastChild );                                                           //> Insert script into web page's <head> section.
+const                                   head              =    document.head                            //> Get the DOM's head section
+                                                           ||  document.getElementsByTagName('head')[0] //> "
+                                                            || document.documentElement;                //> " (cross-browser).
+head.insertBefore( scriptWebcam ,head.lastChild );                                                      //> Insert script into DOM web page's <head> section.
                                                                                                         //>
-window['chrome']['runtime']['onMessage']['addListener'](   function(a){ console.log(a); }   );          //>
+window['chrome']['runtime']['onMessage']['addListener'](   function(a){ console.log(a); }   );          //> ???DEBUG?
+                                                                                                        //>
+window['chrome']['runtime']['openOptionsPage']();                                                       //>
 
 
 //End of file.
