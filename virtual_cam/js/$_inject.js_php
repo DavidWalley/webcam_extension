@@ -1,4 +1,4 @@
-// $_inject.js_php - A content script - Inject a script into all pages running in Chrome after Daves Virtual Webcam extension is installed (as mentioned in manifest.json extension file).
+z// $_inject.js_php - A content script - Inject a script into all pages running in Chrome after Daves Virtual Webcam extension is installed (as mentioned in manifest.json extension file). Content Script - Scripts that run in isolation in the context of the web page
 // (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
 // Can use chrome.runtime
@@ -7,30 +7,34 @@
                                                                                                         //>
 const                                   scriptWebcam            = document.createElement('script');     //> Document is the host page DOM that this code is running in. We are going to inject a script into it.
 scriptWebcam.setAttribute(        'type','text/javascript'                                           ); //> The script is in JavaScript.
-/*DEV*/ scriptWebcam.setAttribute( 'src',window['chrome']['runtime']['getURL']('js/$_webcam.js_php') ); //> Form a URL to get to the main code file. For development.
+/*DEV*/ scriptWebcam.setAttribute( 'src',window['chrome']['runtime']['getURL']('js/$_webcam.js_php') ); //> Form a URL to get to the main code file. For development. Injected Script - Scripts that are programmatically injected into the web page. we inject scripts by appending them to the DOM. This makes the browser assume that it is run in the context of the web page. This in turn provides the injected script access to the local variables and functions.   https://www.freecodecamp.org/news/chrome-extension-message-passing-essentials/
 //*PRO*/scriptWebcam.setAttribute( 'src',window['chrome']['runtime']['getURL'](  'js/webcam.js'    ) ); //> Form a URL to get to the main code file. For production with Closure Compiled code.
                                                                                                         //>
 const                                   head              =    document.head                            //> Get the DOM's head section
                                                            ||  document.getElementsByTagName('head')[0] //> "
                                                             || document.documentElement;                //> " (cross-browser).
 head.insertBefore( scriptWebcam ,head.lastChild );                                                      //> Insert script into DOM web page's <head> section.
+
+
                                                                                                         //>
-window['chrome']['runtime']['onMessage']['addListener'](   function(a){ console.log(a); }   );          //> ???DEBUG?
                                                                                                         //>
 //window['chrome']['runtime']['openOptionsPage']();                                                       //>
 
 
-//chrome.runtime.onMessage.addListener(                           //> ###
-
 console.log();'Hoot from $_inject.js_php'
 
-chrome.runtime.onMessage.addListener(                           //> ###
- function(message ,sender ,sendResponse){
-  console.log("Hark for background.");
-  console.log( message );                                       //> Got this far.
+window['chrome']['runtime']['onMessage']['addListener'](                                                //> ###
+ function(message ,sender ,sendResponse){                                                               //> Listen for message from options.
+  console.log("Heard in inject.js, from options.");                                                     //>
+  console.log( message );                                                                               //> Got this far. Now - how to send to webcam.js?
   //sendResponse( "Hark to you too" );
  //return Promise.resolve( {response : "Howdy from content script inject.js"} );   // this failed to make an impression with options.js.
- }
-);
+ }                                                                                                      //>
+);                                                                                                      //>
+
+//> Got this far. Now - how to send to webcam.js?
+// ? Insert something into DOM for communication?
+// ? Save to chrome.storage? Your extension's content scripts can directly access user data without the need for a background page.
+
 
 //End of file.

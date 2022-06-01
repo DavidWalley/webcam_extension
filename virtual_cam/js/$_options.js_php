@@ -9,19 +9,19 @@ function                                restore_options(////////////////////////
 }//restore_options////////////////////////////////////////////////////////////////////////////////////////>
 
 
-function                                Send_ToTabs(////////////////////////////////////////////////>
+function                                Send_ToTabs(//////////////////////////////////////////////////////>
                                         a_tabs                                                          //>
-,                                       a_s
+,                                       a_s                                                             //>
 ){                                      //////////////////////////////////////////////////////////////////>
- console.log(a_tabs);                                                                                    //>
+ console.log(a_tabs);                                                                                   //>
  for( let tab of a_tabs) {                                                                              //>
   chrome.tabs.sendMessage(                                                                              //> ###
    tab.id                                                                                               //>
-  ,{greeting : "Data is... "+ a_s}                                                                      //>
-  ).then(    function(a){ console.log("From content script:"); console.log(a); }         //>
+  ,{greeting : "Data is... "+ a_s}                                                                      //> This works!
+  ).then(    function(a){ console.log("From content script:"); console.log(a); }                        //>
   ).catch(   function(e){ console.error('Error: '+ e); }   );                                           //>
  }//for                                                                                                 //>
-}//Send_ToTabs//////////////////////////////////////////////////////////////////////////////////////>
+}//Send_ToTabs////////////////////////////////////////////////////////////////////////////////////////////>
 
 
 function                                Send(/////////////////////////////////////////////////////////////>
@@ -33,7 +33,7 @@ function                                Send(///////////////////////////////////
   {//active        : true                                                                               //>
 //,currentWindow : true                                                                                 //>
   }                                                                                                     //>
- ).then(  function(a){ Send_ToTabs(a ,a_s);     }                                                                             //>
+ ).then(  function(a){ Send_ToTabs(a ,a_s);     }                                                       //>
  ).catch( function(e){ console.log("Err: "+ e); }                                                       //> Error: Error: Could not establish connection. Receiving end does not exist.
  );                                                                                                     //>
 }//Send///////////////////////////////////////////////////////////////////////////////////////////////////>

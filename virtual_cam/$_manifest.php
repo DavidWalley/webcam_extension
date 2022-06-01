@@ -17,6 +17,21 @@
 //                                              |             ||                |                       //>
 //                                              +-------------++----------------+                       //>
 
+// JavaScript code in Chrome extensions can be divided in the following groups:  https://stackoverflow.com/questions/9915311/chrome-extension-code-vs-content-scripts-vs-injected-scripts/9916089#9916089
+// Extension code - Full access to all permitted chrome.* APIs.
+//                  This includes the background page, and all pages which have direct access to it via chrome.extension.getBackgroundPage(), such as the browser pop-ups.
+// 
+// Content scripts (via the manifest file or chrome.tabs.executeScript) 
+//                - Partial access to some of the chrome APIs
+//              ??? full access to the page's DOM (not to any of the window objects, including frames)
+//                - Content scripts run in a scope between the extension and the page.
+//                - The global window object of a Content script is distinct from the page/extension's global namespace.
+// 
+// Injected scripts (via this method in a Content script) 
+//                - Full access to all properties??? in the page. No access to any of the chrome.* APIs.
+//                - Injected scripts behave as if they were included by the page itself, and are not connected to the extension in any way. 
+//                  See this post to learn more information on the various injection methods.
+
 //. {"name"                 : "First Plugin Testing"
 //. ,"version"              : "1.0"
 //. ,"manifest_version"     : 2
