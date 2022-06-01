@@ -9,6 +9,11 @@
 // u               = uniform
 
 
+// TODO animated hand, emojis? floating hearts. Stinker
+// scrolling text - bouncing ball
+// screen shot!!!
+
+
 const                                   N                       = "\n";                                 //> Newline. Used within GPU code text, to make reports from the GPU easier to understand, i.e, gives line with the error.
 
 /*DEV*/ function                        G_ASSERT(/////////////////////////////////////////////////////////# Power comments during development.
@@ -375,6 +380,11 @@ function                                Tick(//FilterStream/////////////////////
                                                                                                         //>
  if( !g_context2dOut ){ requestAnimationFrame( Tick );                                          return;}//> Run this periodic routine again.
                                                                                                         //>
+
+var                                     eleDivTest              = document.getElementById('divRthisskdheww');
+if( eleDivTest ){ console.log( eleDivTest.innerHTML ); }
+
+
  var                                    eleZoom     = document.getElementById( g_sGUIiNrANGEzOOM     ); //>
  var                                    eleBright   = document.getElementById( g_sGUIiNrNAGEbRIGHT   ); //>
  var                                    eleContrast = document.getElementById( g_sGUIiNrANGEcONTRAST ); //>

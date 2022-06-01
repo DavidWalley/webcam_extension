@@ -1,4 +1,4 @@
-console.log("hello from daves background");
+console.log("hello from daves background.JS");
 
 chrome.extension.onRequest.addListener(
   function(request, sender, sendResponse) {

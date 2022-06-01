@@ -15,11 +15,11 @@ function                                Send_ToTabs(////////////////////////////
 ){                                      //////////////////////////////////////////////////////////////////>
  console.log(a_tabs);                                                                                   //>
  for( let tab of a_tabs) {                                                                              //>
-  chrome.tabs.sendMessage(                                                                              //> ###
+  chrome.tabs.sendMessage(                                                                              //> ###message
    tab.id                                                                                               //>
   ,{greeting : "Data is... "+ a_s}                                                                      //> This works!
   ).then(    function(a){ console.log("From content script:"); console.log(a); }                        //>
-  ).catch(   function(e){ console.error('Error: '+ e); }   );                                           //>
+  ).catch(   function(e){}   );                                                                         //>
  }//for                                                                                                 //>
 }//Send_ToTabs////////////////////////////////////////////////////////////////////////////////////////////>
 
