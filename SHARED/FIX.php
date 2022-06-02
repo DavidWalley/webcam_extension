@@ -65,20 +65,23 @@ function                                Go_Notes(///////////////////////////////
 
 
 function                                Go_Replace(///////////////////////////////////////////////////////>
-                                        $a_sNeedle                                                      //>
-,                                       $a_sReplacement                                                 //>
+                                        $a_sVersion
 ,                                       $a_sPathFileHaystack                                            //>
 ){                                      //////////////////////////////////////////////////////////////////>
                                         $fileIn                 = fopen( $a_sPathFileHaystack ,'r' );   //>
  if( $fileIn ){                                                                                         //>
   while( !feof($fileIn) ){                                                                              //>
    $s = fgets($fileIn);                                                                                 //>
-   echo (   str_replace( $a_sNeedle ,$a_sReplacement ,$s )   );                                         //> If line contains target substring, replace them.
+                      // needle    ,replace      haystack
+   $s = str_replace(  "/*DEV*/"    ,"//*DEV*/"  ,$s );                                                  //> If line contains target substring, replace them.
+   $s = str_replace( "//*PRO*/"    , "/*PRO*/"  ,$s );                                                  //> If line contains target substring, replace them.
+   $s = str_replace( "/*VERSION*/" ,$a_sVersion ,$s );                                                  //> If line contains target substring, replace them.
+   echo $s;
   }//while                                                                                              //>
   fclose($fileIn);                                                                                      //>
  }//if                                                                                                  //>
                                                                                                         //>
- if( "END_OF_FILE" === $a_sNeedle ){ echo ('//'. $a_sReplacement); }                                    //> Add cache-busting comment at end of file.
+ //if( "END_OF_FILE" === $a_sNeedle ){ echo ('//'. $a_sReplacement); }                                  //> Add cache-busting comment at end of file. ???Just use /*VERSION*/?
 }//Go_Replace/////////////////////////////////////////////////////////////////////////////////////////////>
 
 
@@ -88,10 +91,9 @@ function                                Go(/////////////////////////////////////
  if( "TIMESTAMP" === $sArg1 ){   echo ( time() - 1636000000 );                                  return;}//> If a request for a time, report it.
                                                                                                         //>
                                         $sArg2                  = $_SERVER['argv'][2];                  //> 2nd argument given on command line.
- if( "NOTES"     === $sArg1 ){   Go_Notes( $sArg2 );                                            return;}//> Make changes so prettier can handle blank lines and comments correctly.
-                                                                                                        //>
-                                        $sFileIn                = $_SERVER['argv'][3];                  //> 3rd is the haystack.
- Go_Replace( $sArg1 ,$sArg2 ,$sFileIn );                                                                //>
+ if( "NOTES"     === $sArg1 ){   Go_Notes(   $sArg2 );                                          return;}//> Make changes so prettier can handle blank lines and comments correctly.
+                                        $sArg3                  = $_SERVER['argv'][3];                  //> 3rd is the file.
+ if( "PRO"       === $sArg1 ){   Go_Replace( $sArg2 ,$sArg3 );                                  return;}//> Change comments for DEV and PRO, version, given a path/file name.
 }//Go/////////////////////////////////////////////////////////////////////////////////////////////////////>
 
 Go();                                                                                                   //> Run the main routine.

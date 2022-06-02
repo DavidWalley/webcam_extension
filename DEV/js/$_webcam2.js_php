@@ -252,7 +252,7 @@ class                                   ShaderRenderer//////////////////////////
   ,                              ( Date.now()%100000 )*0.0001                                           //> ???Overcome  some kind of number format issue - can't seem to pass in a float as is?
   );                                                                                                    //>
                                                                                                         //>
-  var                                   dZoom                   = eleZoom.value;                        //>
+  var                                   dZoom                   = 1; //eleZoom.value;                        //>
   dZoom = Math.pow( 2 , parseFloat(100 -dZoom)*0.02 )*0.5;                                              //> 0.5 to 2
                                                                                                         //>
   g.uniform1f( me._location_ufZoom ,         dZoom        );                                            //> Video zoom factor.
@@ -316,8 +316,7 @@ class                                   ShaderRenderer//////////////////////////
 
 
 let                                     g_shaderrenderer        = null;                                 //>
-let                                     g_eleVideoIn            = null;                                 //>
-let                                     g_eleCanvasOut          = null; let g_context2dOut   = null;    //>
+//let                                   g_eleVideoIn            = null;                                 //>
 let                                     g_imagedataWas          = null;                                 //>
 let                                     g_eleCanvasFlags        = null; let g_context2dFlags = null;    //>
 let                                     g_imageFlags            = null;                                 //>
@@ -336,8 +335,22 @@ let                                     g_sDivTestWas           = '';           
 function                                Tick(//FilterStream///////////////////////////////////////////////# Periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
  //g_shaderrenderer.render();                                                                           //> Use a WebGL renderer.
+ if(  !g_eleCanvasOut 
+  ||  !        g_imagedataWas   
+   || !g_context2dOut 
+ ){                               requestAnimationFrame( Tick );                                return;}//> Run this periodic routine again, but get out of here for now.
+
+  /*DEV*/ G_ASSERT( g_eleCanvasOut ,"NOT GOT g_eleCanvasOut"           );                      //>
+  /*DEV*/ G_ASSERT(         g_imagedataWas   ,"NOT GOT g_imagedataWas"           );                      //>
+  /*DEV*/ G_ASSERT( g_context2dOut ,"NOT GOT g_context2dOut" );                      //>
                                                                                                         //>
- if( !g_context2dOut ){ requestAnimationFrame( Tick );                                          return;}//> Run this periodic routine again.
+  g_eleCanvasOut.width    = g_nW_px;                                                          //>
+  g_eleCanvasOut.height   = g_nH_px;                                                          //>
+  g_imagedataWas          = g_context2dOut.createImageData(g_nW_px+2 ,g_nH_px+2);             //>
+                                                                                                        //>
+  g_whenGo_ms = Date.now();                                                                             //>
+
+
                                                                                                         //>
  var                                    eleDivTest     = document.getElementById('divDataFromOptions'); //>
  if( eleDivTest ){                                                                                      //>
@@ -355,7 +368,7 @@ function                                Tick(//FilterStream/////////////////////
  }}//if//if                                                                                             //>
                                                                                                         //>
  g_context2dOut.globalAlpha = 1.0;                                                                      //> Restore opaque addition.
- g_context2dOut.drawImage( g_eleVideoIn                                                                 //>
+ g_context2dOut.drawImage(  g_eleVideoIn                                                      //>
  ,                           (g_nW_px - g_nW_px*g_dZoom)*0.5                                            //> Keep centered, left-right and
  ,                           (g_nH_px - g_nH_px*g_dZoom)*0.5                                            //> top-bottom.
  ,                                      g_nW_px*g_dZoom                                                 //> zoom in by user selected amount
@@ -435,12 +448,6 @@ function                                Tick(//FilterStream/////////////////////
 
 function                                Go_Tick(//////////////////////////////////////////////////////////# Start of stream modification - start periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
- g_eleCanvasOut.width    = g_nW_px;                                                                     //>
- g_eleCanvasOut.height   = g_nH_px;                                                                     //>
- g_imagedataWas          = g_context2dOut.createImageData(g_nW_px+2 ,g_nH_px+2);                        //>
-                                                                                                        //>
- g_whenGo_ms = Date.now();                                                                              //>
-                                                                                                        //>
  Tick();                                                                                                //> Start periodic routine
 }//Go_Tick////////////////////////////////////////////////////////////////////////////////////////////////>
 
@@ -467,9 +474,10 @@ function                                Go_LoadFlags(///////////////////////////
 
 async function                          Go(///////////////////////////////////////////////////////////////# Main execution starts here.
 ){                                      //////////////////////////////////////////////////////////////////# Report nothing.
- Go_ModifyMediaDevices_EnumerateDevices();                                                              //>
- Go_ModifyMediaDevices_GetUserMedia();                                                                  //>
+// Go_ModifyMediaDevices_EnumerateDevices();                                                              //>
+// Go_ModifyMediaDevices_GetUserMedia();                                                                  //>
  Go_LoadFlags();                                                                                        //>
+ Go_Tick();                                                                                             //>
 }//Go/////////////////////////////////////////////////////////////////////////////////////////////////////>
 
 

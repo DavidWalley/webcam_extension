@@ -12,13 +12,18 @@
 // scrolling text - bouncing ball
 // screen shot!!!
 
+let                                     g_eleVideoIn            = null;                                 //>
+let                                     g_eleCanvasOut          = null;                                 //>
+let                                     g_context2dOut          = null;                                 //>
+
+
 async function                          Go_ModifyMediaDevices_EnumerateDevices(///////////////////////////# Locally redefine system function to get list of media devices (cameras and microphones).
 ){                                      //////////////////////////////////////////////////////////////////# Change system function locally.
  const                                  enumerateDevicesWas  = MediaDevices.prototype.enumerateDevices; //> Get existing version of system function to get a list of cameras.
                                                                                                         //>
  MediaDevices['prototype']            ['enumerateDevices'] = async function(// // // // // // // // // ///# Redefine this system function locally, to include the virtual camera.
  ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
-  document.getElementById('divDataFromOptions').setAttribute('loadmore' ,'1');                          //> Send message back to inject.js (which has a Mutation Observer on this element's attributes) to load bulk of the code.
+  document.getElementById('divDataFromOptions').setAttribute('virtual_webcam_slava_loadmore' ,'1');     //> Send message back to inject.js (which has a Mutation Observer on this element's attributes) to load bulk of the code.
                                                                                                         //>
   const                                 r     = await enumerateDevicesWas.call(navigator.mediaDevices); //> Get all the current cameras (should not include the virtual camera?)
   const                                 x               = {'deviceId' : 'virtual'                       //>
@@ -39,7 +44,7 @@ async function                          Go_ModifyMediaDevices_GetUserMedia(/////
                                                                                                         //>
  MediaDevices['prototype']            ['getUserMedia'] = async function(// // // // // // // // // // ////# Redefine this system function locally, to include the virtual camera.
  ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
-  document.getElementById('divDataFromOptions').setAttribute('loadmore' ,'2');                          //> Send message back to inject.js (which has a Mutation Observer on this element's attributes) to load bulk of the code.
+  document.getElementById('divDataFromOptions').setAttribute('virtual_webcam_slava_loadmore' ,'2');     //> Send message back to inject.js (which has a Mutation Observer on this element's attributes) to load bulk of the code.
                                                                                                         //>
   const                                 args                    = arguments;                            //>
   if(   !args.length   ||   !args[0].video   ||   !args[0].video.deviceId                               //>
@@ -50,20 +55,21 @@ async function                          Go_ModifyMediaDevices_GetUserMedia(/////
   const                 usermedia = await getUserMediaWas.call( navigator.mediaDevices                  //>
                                                           ,{video : {facingMode: args[0].facingMode     //> This constraints could mimic closely the request. Also, there could be a preferred webcam on the options. Right now it defaults to the predefined input.
                                                                     ,advanced  : args[0].video.advanced //>
-                                                                    ,width     : g_nW_px                //>
-                                                                    ,height    : g_nH_px                //>
+                                                                  //,width     : 800                    //>
+                                                                  //,height    : 600                    //>
                                                                     }                                   //>
                                                            ,audio : false                               //> No audio.
                                                           });                                           //>
   if( !usermedia ){          return await getUserMediaWas.call( navigator.mediaDevices ,...arguments );}//> If devices not found, then report result of unmodified routine.
                                                                                                         //>
-  g_eleVideoIn   = document.createElement('video' );                                                    //>
-  g_eleCanvasOut = document.createElement('canvas');  g_context2dOut = g_eleCanvasOut.getContext('2d'); //>
+  g_eleVideoIn           = document.createElement('video' );                                            //>
+  g_eleCanvasOut         = document.createElement('canvas');                                            //>
+  g_context2dOut         = g_eleCanvasOut.getContext('2d');                                             //>
   g_eleVideoIn.srcObject = usermedia;                                                                   //>
   g_eleVideoIn.autoplay  = true;                                                                        //> TODO Shut down and restart g_shaderrenderer???
   g_eleVideoIn.addEventListener( 'playing'                                                              //>
   ,function(){                                                                                          //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
-    Go_Tick();                                                                                          //>
+    //Go_Tick();                                                                                        //>
   });                                                                                                   //> .
                                                                                                         //>
  return g_eleCanvasOut.captureStream();                                                                 //> Report a real-time video capture of the surface of the canvas.
@@ -71,8 +77,8 @@ async function                          Go_ModifyMediaDevices_GetUserMedia(/////
 }//Go_ModifyMediaDevices_GetUserMedia/////////////////////////////////////////////////////////////////////>
 
 
-Go_ModifyMediaDevices_EnumerateDevices();
-Go_ModifyMediaDevices_GetUserMedia();
+Go_ModifyMediaDevices_EnumerateDevices();                                                               //>
+Go_ModifyMediaDevices_GetUserMedia();                                                                   //>
 
 
 //End of file.
