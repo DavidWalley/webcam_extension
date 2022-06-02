@@ -8,13 +8,10 @@
 // Fragment Shader = 2nd part of GPU program - In 3-D rendering program, this code is run more-or-less on a per-output pixel order. Do as much work as you can in the vertex shader, rather than in the fragment shader.
 // u               = uniform
 
-
 // TODO animated hand, emojis? floating hearts. Stinker
 // scrolling text - bouncing ball
 // screen shot!!!
 
-
-const                                   N                       = "\n";                                 //> Newline. Used within GPU code text, to make reports from the GPU easier to understand, i.e, gives line with the error.
 
 /*DEV*/ function                        G_ASSERT(/////////////////////////////////////////////////////////# Power comments during development.
 /*DEV*/                                 a_b                                                             //# Must be true, otherwise
@@ -26,6 +23,8 @@ const                                   N                       = "\n";         
 /*DEV*/  debugger;                                                                                      //> Switch to browser's debug mode? https://stackoverflow.com/questions/9298839/is-it-possible-to-stop-javascript-execution#9298915
 /*DEV*/ }//G_ASSERT///////////////////////////////////////////////////////////////////////////////////////>
 
+
+const                                   N                       = "\n";                                 //> Newline. Used within GPU code text, to make reports from the GPU easier to understand, i.e, gives line with the error.
 
 const                                   g_sCodeVertexShader     =                                       //> Vertex shader GLSL code, for execution on the GPU...
  'attribute vec4 '                      +'attributePosition;'                                        +N //> DEPRECATED 'attribute' qualifier is effectively equivalent to an input qualifier in vertex shaders. It cannot be used in any other shader stage. It cannot be used in interface blocks.
@@ -48,7 +47,7 @@ const                                   g_sCodeFragmentShader   =               
 +'uniform float '                       +'ufSide;'                                                   +N //>
 +'uniform float '                       +'ufFlip;'                                                   +N //>
 +'uniform float '                       +'ufZoom;'                                                   +N //> Video Zoom factor
-
+                                                                                                        //>
 +'uniform sampler2D '                   +'usampler2d0_Video;'                                        +N //> Texture unit 0 (oF at least 8) is video input (because?). sampler2D is just a way to get data from an array.   https://stackoverflow.com/questions/63322297/what-are-the-use-cases-of-sampler2d-uniforms-in-webgl-opengl
 +'uniform sampler2D '                   +'usampler2d1_Flag;'                                         +N //> Texture unit 1
 +'uniform sampler2D '                   +'usampler2d2_Dave;'                                         +N //> Texture unit 2
@@ -155,14 +154,6 @@ const                                   g_sCodeFragmentShader   =               
 +'}'+N//main// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
 ;                                                                                                       //> /*DEV*/console.log( g_sCodeFragmentShader );
 
-//. const                                   g_sINoPTIONsIDE         = 'inradioWebcam_Extension_Side'  ;     //>
-//. const                                   g_sINoPTIONfLIP         = 'inradioWebcam_Extension_Flip'  ;     //>
-//. const                                   g_sGUIdIVfLAG_BEFORE    = 'divWebcam_Extension_FlagBefore';     //>
-//. const                                   g_sGUIdIVfLAG_NEXT      = 'divWebcam_Extension_FlagNext'  ;     //>
-//. const                                   g_sGUIiNrANGEzOOM       = 'inrangeGuiZoom'                ;     //>
-//. const                                   g_sGUIiNrNAGEbRIGHT     = 'inrangeGuiBright'              ;     //>
-//. const                                   g_sGUIiNrANGEcONTRAST   = 'inrangeGuiContrast'            ;     //>
-
 
 class                                   ShaderRenderer////////////////////////////////////////////////////#
 {/////////////////////////////////////////////////////////////////////////////////////////////////////////>
@@ -240,31 +231,6 @@ class                                   ShaderRenderer//////////////////////////
   const                                 me                      = this;                                 /*DEV*/G_ASSERT( 'ShaderRenderer' === me.constructor.name ,'me bad "'+ me.constructor.name +'"');//> Code clarity. Remember this for making a clear reference to the object being constructed in callbacks.
   const                                 g                       = me._g;                                //> Collapse the following a bit:
                                                                                                         //>
-//  var                                eleSides    = document.getElementsByName(g_sINoPTIONsIDE      ); //> get data from a field on a configuration page? Text in input field.
-//  var                                eleFlips    = document.getElementsByName(g_sINoPTIONfLIP      ); //> get data from a field on a configuration page? Text in input field.
-//$  var                                eleBefore   = document.getElementById(   g_sGUIdIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
-//$  var                                eleNext     = document.getElementById(   g_sGUIdIVfLAG_NEXT   ); //> get data from a field on a configuration page? Text in input field.
-//$  var                                eleZoom     = document.getElementById(   g_sGUIiNrANGEzOOM    ); //>
-//$  var                                eleBright   = document.getElementById(   g_sGUIiNrNAGEbRIGHT  ); //>
-//$  var                                eleContrast = document.getElementById(   g_sGUIiNrANGEcONTRAST); //>
-//  /*DEV*/ G_ASSERT( eleSides    ,"eleSides    not got." );                                            //>
-//  /*DEV*/ G_ASSERT( eleFlips    ,"eleFlips    not got." );                                            //>
-  /*DEV*/ G_ASSERT( eleBefore   ,"eleBefore   not got." );                                            //>
-  /*DEV*/ G_ASSERT( eleNext     ,"eleNext     not got." );                                            //>
-  /*DEV*/ G_ASSERT( eleZoom     ,"eleZoom     not got." );                                            //>
-  /*DEV*/ G_ASSERT( eleBright   ,"eleBright   not got." );                                            //>
-  /*DEV*/ G_ASSERT( eleContrast ,"eleContrast not got." );                                            //>
-//if( !eleSides  ){                                                                           return;}//>
-//if( !eleFlips  ){                                                                           return;}//>
-  if( !eleBefore ){                                                                           return;}//>
-  if( !eleNext   ){                                                                           return;}//>
-//                                                                                                      //>
-//  if( !me._bEventHandlersGo ){                                                                        //> If popup initialization has not been done, then
-//   eleBefore.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                   //> Handle clicks on previous and
-//   eleNext.addEventListener(   'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );                   //> next flag buttons.
-//   me._bEventHandlersGo = true;                                                                       //> Remember this initialization has been done
-//  }//if                                                                                               //> .
-                                                                                                        //>
   g.enableVertexAttribArray( me._attriblocationPosition                     );                          //> Index of the generic vertex attribute bound to the attribute '_attriblocationPosition'. attributes in a vertex shader are disabled by default. To use one, you have to first enable it with this function.
   g.bindBuffer(              g.ARRAY_BUFFER             ,me._bufferPosition );                          //>
   g.vertexAttribPointer(     me._attriblocationPosition                                                 //> Specify how to interpret data: '_attriblocationPosition' takes
@@ -285,15 +251,6 @@ class                                   ShaderRenderer//////////////////////////
   g.uniform1f(                   me._location_ufNow_ms                                                  //> Pass in the current time.
   ,                              ( Date.now()%100000 )*0.0001                                           //> ???Overcome  some kind of number format issue - can't seem to pass in a float as is?
   );                                                                                                    //>
-                                                                                                        //>
-// user input                                                                                           //>
-//  var                                   sSide                   = '';                                   //> Not doing flying flag from other side in JS code.
-//  var                                   sFlip                   = '';                                   //>
-//  var                                   i                       = 0;                                    //>
-//  for( i = 0; i<eleSides.length; i++ ){ if( eleSides[i].checked ){ sSide = eleSides[i].value; break;} } //>
-//  for( i = 0; i<eleFlips.length; i++ ){ if( eleFlips[i].checked ){ sFlip = eleFlips[i].value; break;} } //>
-//  g.uniform1f( me._location_ufSide ,('R' === sSide)?1 :-1 );                                            //>
-//  g.uniform1f( me._location_ufFlip ,('N' === sFlip)?1 :-1 );                                            //> Normal or F=flip
                                                                                                         //>
   var                                   dZoom                   = eleZoom.value;                        //>
   dZoom = Math.pow( 2 , parseFloat(100 -dZoom)*0.02 )*0.5;                                              //> 0.5 to 2
@@ -369,11 +326,11 @@ let                                     g_nW_px                 = 640 ;         
 let                                     g_nH_px                 = 480 ;                                 //>
 let                                     g_whenGo_ms             = null;                                 //>
 let                                     g_iFlag                 =   0 ;                                 //> Index to current flag image.
-let                                     g_dZoom                 =   1 ;
-let                                     g_dBrightness           =   0 ;
-let                                     g_dContrast             =   0 ;
-
-let                                     g_sDivTestWas           = '';
+let                                     g_dZoom                 =   1 ;                                 //>
+let                                     g_dBrightness           =   0 ;                                 //>
+let                                     g_dContrast             =   0 ;                                 //>
+                                                                                                        //>
+let                                     g_sDivTestWas           = '';                                   //>
 
 
 function                                Tick(//FilterStream///////////////////////////////////////////////# Periodic routine.
@@ -383,19 +340,19 @@ function                                Tick(//FilterStream/////////////////////
  if( !g_context2dOut ){ requestAnimationFrame( Tick );                                          return;}//> Run this periodic routine again.
                                                                                                         //>
  var                                    eleDivTest     = document.getElementById('divDataFromOptions'); //>
- if( eleDivTest ){
-  var                                   sData                   = eleDivTest.innerHTML;
-  if( sData !== g_sDivTestWas ){
-   console.log( 'changed !!!!!!!!!! '+ sData );
-   try{
-    var                                 ob                      = JSON.parse(sData);
-    console.log( ob );
+ if( eleDivTest ){                                                                                      //>
+  var                                   sData                   = eleDivTest.innerHTML;                 //>
+  if( sData !== g_sDivTestWas ){                                                                        //>
+   console.log( 'changed !!!!!!!!!! '+ sData );                                                         //>
+   try{                                                                                                 //>
+    var                                 ob                      = JSON.parse(sData);                    //>
+    console.log( ob );                                                                                  //>
     if( ob['inrangeZoom'    ] ){ g_dZoom       = Math.pow( 3 ,parseFloat( ob['inrangeZoom'    ] )*0.01     ); }//>    1 to   3
     if( ob['inrangeBright'  ] ){ g_dBrightness =              parseFloat( ob['inrangeBright'  ] )*2.55 - 128; }//> -128 to 128
     if( ob['inrangeContrast'] ){ g_dContrast   = 3*(          parseFloat( ob['inrangeContrast'] ) - 50     ); }//> -150 to 150
-   }catch(e){ console.log('bad '+ e); }
-   g_sDivTestWas = sData;
- }}//if//if
+   }catch(e){ console.log('bad '+ e); }                                                                 //>
+   g_sDivTestWas = sData;                                                                               //>
+ }}//if//if                                                                                             //>
                                                                                                         //>
  g_context2dOut.globalAlpha = 1.0;                                                                      //> Restore opaque addition.
  g_context2dOut.drawImage( g_eleVideoIn                                                                 //>
@@ -478,77 +435,14 @@ function                                Tick(//FilterStream/////////////////////
 
 function                                Go_Tick(//////////////////////////////////////////////////////////# Start of stream modification - start periodic routine.
 ){                                      //////////////////////////////////////////////////////////////////#
-// Go_Gui();                                                                                              //>
  g_eleCanvasOut.width    = g_nW_px;                                                                     //>
  g_eleCanvasOut.height   = g_nH_px;                                                                     //>
  g_imagedataWas          = g_context2dOut.createImageData(g_nW_px+2 ,g_nH_px+2);                        //>
                                                                                                         //>
  g_whenGo_ms = Date.now();                                                                              //>
-//$ var                                    eleBefore    = document.getElementById( g_sGUIdIVfLAG_BEFORE ); //> get data from a field on a configuration page? Text in input field.
-//$ var                                    eleNext      = document.getElementById( g_sGUIdIVfLAG_NEXT   ); //> get data from a field on a configuration page? Text in input field.
-//$ /*DEV*/ G_ASSERT( eleBefore ,"eleBefore not got." );                                                   //>
-//$ /*DEV*/ G_ASSERT( eleNext   ,"eleNext   not got." );                                                   //>
-//$ eleBefore.addEventListener( 'click' ,function(){ g_iFlag = (g_iFlag + 7)%8; } );                       //> Handle clicks on previous and
-//$ eleNext.addEventListener(   'click' ,function(){ g_iFlag = (g_iFlag + 1)%8; } );                       //> next flag buttons.
                                                                                                         //>
  Tick();                                                                                                //> Start periodic routine
 }//Go_Tick////////////////////////////////////////////////////////////////////////////////////////////////>
-
-
-async function                          Go_ModifyMediaDevices_EnumerateDevices(///////////////////////////# Locally redefine system function to get list of media devices (cameras and microphones).
-){                                      //////////////////////////////////////////////////////////////////# Change system function locally.
- const                                  enumerateDevicesWas  = MediaDevices.prototype.enumerateDevices; //> Get existing version of system function to get a list of cameras.
-                                                                                                        //>
- MediaDevices['prototype']            ['enumerateDevices'] = async function(// // // // // // // // // ///# Redefine this system function locally, to include the virtual camera.
- ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
-  const                                result = await enumerateDevicesWas.call(navigator.mediaDevices); //> Get all the current cameras (should not include the virtual camera?)
-  const                                x                = {'deviceId' : 'virtual'                       //>
-                                                          ,'groupID'  : 'uh'                            //>
-                                                          ,'kind'     : 'videoinput'                    //>
-/*DEV*/                                                   ,'label'    : 'DEV Virtual Webcam'            //>
-//*PRO*/                                                  ,'label'    : 'Slavi Ukraini Virtual Webcam'  //>
-                                                          }                                             //>
-  result.push( /** @type {!MediaDeviceInfo|!undefined} */ (x) );                                        //> Append new device info to the list. We could add "Virtual VHS" or "Virtual Median Filter" and map devices with filters. @type is required to get past a Closure Compiler error.
- return result;                                                                                         //> Report the new list.
- };//enumerateDevices// // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
-}//Go_ModifyMediaDevices_EnumerateDevices/////////////////////////////////////////////////////////////////>
-
-
-async function                          Go_ModifyMediaDevices_GetUserMedia(///////////////////////////////# Locally redefine system function to get list of cameras, to include the virtual camera.
-){                                      //////////////////////////////////////////////////////////////////# Change system function locally.
- const                                  getUserMediaWas         = MediaDevices.prototype.getUserMedia;  //> Get existing version of system function to get a camera's video stream.
-                                                                                                        //>
- MediaDevices['prototype']            ['getUserMedia'] = async function(// // // // // // // // // // ////# Redefine this system function locally, to include the virtual camera.
- ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
-  const                                 args                    = arguments;                            //>
-  if(   !args.length   ||   !args[0].video   ||   !args[0].video.deviceId                               //>
-   || (  'virtual' !== args[0].video.deviceId   &&   'virtual' !== args[0].video.deviceId.exact )       //>
-  ){                                                                                                    //>
-                             return await getUserMediaWas.call( navigator.mediaDevices ,...arguments ) ;//> Report result of unmodified routine.
-  }//if                                                                                                 //>
-  const                 usermedia = await getUserMediaWas.call( navigator.mediaDevices                  //>
-                                                          ,{video : {facingMode: args[0].facingMode     //> This constraints could mimic closely the request. Also, there could be a preferred webcam on the options. Right now it defaults to the predefined input.
-                                                                    ,advanced  : args[0].video.advanced //>
-                                                                    ,width     : g_nW_px                //>
-                                                                    ,height    : g_nH_px                //>
-                                                                    }                                   //>
-                                                           ,audio : false                               //> No audio.
-                                                          });                                           //>
-  if( !usermedia ){          return await getUserMediaWas.call( navigator.mediaDevices ,...arguments );}//> If devices not found, then report result of unmodified routine.
-                                                                                                        //>
-  g_eleVideoIn   = document.createElement('video' );                                                    //>
-  g_eleCanvasOut = document.createElement('canvas');  g_context2dOut = g_eleCanvasOut.getContext('2d'); //>
-  g_eleVideoIn.srcObject = usermedia;                                                                   //>
-  g_eleVideoIn.autoplay  = true;                                                                        //> TODO Shut down and restart g_shaderrenderer???
-  g_eleVideoIn.addEventListener( 'playing'                                                              //>
-  ,function(){                                                                                          //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
-//??? Load more script?
-    Go_Tick();                                                                                          //>
-  });                                                                                                   //> .
-                                                                                                        //>
- return g_eleCanvasOut.captureStream();                                                                 //> Report a real-time video capture of the surface of the canvas.
- };//function// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ///>
-}//Go_ModifyMediaDevices_GetUserMedia/////////////////////////////////////////////////////////////////////>
 
 
 function                                Go_LoadFlags(/////////////////////////////////////////////////////# Load image with all predefined flags.
@@ -569,66 +463,6 @@ function                                Go_LoadFlags(///////////////////////////
                        };//function                                                                     //>
  g_imageFlags.src    = g_sDATAuRIFLAGS;                                                                 //> Kick-start the above, using a data URI text string.
 }//Go_LoadFlags///////////////////////////////////////////////////////////////////////////////////////////>
-
-
-//. function                                Go_Gui(///////////////////////////////////////////////////////////# Create div to be used for user to set options.
-//. ){                                      //////////////////////////////////////////////////////////////////#
-//. //. //window['chrome']['storage']['local']['get']
-//.  const cat = window.localStorage.getItem('myCat');
-//. // chrome.storage.local.get(             //    variable chrome is undeclared
-//. //  ['iExtensionVirtualWebcam_Flag']                                                                      //> Get user settings default values.
-//. // ,function(result){   console.log('Value currently is ' + result.iExtensionVirtualWebcam_Flag);   }
-//. // );       
-//. 
-//. 
-//.  const                                  eleGui                  = document.createElement('div');        //> Create div that can be used for user to set options.
-//.  eleGui.style.display    = 'block';                                                              //>
-//.  eleGui.position         = 'absolute'    ;                                                              //>
-//.  eleGui.left             = '10px'        ;                                                              //>
-//.  eleGui.top              = '20px'        ;                                                              //>
-//.  eleGui.style.width      = '400px'       ;                                                              //>
-//.  eleGui.style.height     = '100px'       ;                                                              //>
-//.  eleGui.style.background = '#FFFFCC'     ;                                                              //> Pale yellow
-//. var sDummy =
-//.    '<span id="'+ g_sGUIdIVfLAG_BEFORE +'" style="'                                                      //> Select previous flag.
-//.   +                                      'cursor'               +':pointer'                             //>
-//.   +                                     ';width'                +':4rem'                                //>
-//.   +                                     ';font-size'            +':2em'                                 //>
-//.   +                                     ';font-weight'          +':bold'                                //>
-//.   +'">'+ " < " +'</span>'                                                                               //>
-//.   +'<span id="'+ g_sGUIdIVfLAG_NEXT +'" style="'                                                        //> Select next flag.
-//.   +                                      'cursor'               +':pointer'                             //>
-//.   +                                     ';width'                +':4rem'                                //>
-//.   +                                     ';font-size'            +':2em'                                 //>
-//.   +                                     ';font-weight'          +':bold'                                //>
-//.   +'">'+ " > " +'</span>'                                                                               //>
-//.                                                                                                         //>
-//.   +'<br>'                                                                                               //>
-//.   +'<div>'                                                                                              //>
-//.   + '<input type="range" id="'+ g_sGUIiNrANGEzOOM                                                       //>
-//.   +                 '" name="'+ g_sGUIiNrANGEzOOM     +'" min="0" max="100">'                           //> Arbitrary scale of 100.
-//.   + '<label for="'+             g_sGUIiNrANGEzOOM     +'">'+ "Zoom"       +'</label>'                   //>
-//.   + '<br>'                                                                                              //>
-//.   + '<input type="range" id="'+ g_sGUIiNrNAGEbRIGHT                                                     //>
-//.   +                 '" name="'+ g_sGUIiNrNAGEbRIGHT   +'" min="0" max="100">'                           //> Arbitrary scale of 100.
-//.   + '<label for="'+             g_sGUIiNrNAGEbRIGHT   +'">'+ "Brightness" +'</label>'                   //>
-//.   + '<br>'                                                                                              //>
-//.   + '<input type="range" id="'+ g_sGUIiNrANGEcONTRAST                                                   //>
-//.   +                 '" name="'+ g_sGUIiNrANGEcONTRAST +'" min="0" max="100">'                           //> Arbitrary scale of 100.
-//.   + '<label for="'+             g_sGUIiNrANGEcONTRAST +'">'+ "Contrast"   +'</label>'                   //>
-//.   +'</div>'                                                                                             //>
-//. //  '<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_L" value="L" checked><label for="'+g_sINoPTIONsIDE+'_L">'+"L"     +'</label>'
-//. // +'<input type="radio" name="'+g_sINoPTIONsIDE+'" id="'+g_sINoPTIONsIDE+'_R" value="R">'     +'<label for="'+g_sINoPTIONsIDE+'_R">'+"R"     +'</label>'
-//. // +' &nbsp; &nbsp; &nbsp; '
-//. // +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_N" value="N" checked><label for="'+g_sINoPTIONfLIP+'_N">'+"Normal"+'</label>'
-//. // +'<input type="radio" name="'+g_sINoPTIONfLIP+'" id="'+g_sINoPTIONfLIP+'_F" value="F">'     +'<label for="'+g_sINoPTIONfLIP+'_F">'+"Flip"  +'</label>'
-//. // +' &nbsp; &nbsp; &nbsp; '                                                                            //>
-//.  ;                                                                                                      //>
-//. 
-//.  //console.log(sDummy);
-//.  eleGui.innerHTML        = sDummy;                                                                      //> HTML for a simple pop-up control panel:
-//.  document.body.appendChild(eleGui);                                                                     //>
-//. }//Go_Gui/////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
 async function                          Go(///////////////////////////////////////////////////////////////# Main execution starts here.
@@ -1489,5 +1323,6 @@ const                                   g_sDATAuRIFLAGS         =
 
 
 Go();                                                                                                   //>
+
 
 //End of file.

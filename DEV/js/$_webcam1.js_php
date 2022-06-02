@@ -1,0 +1,78 @@
+// $_webcam1.js_php - JavaScript with PHP macros for Daves Virtual Webcam
+// (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3).
+// Refactoring of https://github.com/spite/virtual-webcam
+
+// GLOSSARY AND ABBREVIATIONS:
+// Shader          = a program running on a GPU (Graphical Processing Unit).
+// Vertex Shader   = 1st part of GPU program - In 3-D rendering program, this code is run in parallel on a per-triangle-vertex order.
+// Fragment Shader = 2nd part of GPU program - In 3-D rendering program, this code is run more-or-less on a per-output pixel order. Do as much work as you can in the vertex shader, rather than in the fragment shader.
+// u               = uniform
+
+// TODO animated hand, emojis? floating hearts. Stinker
+// scrolling text - bouncing ball
+// screen shot!!!
+
+async function                          Go_ModifyMediaDevices_EnumerateDevices(///////////////////////////# Locally redefine system function to get list of media devices (cameras and microphones).
+){                                      //////////////////////////////////////////////////////////////////# Change system function locally.
+ const                                  enumerateDevicesWas  = MediaDevices.prototype.enumerateDevices; //> Get existing version of system function to get a list of cameras.
+                                                                                                        //>
+ MediaDevices['prototype']            ['enumerateDevices'] = async function(// // // // // // // // // ///# Redefine this system function locally, to include the virtual camera.
+ ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
+  document.getElementById('divDataFromOptions').setAttribute('loadmore' ,'1');                          //> Send message back to inject.js (which has a Mutation Observer on this element's attributes) to load bulk of the code.
+                                                                                                        //>
+  const                                 r     = await enumerateDevicesWas.call(navigator.mediaDevices); //> Get all the current cameras (should not include the virtual camera?)
+  const                                 x               = {'deviceId' : 'virtual'                       //>
+                                                          ,'groupID'  : 'uh'                            //>
+                                                          ,'kind'     : 'videoinput'                    //>
+/*DEV*/                                                   ,'label'    : 'DEV Virtual Webcam'            //>
+//*PRO*/                                                  ,'label'    : 'Slavi Ukraini Virtual Webcam'  //>
+                                                          }                                             //>
+  r.push( /** @type {!MediaDeviceInfo|!undefined} */ (x) );                                             //> Append new device info to the list. We could add "Virtual VHS" or "Virtual Median Filter" and map devices with filters. @type is required to get past a Closure Compiler error.
+ return r;                                                                                              //> Report the new list.
+ };//enumerateDevices// // // // // // // // // // // // // // // // // // // // // // // // // // // ////>
+}//Go_ModifyMediaDevices_EnumerateDevices/////////////////////////////////////////////////////////////////>
+
+
+async function                          Go_ModifyMediaDevices_GetUserMedia(///////////////////////////////# Locally redefine system function to get list of cameras, to include the virtual camera.
+){                                      //////////////////////////////////////////////////////////////////# Change system function locally.
+ const                                  getUserMediaWas         = MediaDevices.prototype.getUserMedia;  //> Get existing version of system function to get a camera's video stream.
+                                                                                                        //>
+ MediaDevices['prototype']            ['getUserMedia'] = async function(// // // // // // // // // // ////# Redefine this system function locally, to include the virtual camera.
+ ){                                     // // // // // // // // // // // // // // // // // // // // // ///#
+  document.getElementById('divDataFromOptions').setAttribute('loadmore' ,'2');                          //> Send message back to inject.js (which has a Mutation Observer on this element's attributes) to load bulk of the code.
+                                                                                                        //>
+  const                                 args                    = arguments;                            //>
+  if(   !args.length   ||   !args[0].video   ||   !args[0].video.deviceId                               //>
+   || (  'virtual' !== args[0].video.deviceId   &&   'virtual' !== args[0].video.deviceId.exact )       //>
+  ){                                                                                                    //>
+                             return await getUserMediaWas.call( navigator.mediaDevices ,...arguments ) ;//> Report result of unmodified routine.
+  }//if                                                                                                 //>
+  const                 usermedia = await getUserMediaWas.call( navigator.mediaDevices                  //>
+                                                          ,{video : {facingMode: args[0].facingMode     //> This constraints could mimic closely the request. Also, there could be a preferred webcam on the options. Right now it defaults to the predefined input.
+                                                                    ,advanced  : args[0].video.advanced //>
+                                                                    ,width     : g_nW_px                //>
+                                                                    ,height    : g_nH_px                //>
+                                                                    }                                   //>
+                                                           ,audio : false                               //> No audio.
+                                                          });                                           //>
+  if( !usermedia ){          return await getUserMediaWas.call( navigator.mediaDevices ,...arguments );}//> If devices not found, then report result of unmodified routine.
+                                                                                                        //>
+  g_eleVideoIn   = document.createElement('video' );                                                    //>
+  g_eleCanvasOut = document.createElement('canvas');  g_context2dOut = g_eleCanvasOut.getContext('2d'); //>
+  g_eleVideoIn.srcObject = usermedia;                                                                   //>
+  g_eleVideoIn.autoplay  = true;                                                                        //> TODO Shut down and restart g_shaderrenderer???
+  g_eleVideoIn.addEventListener( 'playing'                                                              //>
+  ,function(){                                                                                          //> Use a 2D Canvas. me.canvas.width = me.video.videoWidth; me.canvas.height = me.video.videoHeight;
+    Go_Tick();                                                                                          //>
+  });                                                                                                   //> .
+                                                                                                        //>
+ return g_eleCanvasOut.captureStream();                                                                 //> Report a real-time video capture of the surface of the canvas.
+ };//function// // // // // // // // // // // // // // // // // // // // // // // // // // // // // // ///>
+}//Go_ModifyMediaDevices_GetUserMedia/////////////////////////////////////////////////////////////////////>
+
+
+Go_ModifyMediaDevices_EnumerateDevices();
+Go_ModifyMediaDevices_GetUserMedia();
+
+
+//End of file.

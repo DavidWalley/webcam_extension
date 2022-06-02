@@ -1,51 +1,72 @@
-// $_inject.js_php - A content script - Inject a script into all pages running in Chrome after Daves Virtual Webcam extension is installed (as mentioned in manifest.json extension file). Content Script - Scripts that run in isolation in the context of the web page
+// $_inject.js_php - A content script - Inject a script into all pages running in Chrome after Daves Virtual Webcam extension is installed (as mentioned in manifest.json extension file). Content Script - Scripts that run in isolation in the context of the web page. Can use chrome.runtime
 // (c)2022 David C. Walley. Released under version 3 of the GNU General Public License (GPLv3). 
 
-// Can use chrome.runtime
 
 'use strict';                                                                                           //>
-                                                                                                        //>
-const                                   scriptWebcam            = document.createElement('script');     //> Document is the host page DOM that this code is running in. We are going to inject a script into it.
-scriptWebcam.setAttribute(        'type','text/javascript'                                           ); //> The script is in JavaScript.
-/*DEV*/ scriptWebcam.setAttribute( 'src',window['chrome']['runtime']['getURL']('js/$_webcam.js_php') ); //> Form a URL to get to the main code file. For development. Injected Script - Scripts that are programmatically injected into the web page. we inject scripts by appending them to the DOM. This makes the browser assume that it is run in the context of the web page. This in turn provides the injected script access to the local variables and functions.   https://www.freecodecamp.org/news/chrome-extension-message-passing-essentials/   https://radu-dita.medium.com/chrome-extension-when-to-use-content-scripts-and-injected-scripts-238563dce8af
-//*PRO*/scriptWebcam.setAttribute( 'src',window['chrome']['runtime']['getURL'](  'js/webcam.js'    ) ); //> Form a URL to get to the main code file. For production with Closure Compiled code.
-                                                                                                        //>
-// ??? Every single tab gets the above? Can it be restricted to tabs with video? (Probably not because video may be created later?)
-const                                   head              =    document.head                            //> Get the DOM's head section
+
+
+function                                AddScript(////////////////////////////////////////////////////////>
+                                        a_sFile
+){                                      //////////////////////////////////////////////////////////////////>
+ const                                  scriptWebcam            = document.createElement('script');     //> Document is the host page DOM that this code is running in. We are going to inject a script into it.
+ scriptWebcam.setAttribute(        'type' ,'text/javascript'                      );                    //> The script is in JavaScript.
+ scriptWebcam.setAttribute( 'src' ,window['chrome']['runtime']['getURL'](a_sFile) );                    //> Form a URL to get to the main code file. For development. Injected Script - Scripts that are programmatically injected into the web page. we inject scripts by appending them to the DOM. This makes the browser assume that it is run in the context of the web page. This in turn provides the injected script access to the local variables and functions.   https://www.freecodecamp.org/news/chrome-extension-message-passing-essentials/   https://radu-dita.medium.com/chrome-extension-when-to-use-content-scripts-and-injected-scripts-238563dce8af
+                                                                                                        //> ??? Every single tab gets the above? Can it be restricted to tabs with video? (Probably not because video may be created later?)
+ const                                   head             =    document.head                            //> Get the DOM's head section
                                                            ||  document.getElementsByTagName('head')[0] //> "
                                                             || document.documentElement;                //> " (cross-browser)?
-head.insertBefore( scriptWebcam ,head.lastChild );                                                      //> Insert script into DOM web page's <head> section.
-                                                                                                        //>
+ head.insertBefore( scriptWebcam ,head.lastChild );                                                     //> Insert script into DOM web page's <head> section.
+}//AddScript//////////////////////////////////////////////////////////////////////////////////////////////>
 
 
-// Redefine Media functions here, and wait for use before loading bulk of code?
-
-
-
-
-//??? <meta name="twitter:title" content="Mozilla Developer Network">
+/*DEV*/  AddScript( 'js/$_webcam1.js_php' );                                                            //>
+//*PRO*/ AddScript(   'js/webcam1.js'     );                                                            //>
+//??? <meta name="twitter:title" content="Mozilla Developer Network">                                   //>
 const                                   body              =    document.body                            //> Get the DOM's body section
                                                            ||  document.getElementsByTagName('body')[0] //> "
                                                             || document.documentElement;                //> " (cross-browser)?
-const                                   eleDivTest              = document.createElement('div');        //> Create div in every page for communication? Is this over-kill?
-eleDivTest.id                    = 'divDataFromOptions';
+const                                   eleDivTest           = document.createElement('div');           //> Create div in every page for communication? Is this over-kill?
+eleDivTest.id                    = 'divDataFromOptions';                                                //>
 eleDivTest.style.backgroundColor = '#FF8844';                                                           //> DEBUG
 eleDivTest.innerHTML             = '';                                                                  //> DEBUG
 body.insertBefore( eleDivTest ,body.lastChild );                                                        //> Insert script into DOM web page's <body> section.
                                                                                                         //>
+//window['chrome']['runtime']['openOptionsPage']();                                                     //> ???where?
+eleDivTest.setAttribute('custom', '0');
+
+let                                     g_bMoreLoaded           = false;                                //>
                                                                                                         //>
-//window['chrome']['runtime']['openOptionsPage']();                                                     //>
+const                                   onMutated =function(//////////////////////////////////////////////>> Callback function to execute when mutations are observed
+                                        mutationList                                                    //>
+,                                       observer                                                        //>
+){                                      //////////////////////////////////////////////////////////////////>
+ for( const m of mutationList ){                                                                        //> Use traditional 'for loops' for IE 11
+  if( m.type === 'attributes' ){                                                                        //>
+   if( 'loadmore' === m.attributeName ){                                                                //>
+    console.log("load MOre " );                                                                         //>
+    if( !g_bMoreLoaded ){                                                                               //>
+     /*DEV*/  AddScript( 'js/$_webcam2.js_php' );                                                       //>
+     //*PRO*/ AddScript(   'js/webcam2.js'     );                                                       //>
+     g_bMoreLoaded = true;                                                                              //>
+    }//if                                                                                               //>
+   }else{                                                                                               //>
+    console.log("unexpected "+ m.attributeName);                                                        //>
+   }//if                                                                                                //>
+  }                                                                                                     //>
+ }//for                                                                                                 //>
+};////////////////////////////////////////////////////////////////////////////////////////////////////////>
 
 
-console.log();'%%%%%%%%%%%%%%% Hoot from $_inject.js_php'
-
+const                                   observer                = new MutationObserver(onMutated);      //> Create an observer instance linked to the callback function
+observer.observe(                                                                                       //>
+ eleDivTest                                                                                             //>
+,{ attributes:true }                                                                                    //> Options for the observer (which mutations to observe)
+);                                                                                                      //> Start observing the target node for configured mutations
+// . . .                                                                                                //>
+//observer.disconnect();                                                                                //> Later, you can stop observing
 window['chrome']['runtime']['onMessage']['addListener'](                                                //> ###message Listen for message from options page.
  function(message ,sender ,sendResponse){   eleDivTest.innerHTML = message.data;   }                    //>
 );                                                                                                      //>
-
-//> Got this far. Now - how to send to webcam.js?
-// ? Insert something into DOM for communication?
-// ? Save to chrome.storage? Your extension's content scripts can directly access user data without the need for a background page.
 
 
 //End of file.
