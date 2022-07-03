@@ -29,28 +29,38 @@ var $_sIDbUTTONsANPsHOT_B = "buttonSnapshot_B";
 var $_sIDbUTTONsANPsHOT_F = "buttonSnapshot_F";
 var $_sIDdIVhOLD = "divHold";
 var $_sIDvIDEOgRAB = "videoGrab";
-var $_sIDdIVcROP_ = "divCrop_";
+var $_sIDdIVcROP_CORNER_TL = "divCrop_CORNER_TL";
+var $_sIDdIVcROP_CORNER_TR = "divCrop_CORNER_TR";
+var $_sIDdIVcROP_CORNER_BR = "divCrop_CORNER_BR";
+var $_sIDdIVcROP_CORNER_BL = "divCrop_CORNER_BL";
+var $_sIDdIVcROP_CORNER_MD = "divCrop_CORNER_MD";
 var $_sIDdIVcONFIRM = "divConfirm";
 var $_sIDcANVAScONFIRM = "canvasConfirm";
 var $_sIDbUTTONcONFIRMoK = "buttonConfirmOk";
 var $_sIDbUTTONcONFIRMnO = "buttonConfirmNo";
 var $_sIDdIVfLAGbEFORE = "divFlagBefore";
 var $_sIDdIVfLAGnEXT = "divFlagNext";
+var $_sMESSAGE_TEXT_T = "sMessage_text_T";
+var $_sMESSAGE_TEXT_L = "sMessage_text_L";
+var $_sMESSAGE_TEXT_R = "sMessage_text_R";
+var $_sMESSAGE_TEXT_N = "sMessage_text_N";
 var $_sIDiNtEXTeDGE_T = "intextEdge_T";
 var $_sIDiNtEXTeDGE_L = "intextEdge_L";
 var $_sIDiNtEXTeDGE_R = "intextEdge_R";
 var $_sIDbUTTONsHOWeDGES = "buttonEdges";
 var $_sIDiNtEXTnEWS = "intextNews";
 var $_sIDbUTTONsHOWnEWS = "buttonNews";
-var $_sELEvIDEOiN = "g_eleVideoIn";
-var $_sELEcANVASoUT = "g_eleCanvasOut";
-var $_sCONTEXT2DoUT = "g_context2dOut";
-var $_sIDdIVfLAGdATA = "divEasyMeetingVirtual_data";
-var $_sATTRIBUTE_OPTIONS = "g_optionsmessage";
-var $_sATTRIBUTE_OPEN = "g_optionsopen";
+var $_sIDdIVsHAREDtALK = "divEasyMeeting_SharedTalk";
+var $_sATTRIBUTE_INSERTcODE2 = "g_attribute_insertcode2";
+var $_sATTRIBUTE_GOoPTIONS = "g_attribute_gooptions";
+var $_sRUNTIMEaCT_GOoPTIONS = "g_action_gooptions";
+var $_sMESSAGE_TYPE_js_opts = "js_opts";
+var $_sMESSAGE_TYPE_js_edge = "js_edge";
+var $_sMESSAGE_TYPE_js_news = "js_news";
+var $_sMESSAGE_TYPE_datau_B = "datau_B";
+var $_sMESSAGE_TYPE_datau_F = "datau_F";
 
 function G_eleTAP($a, $f) {
-  console.log("G_eleTAP >>" + $a + "<<");
   document.getElementById($a).addEventListener("click", $f);
 }
 
@@ -62,7 +72,7 @@ const g_eleVideoGrab = G_ele($_sIDvIDEOgRAB);
 
 function Sender_Tabs( // Send Chrome tabs, each of which may have a listener set up in its inject.js
   a_tabs, // List of all open tabs in Chrome.
-  a_sType, // Type may be 'js_opts' JSON data, or, 'datau_?' image data as text.
+  a_sType, // Type may be $_sMESSAGE_TYPE_js_opts JSON data, or, 'datau_?' image data as text.
   a_sData // Data package.
 ) {
   for (let tab of a_tabs) {
@@ -74,7 +84,7 @@ function Sender_Tabs( // Send Chrome tabs, each of which may have a listener set
 }
 
 async function Sender( // Get a list of all open Chrome tabs, and send them a message.
-  a_sType, // Type may be 'js_opts' JSON data, or, 'datau_B' image data as text for background or flag.
+  a_sType, // Type may be $_sMESSAGE_TYPE_js_opts JSON data, or, $_sMESSAGE_TYPE_datau_B image data as text for background or flag.
   a_sData // Data package.
 ) {
   window["chrome"]["tabs"]
@@ -89,40 +99,68 @@ async function Sender( // Get a list of all open Chrome tabs, and send them a me
 
 let g_iFlag = 1;
 
+function sEleEncode(a) {
+  return G_ele(a).value.split("~").join("~0").split(" ").join("~1");
+}
+
 function UpdateEdgesText() { // Send message with latest edge message text values.
-  var ele = G_ele($_sIDiNtEXTeDGE_T);
-  console.log(ele);
-  var sT = ele.value;
-  sT = sT.split("~").join("~0").split(" ").join("~1");
-  ele = G_ele($_sIDiNtEXTeDGE_L);
-  console.log(ele);
-  var sL = ele.value;
-  sL = sL.split("~").join("~0").split(" ").join("~1");
-  ele = G_ele($_sIDiNtEXTeDGE_R);
-  console.log(ele);
-  var sR = ele.value;
-  sR = sR.split("~").join("~0").split(" ").join("~1");
-  Sender("js_edge", JSON.stringify({ sText_T: sT, sText_L: sL, sText_R: sR }));
+  Sender(
+    $_sMESSAGE_TYPE_js_edge,
+    '{"' +
+      $_sMESSAGE_TEXT_T +
+      '":"' +
+      sEleEncode($_sIDiNtEXTeDGE_T) +
+      '"' +
+      ',"' +
+      $_sMESSAGE_TEXT_L +
+      '":"' +
+      sEleEncode($_sIDiNtEXTeDGE_L) +
+      '"' +
+      ',"' +
+      $_sMESSAGE_TEXT_R +
+      '":"' +
+      sEleEncode($_sIDiNtEXTeDGE_R) +
+      '"' +
+      "}"
+  );
 }
 
 function SendNews() { // Send message with latest scrolling message text value.
-  var sNews = G_ele($_sIDiNtEXTnEWS).value;
-  sNews = sNews.split("~").join("~0");
-  sNews = sNews.split(" ").join("~1");
-  Sender("js_news", JSON.stringify({ sText: sNews }));
+  Sender(
+    $_sMESSAGE_TYPE_js_news,
+    '{"' + $_sMESSAGE_TEXT_N + '":"' + sEleEncode($_sIDiNtEXTnEWS) + '"}'
+  );
 }
 
 function SendAndSaveOptions() { // On any change to an input, send a message to all Chrome tabs (because they may be listening).
-  var obData = {};
-  obData[$_sOPTIONzOOM] = "" + G_ele($_sIDrANGEzOOM).value;
-  obData[$_sOPTIONsIZE] = "" + G_ele($_sIDrANGEsIZE).value;
-  obData[$_sOPTIONbRIGHT] = "" + G_ele($_sIDrANGEbRIGHT).value;
-  obData[$_sOPTIONcONTRAST] = "" + G_ele($_sIDrANGEcONTRAST).value;
-  obData[$_sOPTIONfLAG] = "" + g_iFlag;
-  Sender("js_opts", JSON.stringify(obData));
-  window["chrome"]["storage"]["local"]["set"](
-    { options: obData },
-    function () {}
+  Sender(
+    $_sMESSAGE_TYPE_js_opts,
+    '{"' +
+      $_sOPTIONzOOM +
+      '":"' +
+      G_ele($_sIDrANGEzOOM).value +
+      '"' +
+      ',"' +
+      $_sOPTIONsIZE +
+      '":"' +
+      G_ele($_sIDrANGEsIZE).value +
+      '"' +
+      ',"' +
+      $_sOPTIONbRIGHT +
+      '":"' +
+      G_ele($_sIDrANGEbRIGHT).value +
+      '"' +
+      ',"' +
+      $_sOPTIONcONTRAST +
+      '":"' +
+      G_ele($_sIDrANGEcONTRAST).value +
+      '"' +
+      ',"' +
+      $_sOPTIONfLAG +
+      '":"' +
+      g_iFlag +
+      '"' +
+      "}"
   );
 }
 
@@ -176,7 +214,6 @@ function anCropInHolderLTWH() { // Put 2 click points in order, reporting them a
 
 function MoveCroppingDivs() { // Arrange 4 mask divs to cover area other than central rectangular hole, and border div for the hole.
   const P = "px";
-  const S = $_sIDdIVcROP_;
   var X = g_nVideoImageInEleL;
   var Y = g_nVideoImageInEleT;
   var U = g_nVideoImageW;
@@ -186,27 +223,27 @@ function MoveCroppingDivs() { // Arrange 4 mask divs to cover area other than ce
   var T = a_anLtwh[1] - g_nVideoImageInEleT;
   var R = a_anLtwh[2] + L;
   var B = a_anLtwh[3] + T;
-  var e = G_ele(S + "CORNER_TL").style;
+  var e = G_ele($_sIDdIVcROP_CORNER_TL).style;
   e.left = X + P;
   e.top = Y + P;
   e.width = R + P;
   e.height = T + P;
-  e = G_ele(S + "CORNER_TR").style;
+  e = G_ele($_sIDdIVcROP_CORNER_TR).style;
   e.left = X + R + P;
   e.top = Y + P;
   e.width = U - R + P;
   e.height = B + P;
-  e = G_ele(S + "CORNER_BR").style;
+  e = G_ele($_sIDdIVcROP_CORNER_BR).style;
   e.left = X + L + P;
   e.top = Y + B + P;
   e.width = U - L + P;
   e.height = V - B + P;
-  e = G_ele(S + "CORNER_BL").style;
+  e = G_ele($_sIDdIVcROP_CORNER_BL).style;
   e.left = X + P;
   e.top = Y + T + P;
   e.width = L + P;
   e.height = V - T + P;
-  e = G_ele(S + "CORNER_MD").style;
+  e = G_ele($_sIDdIVcROP_CORNER_MD).style;
   e.left = X + L - 1 + P;
   e.top = Y + T - 1 + P;
   e.width = R - L - 2 + P;
@@ -262,7 +299,7 @@ function ChangeVideoElementCrop( // Change corner points of crop area - the cent
     }
   }
   MoveCroppingDivs();
-  G_ele($_sIDdIVcROP_ + "CORNER_MD").style.border = "2px solid " + sBorder;
+  G_ele($_sIDdIVcROP_CORNER_MD).style.border = "2px solid " + sBorder;
 }
 
 function ScreenGrabGo_ready() { // Get data about video after it has been initialized, arrange cropping divs.

@@ -29,33 +29,44 @@ var $_sIDbUTTONsANPsHOT_B = "buttonSnapshot_B";
 var $_sIDbUTTONsANPsHOT_F = "buttonSnapshot_F";
 var $_sIDdIVhOLD = "divHold";
 var $_sIDvIDEOgRAB = "videoGrab";
-var $_sIDdIVcROP_ = "divCrop_";
+var $_sIDdIVcROP_CORNER_TL = "divCrop_CORNER_TL";
+var $_sIDdIVcROP_CORNER_TR = "divCrop_CORNER_TR";
+var $_sIDdIVcROP_CORNER_BR = "divCrop_CORNER_BR";
+var $_sIDdIVcROP_CORNER_BL = "divCrop_CORNER_BL";
+var $_sIDdIVcROP_CORNER_MD = "divCrop_CORNER_MD";
 var $_sIDdIVcONFIRM = "divConfirm";
 var $_sIDcANVAScONFIRM = "canvasConfirm";
 var $_sIDbUTTONcONFIRMoK = "buttonConfirmOk";
 var $_sIDbUTTONcONFIRMnO = "buttonConfirmNo";
 var $_sIDdIVfLAGbEFORE = "divFlagBefore";
 var $_sIDdIVfLAGnEXT = "divFlagNext";
+var $_sMESSAGE_TEXT_T = "sMessage_text_T";
+var $_sMESSAGE_TEXT_L = "sMessage_text_L";
+var $_sMESSAGE_TEXT_R = "sMessage_text_R";
+var $_sMESSAGE_TEXT_N = "sMessage_text_N";
 var $_sIDiNtEXTeDGE_T = "intextEdge_T";
 var $_sIDiNtEXTeDGE_L = "intextEdge_L";
 var $_sIDiNtEXTeDGE_R = "intextEdge_R";
 var $_sIDbUTTONsHOWeDGES = "buttonEdges";
 var $_sIDiNtEXTnEWS = "intextNews";
 var $_sIDbUTTONsHOWnEWS = "buttonNews";
-var $_sELEvIDEOiN = "g_eleVideoIn";
-var $_sELEcANVASoUT = "g_eleCanvasOut";
-var $_sCONTEXT2DoUT = "g_context2dOut";
-var $_sIDdIVfLAGdATA = "divEasyMeetingVirtual_data";
-var $_sATTRIBUTE_OPTIONS = "g_optionsmessage";
-var $_sATTRIBUTE_OPEN = "g_optionsopen";
+var $_sIDdIVsHAREDtALK = "divEasyMeeting_SharedTalk";
+var $_sATTRIBUTE_INSERTcODE2 = "g_attribute_insertcode2";
+var $_sATTRIBUTE_GOoPTIONS = "g_attribute_gooptions";
+var $_sRUNTIMEaCT_GOoPTIONS = "g_action_gooptions";
+var $_sMESSAGE_TYPE_js_opts = "js_opts";
+var $_sMESSAGE_TYPE_js_edge = "js_edge";
+var $_sMESSAGE_TYPE_js_news = "js_news";
+var $_sMESSAGE_TYPE_datau_B = "datau_B";
+var $_sMESSAGE_TYPE_datau_F = "datau_F";
 var g_bStopTick = g_bStopTick || window["g_bStopTick"]; // Flag to halt periodic processing.
 //# Video element and related objects are global for optimization - reducing garbage collection:
-var g_eleVideoIn = g_eleVideoIn || window[$_sELEvIDEOiN]; // Use global DOM video element to accept camera input stream.
-var g_bVideoReady = g_bVideoReady || window["g_bVideoReady"]; // Flag that video input has started.
+var g_eleVideoIn = g_eleVideoIn || window["g_eleVideoIn"]; // Use global DOM video element to accept camera input stream.
+var g_bVideoInPlaying = g_bVideoInPlaying || window["g_bVideoInPlaying"]; // Flag that video input has started.
 let g_nVideoInW = 800; // Video Input and Canvas Output width and
 let g_nVideoInH = 600; // height.
 //# Canvas output element and related objects are global for optimization - reducing garbage collection:
-var g_eleCanvasOut = g_eleCanvasOut || window[$_sELEcANVASoUT]; // Use the global offscreen canvas object for output.
+var g_eleCanvasOut = g_eleCanvasOut || window["g_eleCanvasOut"]; // Use the global offscreen canvas object for output.
 var g_context2dOut = null; // Set up output by drawing background + video frame in quick operations.
 var g_imagedataOut = null; // We need this intermediate result for changing pixel data of the whole output canvas at the end.
 var g_abOut = null; // Pixel color data array of the imageData object
@@ -69,7 +80,7 @@ let g_eleCanvas1Flag = null; // Image to insert into corner - normally a flag.
 let g_context2d1Flag = null;
 let g_imagedata1Flag = null;
 let g_ab1Flag = null;
-const g_dFLAGsIZE_1 = 0.35; // Amount of width or height of output used by flag.
+const g_dFLAGsIZE_1 = 0.3; // Amount of width or height of output used by flag.
 let g_eleCanvasAllFlags = null; // To be created canvas, holding an image of 8 selectable flags, initialized from a data URI text string.
 let g_iFlag = 1; // Index to current flag image.
 let g_d1_Zoom = 1; // Inverse zoom factor of video, 1 to 1/3.
@@ -80,11 +91,11 @@ let g_abAdjust = []; // A table for quick conversions of color levels.
 let g_sHeadlineText_T = ""; // Headline text, at top of background.
 let g_sHeadlineText_L = ""; // Text on left side of background.
 let g_sHeadlineText_R = ""; // Text on right side of background.
-let g_sScrollText = ""; // Message to scroll across screen,
+let g_sHeadlineText_N = ""; // Message to scroll across screen,
 let g_whenScrollText_ms = 0; // Time to start scrolling.
 let g_whenGo_ms = null; // Start time of periodic routine.
 
-function EdgeText(a_context2d) {
+function EdgeText(a_context2d) { // Draw text along edges of canvas.
   var dY = Math.floor(0.1 * g_nCanvasOutH);
   a_context2d.lineWidth = Math.floor(0.005 * g_nCanvasOutH);
   a_context2d.strokeStyle = "rgba(255,255,255 ,1)";
@@ -129,7 +140,7 @@ function EdgeText(a_context2d) {
   a_context2d["resetTransform"]();
 }
 
-function BackFill() { // Fill the background canvas with a gradient.
+function BackFill() { // Fill the background canvas with a gradient and the background image.
   g_context2dBack = g_eleCanvasBack.getContext("2d");
   g_context2dBack.globalAlpha = 1.0;
   var lineargradient = g_context2dBack.createLinearGradient(
@@ -151,7 +162,7 @@ function BackFill() { // Fill the background canvas with a gradient.
   g_abBack = g_imagedataBack.data;
 }
 
-let g_imageFromOptions = null; // Background image.
+let g_imageFromOptions = null; // Background image (passed in as data URI from Options page).
 
 function OnLoadImageFromOptions_Back() { // Draw background image onto global background canvas.
   if (!g_imageFromOptions) {
@@ -300,19 +311,27 @@ function OnLoadImageFromOptions_Flag() { // Draw flag image onto global flag can
   g_ab1Flag = g_imagedata1Flag.data;
 }
 
+function sDecode(a) {
+  return a.split("~1").join(" ").split("~0").join("~");
+}
+
 function Tick_DataFromOptions() { // Get possible data from the messaging DOM element (between injected script and options page).
-  var eleDivInjectData = document.getElementById($_sIDdIVfLAGdATA);
-  if (!eleDivInjectData) {
+  var eleDivSharedTalk = document.getElementById($_sIDdIVsHAREDtALK);
+  if (!eleDivSharedTalk) {
     return;
   }
-  var sData = eleDivInjectData.innerText.trim();
+  var sData = eleDivSharedTalk.innerText.trim();
   if ("" === sData) {
     return;
   }
   var sType = sData.slice(0, 7);
   sData = sData.slice(8);
   var ob = null;
-  if ("js_opts" === sType || "js_edge" === sType || "js_news" === sType) {
+  if (
+    $_sMESSAGE_TYPE_js_opts === sType ||
+    $_sMESSAGE_TYPE_js_edge === sType ||
+    $_sMESSAGE_TYPE_js_news === sType
+  ) {
     try {
       ob = JSON.parse(sData);
     } catch (e) {
@@ -320,22 +339,16 @@ function Tick_DataFromOptions() { // Get possible data from the messaging DOM el
     }
   }
   switch (sType) {
-    case "js_edge":
-      g_sHeadlineText_T = ob["sText_T"];
-      g_sHeadlineText_T = g_sHeadlineText_T.split("~1").join(" ");
-      g_sHeadlineText_T = g_sHeadlineText_T.split("~0").join("~");
-      g_sHeadlineText_L = ob["sText_L"];
-      g_sHeadlineText_L = g_sHeadlineText_L.split("~1").join(" ");
-      g_sHeadlineText_L = g_sHeadlineText_L.split("~0").join("~");
-      g_sHeadlineText_R = ob["sText_R"];
-      g_sHeadlineText_R = g_sHeadlineText_R.split("~1").join(" ");
-      g_sHeadlineText_R = g_sHeadlineText_R.split("~0").join("~");
+    case $_sMESSAGE_TYPE_js_edge:
+      g_sHeadlineText_T = sDecode(ob[$_sMESSAGE_TEXT_T]);
+      g_sHeadlineText_L = sDecode(ob[$_sMESSAGE_TEXT_L]);
+      g_sHeadlineText_R = sDecode(ob[$_sMESSAGE_TEXT_R]);
       break;
-    case "js_news":
-      g_sScrollText = ob["sText"].split("~1").join(" ").split("~0").join("~");
+    case $_sMESSAGE_TYPE_js_news:
+      g_sHeadlineText_N = sDecode(ob[$_sMESSAGE_TEXT_N]);
       g_whenScrollText_ms = Date.now();
       break;
-    case "js_opts":
+    case $_sMESSAGE_TYPE_js_opts:
       if (ob[$_sOPTIONzOOM]) {
         g_d1_Zoom = Math.pow(3, -parseFloat(ob[$_sOPTIONzOOM]) * 0.01);
       }
@@ -357,16 +370,16 @@ function Tick_DataFromOptions() { // Get possible data from the messaging DOM el
         Set1FlagFromFlags();
       }
       break;
-    case "datau_B":
-    case "datau_F":
+    case $_sMESSAGE_TYPE_datau_B:
+    case $_sMESSAGE_TYPE_datau_F:
       if ("data:" !== sData.slice(0, 5)) {
         break;
       }
       g_imageFromOptions = new Image();
       g_imageFromOptions.onload = function () {
-        if ("datau_B" === sType) {
+        if ($_sMESSAGE_TYPE_datau_B === sType) {
           OnLoadImageFromOptions_Back();
-        } else if ("datau_F" === sType) {
+        } else if ($_sMESSAGE_TYPE_datau_F === sType) {
           OnLoadImageFromOptions_Flag();
         }
       };
@@ -374,7 +387,7 @@ function Tick_DataFromOptions() { // Get possible data from the messaging DOM el
       break;
     default:
   }
-  eleDivInjectData.innerText = "";
+  eleDivSharedTalk.innerText = "";
 }
 
 function GoFlagData() { // Initialize flag image pixel data.
@@ -458,7 +471,6 @@ function Tick_PixelEdit(a_nDL, a_nDT, a_nDW, a_nDH) { // Periodic direct manipul
 let g_whenWas_ms = -1; // Time of previous run of periodic routine.
 let g_tookTickDecay_ms = 100; // Decaying running average of time periodic routine took to run once.
 let g_tookEndDecay_ms = 100; //
-let g_nTicks = 0; //
 
 function Tick() { // Main periodic routine.
   if (g_bStopTick) {
@@ -475,7 +487,6 @@ function Tick() { // Main periodic routine.
     return;
   }
   var whenNow_ms = Date.now();
-  g_nTicks++;
   Tick_DataFromOptions();
   if (null === g_context2dOut) {
     g_context2dOut = g_eleCanvasOut.getContext("2d");
@@ -488,7 +499,7 @@ function Tick() { // Main periodic routine.
     g_abOut = g_imagedataOut.data;
   }
   g_context2dOut.globalAlpha = 1.0;
-  if (g_bVideoReady && 0 < g_dInlay) {
+  if (g_bVideoInPlaying && 0 < g_dInlay) {
     var nSW = g_nVideoInW * g_d1_Zoom;
     var nSH = g_nVideoInH * g_d1_Zoom;
     var nSL = (g_nVideoInW - nSW) / 2;
@@ -514,13 +525,15 @@ function Tick() { // Main periodic routine.
   }
   Tick_PixelEdit(nDL, nDT, nDW, nDH);
   EdgeText(g_context2dOut);
-  var dX = whenNow_ms - g_whenScrollText_ms;
-  if (0 <= dX) {
-    var dY = Math.floor(0.17 * g_nCanvasOutH);
+  var took_ms = whenNow_ms - g_whenScrollText_ms;
+  var dX = 0;
+  var dY = 0;
+  if (0 <= took_ms) {
+    dY = Math.floor(0.17 * g_nCanvasOutH);
+    var nTextW = g_context2dOut.measureText(g_sHeadlineText_N).width;
     g_context2dOut.font = Math.floor(0.1 * g_nCanvasOutH) + "px serif";
-    if ("" === g_sScrollText) {
-      dX = g_nCanvasOutW * (1 - dX * 0.015);
-      var nTextW = g_context2dOut.measureText(g_sScrollText).width;
+    if ("" === g_sHeadlineText_N) {
+      dX = g_nCanvasOutW * (1 - took_ms * 0.00005);
       if (dX + nTextW < 0) {
         g_whenScrollText_ms = whenNow_ms + 30000;
       }
@@ -530,17 +543,16 @@ function Tick() { // Main periodic routine.
       g_context2dOut.strokeText($_sLINK, dX, dY);
       g_context2dOut.fillText($_sLINK, dX, dY);
     } else {
-      dX = g_nCanvasOutW * (1 - dX * 0.001);
-      var nTextW = g_context2dOut.measureText(g_sScrollText).width;
+      dX = g_nCanvasOutW * (1 - took_ms * 0.0001);
       if (dX + nTextW < 0) {
         g_whenScrollText_ms = whenNow_ms + 30000;
-        g_sScrollText = "";
+        g_sHeadlineText_N = "";
       }
       g_context2dOut.lineWidth = Math.floor(0.005 * g_nCanvasOutH);
       g_context2dOut.strokeStyle = "rgba(255,255,255 ,1)";
       g_context2dOut.fillStyle = "rgba(  0,  0,  0 ,1)";
-      g_context2dOut.strokeText(g_sScrollText, dX, dY);
-      g_context2dOut.fillText(g_sScrollText, dX, dY);
+      g_context2dOut.strokeText(g_sHeadlineText_N, dX, dY);
+      g_context2dOut.fillText(g_sHeadlineText_N, dX, dY);
     }
   }
   var tookTick_ms = whenNow_ms - g_whenWas_ms;
@@ -566,7 +578,7 @@ function Go_Tick() { // Wait before starting the main periodic routine.
     requestAnimationFrame(Go_Tick);
     return;
   }
-  if (!g_bVideoReady) {
+  if (!g_bVideoInPlaying) {
     requestAnimationFrame(Go_Tick);
     return;
   }
@@ -581,8 +593,8 @@ function Go_Tick() { // Wait before starting the main periodic routine.
   OnLoadImageFromOptions_Back();
   Set1FlagFromFlags();
   document
-    .getElementById($_sIDdIVfLAGdATA)
-    .setAttribute($_sATTRIBUTE_OPEN, "1");
+    .getElementById($_sIDdIVsHAREDtALK)
+    .setAttribute($_sATTRIBUTE_GOoPTIONS, "1");
   g_whenGo_ms = Date.now();
   g_whenScrollText_ms = g_whenGo_ms;
   g_bStopTick = false;
