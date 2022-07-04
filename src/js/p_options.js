@@ -97,8 +97,6 @@ async function Sender( // Get a list of all open Chrome tabs, and send them a me
     });
 }
 
-let g_iFlag = 1;
-
 function sEleEncode(a) {
   return G_ele(a).value.split("~").join("~0").split(" ").join("~1");
 }
@@ -155,11 +153,6 @@ function SendAndSaveOptions() { // On any change to an input, send a message to 
       '":"' +
       G_ele($_sIDrANGEcONTRAST).value +
       '"' +
-      ',"' +
-      $_sOPTIONfLAG +
-      '":"' +
-      g_iFlag +
-      '"' +
       "}"
   );
 }
@@ -171,9 +164,6 @@ function RestoreOptions() { // Restores options using the preferences stored in 
       G_ele($_sIDrANGEsIZE).value = "" + a_ob["options"][$_sOPTIONsIZE];
       G_ele($_sIDrANGEbRIGHT).value = "" + a_ob["options"][$_sOPTIONbRIGHT];
       G_ele($_sIDrANGEcONTRAST).value = "" + a_ob["options"][$_sOPTIONcONTRAST];
-      if (a_ob["options"][$_sOPTIONfLAG]) {
-        g_iFlag = parseInt(a_ob["options"][$_sOPTIONfLAG], 10);
-      }
     }
   });
 }
@@ -422,15 +412,40 @@ function SnapshotOk() { // Send snapshot to the virtual cam (webcam2.js).
   G_ele($_sIDdIVcONFIRM).style.visibility = "hidden";
 }
 
+let g_iFlag = 0;
+
+function GoSendFlag() {
+  var eleImgFlags = document.getElementById("imgFlags");
+  var eleCanvasFlags = document.createElement("canvas");
+  var contextFlags = eleCanvasFlags.getContext("2d");
+  let imageFlags = new Image();
+  imageFlags.onload = function () {
+    var nW = Math.floor(imageFlags.width / 4);
+    var nH = Math.floor(imageFlags.height / 5);
+    eleCanvasFlags.width = nW;
+    eleCanvasFlags.height = nH;
+    g_iFlag = G_nMOD(g_iFlag, 21);
+    if (20 === g_iFlag) {
+      Sender($_sMESSAGE_TYPE_datau_F, "");
+    } else {
+      var i = g_iFlag % 5;
+      var j = Math.floor(g_iFlag / 5);
+      contextFlags.drawImage(imageFlags, j * nW, i * nH, nW, nH, 0, 0, nW, nH);
+      Sender($_sMESSAGE_TYPE_datau_F, eleCanvasFlags.toDataURL());
+    }
+  };
+  imageFlags.src = eleImgFlags.src;
+}
+
 async function GoOptions() { // Set up listeners for loading and clicks.
   document.addEventListener("DOMContentLoaded", RestoreOptions);
   G_eleTAP($_sIDdIVfLAGbEFORE, function () {
     g_iFlag--;
-    SendAndSaveOptions();
+    GoSendFlag();
   });
   G_eleTAP($_sIDdIVfLAGnEXT, function () {
     g_iFlag++;
-    SendAndSaveOptions();
+    GoSendFlag();
   });
   G_eleTAP($_sIDbUTTONsHOWeDGES, UpdateEdgesText);
   G_eleTAP($_sIDbUTTONsHOWnEWS, SendNews);
